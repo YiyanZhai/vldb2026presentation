@@ -39,6 +39,16 @@ h2.stitle{font-size:33px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
 #pager{position:fixed; right:14px; bottom:12px; font-size:12px; color:#8b96a0; z-index:50;
   font-variant-numeric:tabular-nums; background:rgba(255,255,255,.7); padding:2px 8px; border-radius:20px;}
 
+/* speaker notes (toggle with S) */
+#notes-panel{position:fixed; left:0; right:0; bottom:0; z-index:60; display:none;
+  background:rgba(18,26,34,.95); color:#eef2f5; padding:13px 22px 15px;
+  font-size:15.5px; line-height:1.42; box-shadow:0 -8px 24px rgba(0,0,0,.3);}
+body.show-notes #notes-panel{display:block;}
+#notes-panel .nt-time{font-size:11.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#8fd0f0;}
+#notes-panel .nt-trans{font-style:italic; color:#c1cbd3; margin:2px 0 5px;}
+#notes-panel .nt-rem{font-weight:800;}
+#notes-panel .nt-rem::before{content:"★ "; color:#f0b429;}
+
 /* ---- typography helpers ---- */
 .lead{font-size:23px; line-height:1.4; color:var(--ink); max-width:24ch;}
 .big{font-size:26px; font-weight:800; line-height:1.25;}
@@ -457,7 +467,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 
 <div id="prog"></div>
 <div id="pager"></div>
-<div class="hint">← → navigate · F fullscreen · O overview</div>
+<div id="notes-panel"></div>
+<div class="hint">← → navigate · F fullscreen · O overview · S notes</div>
 
 <script>
 (function(){
@@ -467,6 +478,21 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   const SECCOL_={problem:'--problem',insight:'--insight',design:'--design',results:'--results',
                 method:'--design',deploy:'--deploy',wrap:'--wrap',backup:'--faint'};
   function secVar(s){return SECCOL_[s.dataset.sec]||'--design';}
+  // speaker notes, index-aligned to slides[]  (t = transition cue, r = remember)
+  const NOTES=[
+    {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
+    {t:'Where this lives.', r:'Metadata cache = hottest path; overhead & simplicity are first-class, not just miss ratio.'},
+    {t:'Metadata behaves differently, not just runs hotter.', r:'Correlated bursts LOOK hot but aren’t — the pattern of the whole talk.'},
+    {t:'How do the best policies handle a burst?', r:'S3-FIFO over-promotes; Clock2Q under-promotes. We want both.'},
+    {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},
+    {t:'Put the window into the full picture.', r:'4 paths: cold/burst → Ghost · hot → Main direct · Ghost-hit → Main · Main = second-chance.'},
+    {t:'Rather than a static trace — let’s watch it.', r:'Window silently filters bursts; the fast path is untouched. (Let one scenario finish.)'},
+    {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
+    {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
+    {t:'The mechanism behind that number.', r:'Promotes <¼ as many blocks — and the genuinely hot ones (short reuse distance).'},
+    {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
+    {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
+  ];
   let ci=0, fi=0;
 
   function frags(s){return [...s.querySelectorAll('.frag')];}
@@ -484,6 +510,11 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     const t=s.dataset.time?(' · '+s.dataset.time):'';
     document.getElementById('pager').textContent=num+t;
     const tm=s.querySelector('.tm'); if(tm) tm.textContent=s.dataset.time?('⏱ '+s.dataset.time):'';
+    // speaker notes
+    const n=NOTES[ci], np=document.getElementById('notes-panel');
+    np.innerHTML = n ? (`<div class="nt-time">Slide ${ci+1}${s.dataset.time?' · '+s.dataset.time:''}</div>`+
+      (n.t?`<div class="nt-trans">↪ ${n.t}</div>`:'')+(n.r?`<div class="nt-rem">${n.r}</div>`:''))
+      : `<div class="nt-time">${s.dataset.secname||''}</div>`;
   }
   function next(){ const fr=frags(slides[ci]);
     if(fi<fr.length){ fi++; } else if(ci<slides.length-1){ ci++; fi=0; } apply(); }
@@ -525,6 +556,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     else if(e.key==='End'){ goto(mainCount-1); }
     else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
     else if(e.key==='o'||e.key==='O'){ toggleOverview(); }
+    else if(e.key==='s'||e.key==='S'){ document.body.classList.toggle('show-notes'); }
   });
 
   resize(); apply();
