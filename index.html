@@ -3,348 +3,531 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clock2Q+ Cache Replacement — Animated Explainer</title>
+<title>Clock2Q+ — VLDB 2026</title>
 <style>
-  :root{
-    --bg:#f6f7f9; --paper:#ffffff; --ink:#1f2933; --muted:#69757f; --line:#3a4750;
-    --small-bg:#fff8e6; --small-edge:#f0b429;
-    --win-bg:#ffe6ad; --win-edge:#e8930c;
-    --ghost-bg:#eef1f4; --ghost-edge:#aab4bd;
-    --clock-bg:#eaf4fb; --clock-edge:#3e9fd6;
-    --evict:#e04b3a; --promote:#2f9e44; --warn:#c98a12;
-    --shadow:0 10px 26px rgba(31,41,51,.12);
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;height:100%;}
-  body{background:radial-gradient(1100px 640px at 50% 0%, #ffffff, var(--bg));
-    color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-    display:grid; place-items:center; overflow:hidden;}
-  #stage{position:relative; width:1120px; height:600px; background:var(--paper);
-    border:1px solid #e4e8ec; border-radius:18px; box-shadow:var(--shadow);}
+:root{
+  --ink:#1c2530; --muted:#5f6b76; --faint:#8b96a0; --line:#dfe4e8; --paper:#ffffff; --bg:#eef1f4;
+  --problem:#e04b3a; --insight:#e8930c; --design:#2f7fbf; --results:#2f9e44; --deploy:#7048b6; --wrap:#1c2530;
+  --small:#f0b429; --ghost:#9aa5ad; --clock:#3e9fd6; --promote:#2f9e44; --evict:#e04b3a;
+  --accent:#2f7fbf;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;}
+body{background:var(--bg); color:var(--ink); overflow:hidden;
+  font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;}
 
-  .region{position:absolute; border-radius:14px;}
-  .region .rlabel{position:absolute; top:-12px; left:16px; background:var(--paper);
-    padding:0 8px; font-size:13px; font-weight:700; color:var(--muted);}
-  #small{left:118px; top:150px; width:376px; height:92px; background:var(--small-bg); border:2px dashed var(--small-edge);}
-  #window{position:absolute; left:124px; top:156px; width:184px; height:80px;
-    background:var(--win-bg); border:2px solid var(--win-edge); border-radius:11px; opacity:.7;}
-  #window .wlabel{position:absolute; bottom:-27px; left:0; width:100%; text-align:center;
-    font-size:12px; font-weight:700; color:var(--win-edge);}
-  #ghost{left:118px; top:360px; width:376px; height:92px; background:var(--ghost-bg); border:2px dashed var(--ghost-edge);}
-  #clockbox{left:600px; top:165px; width:240px; height:240px; background:var(--clock-bg);
-    border:2px solid var(--clock-edge); border-radius:50%;}
-  #clockbox .rlabel{left:50%; transform:translateX(-50%);}
+/* ---- stage scaling ---- */
+#viewport{position:fixed; inset:0; display:grid; place-items:center;}
+#deck{position:relative; width:1280px; height:720px; transform-origin:center center;}
+.slide{position:absolute; inset:0; background:var(--paper); border-radius:10px;
+  box-shadow:0 24px 60px rgba(20,30,40,.22); padding:58px 70px 64px;
+  opacity:0; visibility:hidden; transition:opacity .35s ease; overflow:hidden;}
+.slide.current{opacity:1; visibility:visible;}
 
-  #hand{position:absolute; left:720px; top:283px; width:56px; height:4px; border-radius:3px;
-    background:linear-gradient(90deg,#d6480f,#f77f00); transform-origin:0 center; transform:rotate(-90deg);
-    transition:transform .8s cubic-bezier(.4,0,.2,1); box-shadow:0 1px 4px rgba(0,0,0,.2); z-index:6;}
-  #hand::after{content:""; position:absolute; right:-6px; top:-6px;
-    border-left:13px solid #f77f00; border-top:8px solid transparent; border-bottom:8px solid transparent;}
-  #handhub{position:absolute; left:720px; top:285px; width:15px; height:15px; margin:-7.5px 0 0 -7.5px;
-    border-radius:50%; background:#d6480f; box-shadow:0 1px 4px rgba(0,0,0,.3); z-index:7;}
+/* ---- slide chrome ---- */
+.kicker{font-size:15px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent);}
+h1.title{font-size:40px; font-weight:800; line-height:1.08; margin:6px 0 0; letter-spacing:-.01em;}
+h2.stitle{font-size:33px; font-weight:800; line-height:1.12; margin:6px 0 22px; letter-spacing:-.01em;}
+.slide .foot{position:absolute; left:70px; right:70px; bottom:22px; display:flex; justify-content:space-between;
+  align-items:center; font-size:12.5px; color:var(--faint); border-top:1px solid var(--line); padding-top:9px;}
+.foot .sec{font-weight:800; letter-spacing:.08em; text-transform:uppercase;}
+.accentbar{position:absolute; left:0; top:0; width:8px; height:100%; background:var(--accent);}
 
-  .token{position:absolute; width:52px; height:52px; margin:-26px 0 0 -26px; z-index:5;
-    transition:left .7s cubic-bezier(.45,.05,.25,1), top .7s cubic-bezier(.45,.05,.25,1), opacity .45s;}
-  .token .inner{width:100%; height:100%; border-radius:50%; display:grid; place-items:center;
-    color:#fff; font-weight:800; font-size:18px; box-shadow:0 4px 10px rgba(0,0,0,.18);
-    border:2px solid rgba(255,255,255,.65); transition:transform .25s ease;}
-  .token.pulse .inner{animation:pulse .6s ease;}
-  @keyframes pulse{0%{transform:scale(1);}40%{transform:scale(1.28);}100%{transform:scale(1);}}
-  .token .ref{position:absolute; right:-8px; top:-8px; width:22px; height:22px; border-radius:50%;
-    background:#fff; border:2px solid var(--line); font-size:11px; font-weight:800; color:var(--line);
-    display:none; place-items:center; z-index:2;}
-  .token.has-ref .ref{display:grid;}
-  .token.ref1 .ref{background:#2f9e44; border-color:#1c7a30; color:#fff;}
-  .token.ghost .inner{opacity:.4; border-style:dashed; box-shadow:none;}
-  .token.ghost .ref{display:none;}
-  .token.trashing{opacity:0;}
-  .token.trashing .inner{transform:scale(.4) rotate(25deg);}
-  .token.enter{animation:drop-in .4s ease;}
-  @keyframes drop-in{from{opacity:0;}to{opacity:1;}}
+/* progress */
+#prog{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0; z-index:50; transition:width .3s;}
+#pager{position:fixed; right:14px; bottom:12px; font-size:12px; color:#8b96a0; z-index:50;
+  font-variant-numeric:tabular-nums; background:rgba(255,255,255,.7); padding:2px 8px; border-radius:20px;}
 
-  #reqrow{position:absolute; left:0; top:40px; width:100%; height:56px;}
-  .chip{position:absolute; width:42px; height:42px; margin:-21px 0 0 -21px; border-radius:50%;
-    display:grid; place-items:center; color:#fff; font-weight:800; font-size:15px;
-    box-shadow:0 3px 7px rgba(0,0,0,.15);
-    transition:left .55s cubic-bezier(.4,0,.2,1), opacity .4s, transform .3s; opacity:.42;}
-  .chip.cur{opacity:1; transform:scale(1.16); box-shadow:0 5px 14px rgba(0,0,0,.28);
-    outline:3px solid rgba(31,41,51,.16); outline-offset:2px;}
-  .chip.done{opacity:.12;}
-  #reqlabel{position:absolute; left:36px; top:60px; font-size:12px; font-weight:700; color:var(--muted);}
-  #downarrow{position:absolute; left:155px; top:66px; z-index:3;
-    transition:left .5s cubic-bezier(.4,0,.2,1);}
+/* ---- typography helpers ---- */
+.lead{font-size:23px; line-height:1.4; color:var(--ink); max-width:24ch;}
+.big{font-size:26px; font-weight:800; line-height:1.25;}
+.sub{font-size:17px; color:var(--muted); line-height:1.45;}
+.small{font-size:14px; color:var(--muted);}
+.hl{color:var(--accent); font-weight:800;}
+.hl-r{color:var(--problem); font-weight:800;} .hl-i{color:var(--insight); font-weight:800;}
+.hl-g{color:var(--results); font-weight:800;}
+ul.clean{list-style:none; padding:0; margin:0;}
+ul.clean li{position:relative; padding-left:26px; margin:14px 0; font-size:19px; line-height:1.4;}
+ul.clean li::before{content:""; position:absolute; left:2px; top:9px; width:9px; height:9px; border-radius:50%;
+  background:var(--accent);}
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:34px; align-items:center;}
+.cols3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;}
+.card{background:#f7f9fb; border:1px solid var(--line); border-radius:12px; padding:18px 20px;}
+.card h3{margin:0 0 6px; font-size:17px; font-weight:800;}
+.card p{margin:0; font-size:14.5px; color:var(--muted); line-height:1.4;}
+figure{margin:0;}
+figure img{display:block; max-width:100%; max-height:100%; margin:0 auto; border-radius:6px;}
+figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:8px;}
 
-  .flash{position:absolute; z-index:9; transform:translate(-50%,-50%); background:var(--ink); color:#fff;
-    font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap;
-    box-shadow:0 4px 12px rgba(0,0,0,.25); animation:flash 1.7s ease forwards; pointer-events:none;}
-  .flash::after{content:""; position:absolute; left:50%; bottom:-6px; margin-left:-6px;
-    border-top:6px solid var(--ink); border-left:6px solid transparent; border-right:6px solid transparent;}
-  .flash.good{background:var(--promote);} .flash.good::after{border-top-color:var(--promote);}
-  .flash.bad{background:var(--evict);}     .flash.bad::after{border-top-color:var(--evict);}
-  .flash.warn{background:var(--warn);}     .flash.warn::after{border-top-color:var(--warn);}
-  @keyframes flash{0%{opacity:0; transform:translate(-50%,-30%);}
-    15%{opacity:1; transform:translate(-50%,-50%);} 80%{opacity:1; transform:translate(-50%,-60%);}
-    100%{opacity:0; transform:translate(-50%,-80%);}}
+/* fragments */
+.frag{opacity:0; transform:translateY(6px); transition:opacity .4s ease, transform .4s ease;}
+.frag.on{opacity:1; transform:none;}
 
-  #trash{position:absolute; left:900px; top:300px; z-index:2;}
-  #trash .tl{position:absolute; left:-6px; top:62px; width:80px; text-align:center;
-    font-size:12px; font-weight:700; color:var(--evict);}
+/* callout */
+.callout{background:linear-gradient(0deg,#fbfdff,#fbfdff); border:2px solid var(--accent);
+  border-radius:14px; padding:20px 24px; font-size:22px; font-weight:700; line-height:1.35;}
+.callout.i{border-color:var(--insight);} .callout.r{border-color:var(--problem);}
+.bignum{font-size:58px; font-weight:800; line-height:1; letter-spacing:-.02em;}
+.bignum.g{color:var(--results);}
+.tag{display:inline-block; font-size:12.5px; font-weight:800; padding:3px 10px; border-radius:20px;
+  background:#eef3f8; color:var(--accent);}
 
-  #titlebar{position:absolute; left:40px; top:474px; width:540px;}
-  #scene-title{font-size:21px; font-weight:800; margin:0 0 6px;}
-  #scene-desc{font-size:14px; line-height:1.42; color:var(--muted); min-height:40px;}
+/* queue chips for diagrams */
+.qbox{border:2px dashed var(--small); background:#fff8e6; border-radius:12px; padding:14px; position:relative;}
+.qbox.ghost{border-color:var(--ghost); background:#eef1f4;}
+.chip{width:44px; height:44px; border-radius:50%; display:inline-grid; place-items:center; color:#fff;
+  font-weight:800; font-size:16px; box-shadow:0 3px 7px rgba(0,0,0,.16); border:2px solid rgba(255,255,255,.7);}
+.rowchips{display:flex; gap:10px; align-items:center;}
 
-  #situations{position:absolute; left:620px; top:460px; width:470px;
-    font-size:13px; display:flex; flex-direction:column; gap:6px;}
-  #situations .st{display:flex; align-items:center; gap:9px; color:#9aa5ad; font-weight:600; transition:color .3s;}
-  #situations .st .dot{width:11px; height:11px; border-radius:50%; background:#d7dde2; transition:all .3s;}
-  #situations .st.on{color:var(--ink);}
-  #situations .st.on .dot{background:var(--clock-edge); box-shadow:0 0 0 4px rgba(62,159,214,.2);}
-  #situations .st.did{color:#b3bcc4;} #situations .st.did .dot{background:#9fd6a6;}
+table.tbl{border-collapse:collapse; width:100%; font-size:16px;}
+table.tbl th, table.tbl td{padding:10px 12px; text-align:right; border-bottom:1px solid var(--line);}
+table.tbl th:first-child, table.tbl td:first-child{text-align:left;}
+table.tbl thead th{color:var(--muted); font-size:13.5px; text-transform:uppercase; letter-spacing:.04em;}
+table.tbl tr.win td{background:#f1faf3; font-weight:800;}
 
-  #legend{position:absolute; right:26px; top:16px; display:flex; gap:15px; font-size:11.5px; color:var(--muted);}
-  #legend .li{display:flex; align-items:center; gap:6px;}
-  .badge-demo{width:19px;height:19px;border-radius:50%;background:#fff;border:2px solid var(--line);
-    font-size:10px;font-weight:800;color:var(--line);display:grid;place-items:center;}
-  .badge-demo.g{background:#2f9e44;border-color:#1c7a30;color:#fff;}
-  .swatch-ghost{width:16px;height:16px;border-radius:50%;border:2px dashed var(--ghost-edge);}
+iframe.anim{width:1180px; height:600px; border:0; display:block; margin:0 auto; background:#fff;}
+
+/* title slide */
+#s-title{display:flex; flex-direction:column; justify-content:center;}
+.authors{font-size:16px; color:var(--ink); line-height:1.7; margin-top:8px;}
+.affil{font-size:13.5px; color:var(--muted);}
+.venue{margin-top:20px; font-size:15px; color:var(--muted);}
+.deploypill{display:inline-flex; align-items:center; gap:8px; background:#eaf4fb; color:#1f6fa8;
+  font-weight:700; font-size:14px; padding:6px 14px; border-radius:24px; border:1px solid #cfe6f5;}
+
+.hint{position:fixed; left:14px; bottom:11px; font-size:11.5px; color:#aab4bd; z-index:50;}
+.backup-mark{position:absolute; top:20px; right:26px; font-size:12px; font-weight:800; letter-spacing:.1em;
+  color:var(--faint); text-transform:uppercase;}
+.arrowlbl{font-size:13px; font-weight:700; color:var(--muted);}
+.flow{display:flex; align-items:center; gap:14px;}
+.arrow{font-size:26px; color:var(--faint);}
+svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </style>
 </head>
 <body>
-<div id="stage">
+<div id="viewport"><div id="deck">
 
-  <div id="reqrow"></div>
-  <svg id="downarrow" width="26" height="46" viewBox="0 0 26 46">
-    <path d="M13,46 L13,16" stroke="#1f2933" stroke-width="3"/><path d="M4,20 L13,4 L22,20 Z" fill="#1f2933"/>
-  </svg>
-
-  <div class="region" id="small"><span class="rlabel">Small FIFO</span></div>
-  <div id="window"><span class="wlabel">Correlation Window</span></div>
-
-  <div class="region" id="ghost"><span class="rlabel">Ghost FIFO</span></div>
-  <div class="region" id="clockbox"><span class="rlabel">Main Clock</span></div>
-  <div id="hand"></div><div id="handhub"></div>
-
-  <svg id="trash" width="64" height="58" viewBox="0 0 64 58">
-    <path d="M8,13 h48 l-5,40 a4,4 0 0 1 -4,4 h-30 a4,4 0 0 1 -4,-4 Z" fill="none" stroke="#e04b3a" stroke-width="3"/>
-    <path d="M4,13 h56" stroke="#e04b3a" stroke-width="3"/>
-    <path d="M24,13 v-5 a3,3 0 0 1 3,-3 h10 a3,3 0 0 1 3,3 v5" fill="none" stroke="#e04b3a" stroke-width="3"/>
-    <path d="M20,22 v27 M32,22 v27 M44,22 v27" stroke="#e04b3a" stroke-width="2.4"/>
-    <text class="tl" x="0" y="0"></text>
-  </svg>
-  <span style="position:absolute; left:894px; top:364px; width:76px; text-align:center; font-size:12px; font-weight:700; color:var(--evict);">Evicted</span>
-
-  <div id="titlebar"><div id="scene-title"></div><div id="scene-desc"></div></div>
-
-  <div id="situations">
-    <div class="st" data-k="cold"><span class="dot"></span>Cold block → Ghost</div>
-    <div class="st" data-k="corr"><span class="dot"></span>Correlated burst (filtered by window)</div>
-    <div class="st" data-k="hot"><span class="dot"></span>Hot block → promoted to Main Clock</div>
-    <div class="st" data-k="ghost"><span class="dot"></span>Ghost hit → admitted to Main Clock</div>
-    <div class="st" data-k="evict"><span class="dot"></span>Main Clock eviction (second chance)</div>
+<!-- ============ 1 · TITLE ============ -->
+<section class="slide" id="s-title" data-sec="" data-secname="" data-time="0:30">
+  <div class="accentbar" style="background:var(--wrap)"></div>
+  <div class="kicker" style="color:var(--accent)">VLDB 2026</div>
+  <h1 class="title" style="font-size:52px; margin-top:10px;">Clock2Q+</h1>
+  <div class="big" style="color:var(--muted); font-weight:700; margin-top:8px; max-width:30ch;">
+    Correlation-Aware Cache Replacement for Metadata Caches</div>
+  <div class="authors" style="margin-top:26px;">
+    <b>Yiyan Zhai</b><sup>1</sup>&nbsp;&nbsp; Bintang Dwi Marthen<sup>2</sup>&nbsp;&nbsp;
+    Sarath Balivada<sup>3</sup>&nbsp;&nbsp; Vamsi Sudhakar Bojji<sup>3</sup>&nbsp;&nbsp; Eric Knauft<sup>3</sup><br>
+    Jitender Rohilla<sup>3</sup>&nbsp;&nbsp; Jiaqi Zuo<sup>3</sup>&nbsp;&nbsp; Quanxing Liu<sup>3</sup>
   </div>
-
-  <div id="legend">
-    <div class="li"><span class="badge-demo">0</span> Ref = 0</div>
-    <div class="li"><span class="badge-demo g">1</span> Ref = 1</div>
-    <div class="li"><span class="swatch-ghost"></span> ghost (key only)</div>
+  <div class="affil"><sup>1</sup>Carnegie Mellon University&nbsp;&nbsp; <sup>2</sup>Harvard University&nbsp;&nbsp; <sup>3</sup>Broadcom</div>
+  <div class="venue" style="margin-top:24px;">
+    <span class="deploypill">🛢 Deployed in VMware vSAN — metadata cache</span>
   </div>
-</div>
+</section>
+
+<!-- ============ 2 · MOTIVATION ============ -->
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:00">
+  <div class="accentbar"></div>
+  <div class="kicker">The setting</div>
+  <h2 class="stitle">The metadata cache is on the hottest path</h2>
+  <div class="cols">
+    <div>
+      <ul class="clean">
+        <li class="frag" data-f="1">A block cache keeps hot pages in <b>DRAM</b> to avoid <b>SSD/HDD</b> I/O.</li>
+        <li class="frag" data-f="2">vSAN caches <b>data</b> and <b>metadata</b> separately — metadata is consulted to <i>locate</i> data.</li>
+        <li class="frag" data-f="3">So the metadata policy runs at <b>extreme frequency</b>, <b>high concurrency</b>, hit ratios near <b>100%</b>.</li>
+      </ul>
+      <div class="callout frag" data-f="4" style="margin-top:20px; font-size:19px;">
+        Judged not only on miss ratio, but on <span class="hl">CPU overhead, scalability, and simplicity</span>.
+      </div>
+    </div>
+    <figure class="frag" data-f="1">
+      <svg width="440" height="330" viewBox="0 0 440 330">
+        <!-- tiers -->
+        <rect x="70" y="20" width="300" height="66" rx="10" fill="#eaf4fb" stroke="#3e9fd6" stroke-width="2"/>
+        <text x="220" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1f6fa8">DRAM — Block Cache</text>
+        <text x="220" y="70" text-anchor="middle" font-size="12.5" fill="#5f6b76">data cache · metadata cache</text>
+        <path class="ln" d="M220,92 L220,120" marker-end="url(#ah)"/>
+        <rect x="70" y="128" width="300" height="52" rx="10" fill="#f7f9fb" stroke="#c2ccd4" stroke-width="2"/>
+        <text x="220" y="159" text-anchor="middle" font-size="15" font-weight="700" fill="#5f6b76">SSD</text>
+        <rect x="70" y="196" width="300" height="52" rx="10" fill="#f7f9fb" stroke="#c2ccd4" stroke-width="2"/>
+        <text x="220" y="227" text-anchor="middle" font-size="15" font-weight="700" fill="#5f6b76">HDD</text>
+        <defs><marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#c2ccd4"/></marker></defs>
+        <g class="frag" data-f="2">
+          <text x="220" y="280" text-anchor="middle" font-size="14" fill="#5f6b76">a metadata lookup mediates</text>
+          <text x="220" y="300" text-anchor="middle" font-size="14" fill="#5f6b76">nearly every data access</text>
+        </g>
+      </svg>
+    </figure>
+  </div>
+  <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 3 · CORRELATED REFERENCES ============ -->
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:15">
+  <div class="accentbar"></div>
+  <div class="kicker">The problem</div>
+  <h2 class="stitle">Metadata has <span class="hl-r">correlated references</span></h2>
+  <div class="cols" style="grid-template-columns:0.92fr 1.08fr;">
+    <div>
+      <div class="big frag" data-f="1" style="margin-bottom:14px;">One operation (e.g., an index traversal) touches many tuples on the <span class="hl-r">same metadata page</span>.</div>
+      <ul class="clean">
+        <li class="frag" data-f="2">→ a <b>dense burst</b> of hits, then the page goes cold.</li>
+        <li class="frag" data-f="3">A burst is <b>weak evidence</b> of long-term popularity.</li>
+      </ul>
+      <div class="callout r frag" data-f="4" style="margin-top:18px; font-size:19px;">
+        Data blocks are mostly <b>one-hit wonders</b>. Metadata blocks are <b>re-referenced in bursts</b> — a different world.
+      </div>
+    </div>
+    <figure class="frag" data-f="3">
+      <img src="assets/correlated.png" alt="correlated references" style="max-height:430px;">
+      <figcaption>Metadata pages see <b>multiple re-references</b> within a short window; data pages see <b>none</b>. (CloudPhysics w102, w47)</figcaption>
+    </figure>
+  </div>
+  <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 4 · WHY EXISTING FAIL ============ -->
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:15">
+  <div class="accentbar"></div>
+  <div class="kicker">Why existing policies fall short</div>
+  <h2 class="stitle">Filter too loosely, or too aggressively</h2>
+  <div class="cols">
+    <div class="card frag" data-f="1" style="border-color:#f3c9c3;">
+      <h3 style="color:var(--problem)">S3-FIFO — over-promotes</h3>
+      <p>A Ref bit is set on <i>any</i> re-hit in the Small FIFO. A correlated burst near the head sets Ref&nbsp;=&nbsp;1 → the cold page is <b>promoted to Main</b> and <b>pollutes</b> the cache.</p>
+      <div class="rowchips" style="margin-top:14px;">
+        <span class="chip" style="background:#f15bb5">C</span>
+        <span class="small">burst hit → <b style="color:var(--evict)">Ref=1</b> → wrongly promoted</span>
+      </div>
+    </div>
+    <div class="card frag" data-f="2" style="border-color:#cdd6de;">
+      <h3 style="color:var(--muted)">Clock2Q / 2Q — under-promotes</h3>
+      <p>A genuinely hot block reaches Main only <i>after</i> being evicted to Ghost and re-referenced — an <b>extra, avoidable miss</b> for every hot block.</p>
+      <div class="rowchips" style="margin-top:14px;">
+        <span class="chip" style="background:#4c8bf5">H</span>
+        <span class="small">must miss once before it can be promoted</span>
+      </div>
+    </div>
+  </div>
+  <div class="callout r frag" data-f="3" style="margin-top:26px; text-align:center;">
+    We want the <b>direct-promotion</b> speed of S3-FIFO <span class="hl-r">without</span> admitting correlated bursts.
+  </div>
+  <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 5 · KEY INSIGHT ============ -->
+<section class="slide" data-sec="insight" data-secname="Key insight" data-time="1:00">
+  <div class="accentbar" style="background:var(--insight)"></div>
+  <div class="kicker" style="color:var(--insight)">Key insight</div>
+  <h2 class="stitle"><span class="hl-i">Where</span> a re-hit happens tells you what it means</h2>
+  <div style="display:grid; grid-template-columns:1fr; gap:22px;">
+    <div class="callout i" style="font-size:24px; text-align:center;">
+      Add a <span class="hl-i">Correlation Window</span> at the head of the Small FIFO:<br>
+      hits <b>inside</b> the window do <b>not</b> set the Ref bit.
+    </div>
+    <div class="cols frag" data-f="1">
+      <div class="card" style="border-color:#f6dca6; background:#fffaf0;">
+        <h3 style="color:var(--insight)">Inside the window (just inserted)</h3>
+        <p>A re-hit is almost certainly the <b>same correlated burst</b> → ignore it. Ref stays 0 → the page ages out to Ghost.</p>
+      </div>
+      <div class="card" style="border-color:#bfe3c8; background:#f4fbf5;">
+        <h3 style="color:var(--results)">Beyond the window</h3>
+        <p>A re-hit is <b>genuine reuse</b> → set Ref = 1 → promote directly to Main Clock, no extra miss.</p>
+      </div>
+    </div>
+    <div class="sub frag" data-f="2" style="text-align:center;">A one-line change to S3-FIFO — no new tuning knobs, no ordered LRU.</div>
+  </div>
+  <div class="foot"><span class="sec">Insight</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 6 · DESIGN / ARCHITECTURE ============ -->
+<section class="slide" data-sec="design" data-secname="Design" data-time="1:30">
+  <div class="accentbar" style="background:var(--design)"></div>
+  <div class="kicker" style="color:var(--design)">Clock2Q+ design</div>
+  <h2 class="stitle">Three queues + a correlation window</h2>
+  <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:30px; align-items:center;">
+    <svg width="580" height="410" viewBox="0 0 580 410">
+      <!-- Small FIFO -->
+      <rect x="20" y="30" width="360" height="86" rx="12" fill="#fff8e6" stroke="#f0b429" stroke-width="2.4" stroke-dasharray="7 5"/>
+      <rect x="28" y="38" width="150" height="70" rx="9" fill="#ffe6ad" stroke="#e8930c" stroke-width="2"/>
+      <text x="103" y="24" text-anchor="middle" font-size="12.5" font-weight="800" fill="#e8930c">Correlation Window</text>
+      <text x="200" y="130" text-anchor="middle" font-size="14" font-weight="800" fill="#b9860f">Small FIFO</text>
+      <!-- Main clock -->
+      <circle cx="480" cy="150" r="64" fill="#eaf4fb" stroke="#3e9fd6" stroke-width="2.4"/>
+      <text x="480" y="150" text-anchor="middle" font-size="14" font-weight="800" fill="#1f6fa8">Main</text>
+      <text x="480" y="168" text-anchor="middle" font-size="14" font-weight="800" fill="#1f6fa8">Clock</text>
+      <line x1="480" y1="150" x2="480" y2="100" stroke="#d6480f" stroke-width="3"/>
+      <circle cx="480" cy="150" r="5" fill="#d6480f"/>
+      <!-- Ghost -->
+      <rect x="20" y="250" width="360" height="70" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.4" stroke-dasharray="7 5"/>
+      <text x="200" y="335" text-anchor="middle" font-size="14" font-weight="800" fill="#6b7681">Ghost FIFO (keys only)</text>
+      <!-- Trash -->
+      <text x="480" y="300" text-anchor="middle" font-size="30">🗑️</text>
+      <text x="480" y="322" text-anchor="middle" font-size="12" fill="#8b96a0">evict</text>
+      <!-- arrows -->
+      <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker>
+        <marker id="a2g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f9e44"/></marker></defs>
+      <path d="M384,66 C430,66 440,96 462,120" class="ln" stroke="#2f9e44" marker-end="url(#a2g)"/>
+      <text x="410" y="52" font-size="12.5" font-weight="700" fill="#2f9e44">Ref=1</text>
+      <path d="M200,120 L200,244" class="ln" marker-end="url(#a2)"/>
+      <text x="210" y="190" font-size="12.5" font-weight="700" fill="#6b7681">Ref=0</text>
+      <path d="M384,285 C440,285 452,250 470,206" class="ln" stroke="#2f9e44" marker-end="url(#a2g)"/>
+      <text x="392" y="250" font-size="12.5" font-weight="700" fill="#2f9e44">ghost hit</text>
+      <text x="150" y="392" text-anchor="middle" font-size="12.5" fill="#8b96a0">new blocks enter here →  age toward the tail</text>
+    </svg>
+    <div>
+      <ul class="clean" style="font-size:17.5px;">
+        <li class="frag" data-f="1"><b>Cold / correlated</b> → age out to <b>Ghost</b> (Ref = 0).</li>
+        <li class="frag" data-f="2"><b>Hot</b> (Ref = 1 at tail) → promoted <b>directly to Main</b>.</li>
+        <li class="frag" data-f="3"><b>Ghost hit</b> → proven reuse → admit to Main.</li>
+        <li class="frag" data-f="4"><b>Main Clock</b> → Ref gives a second chance before eviction.</li>
+      </ul>
+      <div class="card frag" data-f="5" style="margin-top:14px; border-color:#bcd8ec; background:#f3f9fd;">
+        <p style="font-size:15px;">Sizes: Small FIFO 10% (window = half), Main Clock 90%, Ghost 50%.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 7 · LIVE ANIMATION ============ -->
+<section class="slide" data-sec="design" data-secname="Design" data-time="1:30" style="padding:34px 40px 54px;">
+  <div class="accentbar" style="background:var(--design)"></div>
+  <div class="kicker" style="color:var(--design); padding-left:24px;">Clock2Q+ in action</div>
+  <iframe class="anim" src="animation.html" title="Clock2Q+ animation" loading="lazy" style="margin-top:6px;"></iframe>
+  <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 8 · METHOD / TRACES ============ -->
+<section class="slide" data-sec="method" data-secname="Method" data-time="1:00">
+  <div class="accentbar" style="background:var(--accent)"></div>
+  <div class="kicker">Evaluating a metadata policy</div>
+  <h2 class="stitle">Turning public block traces into metadata traces</h2>
+  <div class="cols">
+    <div>
+      <ul class="clean">
+        <li class="frag" data-f="1">No public metadata-cache traces exist; production traces can't be shared.</li>
+        <li class="frag" data-f="2"><b>Idea:</b> divide each block number by the B-tree fan-out (200) → the sequence of leaf-page accesses.</li>
+        <li class="frag" data-f="3">Reproducible from <b>any</b> public block trace.</li>
+      </ul>
+      <div class="callout frag" data-f="4" style="margin-top:16px; font-size:18px;">
+        Validated against a real B-tree leaf trace: <span class="hl-g">&lt; 0.01%</span> miss-ratio difference.
+      </div>
+      <div class="small frag" data-f="5" style="margin-top:14px;">
+        106 CloudPhysics traces · 2.1B requests · libCacheSim · 10 SOTA baselines.
+      </div>
+    </div>
+    <figure class="frag" data-f="4">
+      <img src="assets/fidelity.png" alt="trace fidelity" style="max-height:400px;">
+      <figcaption>Derived metadata trace vs. real B-tree leaf trace — nearly identical miss-ratio curves.</figcaption>
+    </figure>
+  </div>
+  <div class="foot"><span class="sec">Method</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 9 · RESULTS: MISS RATIO ============ -->
+<section class="slide" data-sec="results" data-secname="Results" data-time="1:15">
+  <div class="accentbar" style="background:var(--results)"></div>
+  <div class="kicker" style="color:var(--results)">Result — miss ratio</div>
+  <h2 class="stitle">Lowest miss ratio across 10 SOTA policies</h2>
+  <div class="cols" style="gap:24px;">
+    <figure class="frag" data-f="1">
+      <img src="assets/meta_box.png" alt="metadata results" style="max-height:340px;">
+      <figcaption><b>Metadata traces.</b> Clock2Q+ is the 0-line; every policy's box sits below it.</figcaption>
+    </figure>
+    <figure class="frag" data-f="2">
+      <img src="assets/data_box.png" alt="data results" style="max-height:340px;">
+      <figcaption><b>Data traces.</b> Same story — medians below the Clock2Q+ line.</figcaption>
+    </figure>
+  </div>
+  <div class="callout r frag" data-f="3" style="margin-top:18px; border-color:var(--results); text-align:center; font-size:20px;">
+    Best <b>median &amp; mean</b> improvement at every cache size — up to <span class="hl-g">28.5%</span> per-trace over S3-FIFO on metadata.
+  </div>
+  <div class="foot"><span class="sec">Results</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 10 · WHY IT WORKS ============ -->
+<section class="slide" data-sec="results" data-secname="Results" data-time="1:00">
+  <div class="accentbar" style="background:var(--results)"></div>
+  <div class="kicker" style="color:var(--results)">Result — why it works</div>
+  <h2 class="stitle">It promotes far fewer blocks — and the right ones</h2>
+  <div class="cols">
+    <div class="frag" data-f="1">
+      <table class="tbl">
+        <thead><tr><th>Small FIFO →</th><th>Main</th><th>Ghost</th></tr></thead>
+        <tbody>
+          <tr><td>S3-FIFO</td><td>88,529</td><td>126,897</td></tr>
+          <tr class="win"><td>Clock2Q+</td><td>20,762</td><td>186,959</td></tr>
+        </tbody>
+      </table>
+      <div class="big" style="margin-top:16px;">Clock2Q+ promotes <span class="hl-g">&lt; ¼</span> as many Small-FIFO blocks into Main.</div>
+      <div class="sub" style="margin-top:8px;">Correlated bursts are filtered out instead of polluting Main.</div>
+    </div>
+    <figure class="frag" data-f="2">
+      <div class="cols" style="gap:12px;">
+        <img src="assets/nrd_main.png" alt="reuse distance main" style="max-height:250px;">
+        <img src="assets/nrd_ghost.png" alt="reuse distance ghost" style="max-height:250px;">
+      </div>
+      <figcaption>Promoted blocks have <b>short</b> next-reuse distance (hot); ghosted blocks have <b>long</b> distance (cold).</figcaption>
+    </figure>
+  </div>
+  <div class="foot"><span class="sec">Results</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 11 · PRODUCTION ============ -->
+<section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:45">
+  <div class="accentbar" style="background:var(--deploy)"></div>
+  <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
+  <h2 class="stitle">Simplicity as a first-class requirement</h2>
+  <div class="cols3">
+    <div class="card frag" data-f="1"><h3>Low overhead</h3><p>Allocation-free, array-based queues. Hit path = one hash lookup + at most a Ref-bit set.</p></div>
+    <div class="card frag" data-f="2"><h3>Scalable</h3><p>Atomic head/tail indices &amp; clock hand; fine-grained per-entry / per-bucket locks — no global lock.</p></div>
+    <div class="card frag" data-f="3"><h3>Dirty-aware</h3><p>Eviction &amp; promotion skip dirty pages until flushed. Simulated miss-ratio impact: negligible.</p></div>
+    <div class="card frag" data-f="4"><h3>Bounded work</h3><p>Per-eviction scan is capped (skip &lt; 2 on average) → no CPU spikes, no infinite loops.</p></div>
+    <div class="card frag" data-f="5"><h3>Online resizing</h3><p>Grow/shrink queues live, without rebuilding — required in a running system.</p></div>
+    <div class="card frag" data-f="6" style="border-color:#d4c7ee; background:#f7f4fc;"><h3 style="color:var(--deploy)">~A decade in vSAN</h3><p>2Q → Clock2Q → S3-FIFO → Clock2Q+, shaped by real deployment.</p></div>
+  </div>
+  <div class="foot"><span class="sec">Deployment</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 12 · TAKEAWAYS ============ -->
+<section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:45">
+  <div class="accentbar" style="background:var(--wrap)"></div>
+  <div class="kicker" style="color:var(--ink)">Takeaways</div>
+  <h2 class="stitle">Clock2Q+</h2>
+  <ul class="clean" style="font-size:21px;">
+    <li class="frag" data-f="1"><b>Correlated references</b> are a real, performance-critical metadata pattern that defeats one-hit-wonder filters.</li>
+    <li class="frag" data-f="2">The <b>correlation window</b> is a one-line change: filter bursts, still promote genuinely hot blocks directly.</li>
+    <li class="frag" data-f="3"><b>Best miss ratio</b> among SOTA on metadata <i>and</i> data — and it is <b>deployed in VMware vSAN</b>.</li>
+    <li class="frag" data-f="4">Low overhead, scalable, dirty-aware, resizable — <b>simplicity pays off</b> in production.</li>
+  </ul>
+  <div class="callout frag" data-f="5" style="margin-top:22px; text-align:center; border-color:var(--wrap);">
+    Reproducible: Clock2Q+ &amp; the metadata-trace method are upstreamed in <b>libCacheSim</b>.
+  </div>
+  <div class="foot"><span class="sec">Thank you</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ BACKUP ============ -->
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — miss ratio vs. cache size</div>
+  <h2 class="stitle">Lowest curve across the whole range</h2>
+  <figure><img src="assets/mr_curve.png" alt="miss ratio curve" style="max-height:440px;">
+    <figcaption>CloudPhysics w56. Clock2Q+ (orange) has the lowest miss ratio at every cache size, on metadata and data.</figcaption></figure>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — sensitivity</div>
+  <h2 class="stitle">Robust to the window size (no tuning)</h2>
+  <figure><img src="assets/sensitivity.png" alt="sensitivity" style="max-height:440px;">
+    <figcaption>Correlation window = 10% / 30% / 50% of the Small FIFO — miss ratio is essentially unchanged.</figcaption></figure>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — production hardening</div>
+  <h2 class="stitle">Dirty pages &amp; bounded clock-hand work</h2>
+  <div class="cols">
+    <figure><img src="assets/dirty.png" alt="dirty impact" style="max-height:330px;"><figcaption>Simplified dirty-page handling: negligible miss-ratio impact.</figcaption></figure>
+    <figure><img src="assets/skip_limit.png" alt="skip limit" style="max-height:330px;"><figcaption>Capping skipped blocks (limit = 10) bounds worst-case work safely.</figcaption></figure>
+  </div>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — limitation</div>
+  <h2 class="stitle">Where it doesn't win: non-block object caches</h2>
+  <figure><img src="assets/nonblock.png" alt="non-block traces" style="max-height:420px;">
+    <figcaption>On Wikimedia / Meta KV / Tencent object traces (few correlated references), Clock2Q+ is on par with, and slightly behind, S3-FIFO.</figcaption></figure>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
+</div></div>
+
+<div id="prog"></div>
+<div id="pager"></div>
+<div class="hint">← → navigate · F fullscreen · O overview</div>
 
 <script>
 (function(){
-  "use strict";
-  const stage=document.getElementById('stage'), reqrow=document.getElementById('reqrow'), hand=document.getElementById('hand');
-  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const deck=document.getElementById('deck');
+  const slides=[...deck.querySelectorAll('.slide')];
+  const mainCount=slides.filter(s=>s.dataset.sec!=='backup').length;
+  const SECCOL_={problem:'--problem',insight:'--insight',design:'--design',results:'--results',
+                method:'--design',deploy:'--deploy',wrap:'--wrap',backup:'--faint'};
+  function secVar(s){return SECCOL_[s.dataset.sec]||'--design';}
+  let ci=0, fi=0;
 
-  // capacities
-  const S=4, W=2, M=3, G=4;
-
-  // geometry
-  const SLOT=92, SM_X0=168, SM_Y=196, GH_X0=168, GH_Y=406;
-  const CX=720, CY=285, RAD=64, REQ=[168,62], TRASH=[906,320];
-  const RING=[], RINGDEG=[];
-  for(let i=0;i<M;i++){ const deg=i*(360/M)-90; RINGDEG.push(deg);
-    const r=deg*Math.PI/180; RING.push([CX+RAD*Math.cos(r), CY+RAD*Math.sin(r)]); }
-
-  function xy(region,idx){
-    if(region==='small') return [SM_X0+idx*SLOT, SM_Y];
-    if(region==='ghost') return [GH_X0+idx*SLOT, GH_Y];
-    if(region==='clock') return RING[idx];
-    return REQ;
+  function frags(s){return [...s.querySelectorAll('.frag')];}
+  function apply(){
+    slides.forEach((s,i)=>s.classList.toggle('current', i===ci));
+    const s=slides[ci], fr=frags(s);
+    fr.forEach((f,k)=>f.classList.toggle('on', k<fi));
+    // section accent
+    const col=getComputedStyle(document.documentElement).getPropertyValue(secVar(s));
+    document.documentElement.style.setProperty('--accent', col.trim()||'#2f7fbf');
+    // chrome
+    document.getElementById('prog').style.width=((ci)/(slides.length-1)*100)+'%';
+    const isBackup=s.dataset.sec==='backup';
+    const num=isBackup? 'B'+(ci-mainCount+1) : (ci+1)+' / '+mainCount;
+    const t=s.dataset.time?(' · '+s.dataset.time):'';
+    document.getElementById('pager').textContent=num+t;
+    const tm=s.querySelector('.tm'); if(tm) tm.textContent=s.dataset.time?('⏱ '+s.dataset.time):'';
   }
+  function next(){ const fr=frags(slides[ci]);
+    if(fi<fr.length){ fi++; } else if(ci<slides.length-1){ ci++; fi=0; } apply(); }
+  function prev(){ if(fi>0){ fi--; } else if(ci>0){ ci--; fi=frags(slides[ci]).length; } apply(); }
+  function goto(i){ ci=Math.max(0,Math.min(slides.length-1,i)); fi=frags(slides[ci]).length; apply(); }
 
-  const tokens={}, byKey={};
-  let small=[], ghost=[], clock=new Array(M).fill(null), handIdx=0, uid=0;
+  // scaling
+  function resize(){ const s=Math.min(window.innerWidth/1280, window.innerHeight/720);
+    deck.style.transform='scale('+s+')'; }
+  window.addEventListener('resize', resize);
 
-  function makeToken(key,color,ref,spawn){
-    const id='k'+(uid++);
-    const el=document.createElement('div'); el.className='token enter';
-    el.innerHTML=`<div class="inner" style="background:${color}">${key}</div><span class="ref">0</span>`;
-    stage.appendChild(el);
-    tokens[id]={el,key,color,ref:ref??null,ghost:false,windowHit:false};
-    const p=spawn||xy('req'); el.style.left=p[0]+'px'; el.style.top=p[1]+'px';
-    render(id); setTimeout(()=>el.classList.remove('enter'),500);
-    return id;
-  }
-  function render(id){const t=tokens[id]; if(!t)return; const e=t.el;
-    e.classList.toggle('has-ref', t.ref!==null && !t.ghost);
-    e.classList.toggle('ref1', t.ref===1);
-    e.classList.toggle('ghost', t.ghost);
-    if(t.ref!==null) e.querySelector('.ref').textContent=t.ref;}
-  function place(id,x,y){const t=tokens[id]; if(t){t.el.style.left=x+'px'; t.el.style.top=y+'px';}}
-  function layout(){
-    small.forEach((id,i)=>{const p=xy('small',i); place(id,p[0],p[1]);});
-    ghost.forEach((id,i)=>{const p=xy('ghost',i); place(id,p[0],p[1]);});
-    clock.forEach((id,i)=>{if(id){const p=RING[i]; place(id,p[0],p[1]);}});
-  }
-  function pulse(id){const t=tokens[id]; if(!t)return; t.el.classList.add('pulse'); setTimeout(()=>t.el.classList.remove('pulse'),600);}
-  function setRef(id,v){if(tokens[id]){tokens[id].ref=v; render(id);}}
-  function flash(text,x,y,cls){const f=document.createElement('div'); f.className='flash'+(cls?' '+cls:'');
-    f.textContent=text; f.style.left=x+'px'; f.style.top=y+'px'; stage.appendChild(f); setTimeout(()=>f.remove(),1700);}
-  function locate(id){ if(clock.indexOf(id)>=0)return'main'; if(small.indexOf(id)>=0)return'small'; if(ghost.indexOf(id)>=0)return'ghost'; return null; }
-  function setHand(i){ hand.style.transform=`rotate(${RINGDEG[i]}deg)`; }
-
-  async function trash(id){const t=tokens[id]; if(!t)return; place(id,TRASH[0],TRASH[1]); await sleep(300);
-    t.el.classList.add('trashing'); await sleep(600); t.el.remove(); delete tokens[id];}
-
-  function ghostInsertHead(id){
-    tokens[id].ghost=true; tokens[id].ref=null; render(id);
-    ghost.unshift(id); let drop=null; if(ghost.length>G) drop=ghost.pop();
-    return drop; // positioning handled by the single layout() call
-  }
-
-  async function sweepEvict(){
-    let i=handIdx;
-    for(let g=0; g<2*M+2; g++){
-      setHand(i); await sleep(720);
-      const id=clock[i]; if(!id) return i;
-      if(tokens[id].ref===1){
-        pulse(id); setRef(id,0); flash('Ref 1→0 · second chance', RING[i][0], RING[i][1]-38, 'warn'); await sleep(1050); i=(i+1)%M;
-      } else {
-        pulse(id); flash('evict · clean Ref=0', RING[i][0], RING[i][1]-38, 'bad'); await sleep(900);
-        delete byKey[tokens[id].key]; clock[i]=null; await trash(id); return i;
-      }
-    }
-    return i;
-  }
-  async function admitToMain(id){
-    tokens[id].ghost=false; tokens[id].ref=1; render(id);
-    let slot=clock.indexOf(null);
-    if(slot<0){ situation('evict'); say('The Main Clock is full — the hand sweeps for a victim.'); slot=await sweepEvict(); }
-    clock[slot]=id; place(id,RING[slot][0],RING[slot][1]); pulse(id);
-    handIdx=(slot+1)%M; setHand(handIdx); await sleep(400);
-  }
-
-  // request stream — chips stay put; the arrow moves to the current request
-  const downarrow=document.getElementById('downarrow');
-  const SP=50;
-  let reqCur=-1;
-  const curChipX=()=>REQ[0]+reqCur*SP;
-  function setReqStream(seq){ reqCur=-1; reqrow.innerHTML='';
-    seq.forEach((r,i)=>{const c=document.createElement('div'); c.className='chip'; c.textContent=r.k;
-      c.style.background=r.c; c.style.left=(REQ[0]+i*SP)+'px'; reqrow.appendChild(c);});
-    downarrow.style.left=(REQ[0]-13)+'px'; }
-  function advanceReq(){ reqCur++;
-    [...reqrow.children].forEach((c,i)=>{ c.classList.toggle('cur', i===reqCur); c.classList.toggle('done', i<reqCur); });
-    downarrow.style.left=(curChipX()-13)+'px'; }
-
-  // captions
-  const titleEl=document.getElementById('scene-title'), descEl=document.getElementById('scene-desc');
-  function say(t){ descEl.textContent=t; }
-  const NAMES={cold:'Cold block',corr:'Correlated burst',hot:'Hot block',ghost:'Ghost hit',evict:'Main Clock eviction'};
-  function situation(k){ titleEl.textContent=NAMES[k]||'';
-    document.querySelectorAll('#situations .st').forEach(s=>{const on=s.dataset.k===k; s.classList.toggle('on',on); if(on) s.classList.add('did');}); }
-
-  // palette — every object has its own color (labels are alphabetical by first appearance)
-  const COL={A:'#4c8bf5', B:'#f7931e', C:'#00c39a', D:'#9b5de5',
-             E:'#ef476f', F:'#118ab2', G:'#e07a5f', H:'#6a994e'};
-
-  // compact crafted stream (13 requests) — A cold, C correlated, D hot; B/E/F/G/H drive aging
-  const SEQ=['A','B','C','C','D','E','F','D','G','H','A','B','C'].map(k=>({k, c:COL[k]}));
-
-  async function access(key,color){
-    advanceReq(); await sleep(120); // chip slides concurrently with the object's motion below
-    const id=byKey[key], loc=id?locate(id):null;
-
-    if(loc==='main'){
-      const i=clock.indexOf(id); situation('hot');
-      say(`${key} is already in the Main Clock — a hit sets its Ref bit to 1.`);
-      pulse(id); setRef(id,1); flash('Main hit → Ref=1', RING[i][0], RING[i][1]-38, 'good'); await sleep(1400);
-    }
-    else if(loc==='small'){
-      const pos=small.indexOf(id), p=xy('small',pos);
-      if(pos<W){
-        tokens[id].windowHit=true; situation('corr');
-        say(`${key} is hit while still INSIDE the Correlation Window → treated as a correlated reference, so Ref stays 0.`);
-        pulse(id); flash('hit in window → Ref stays 0', p[0], SM_Y-40, 'warn'); await sleep(1650);
-      } else {
-        situation('hot');
-        say(`${key} is hit BEYOND the window → genuine reuse, so Clock2Q+ sets Ref = 1.`);
-        pulse(id); setRef(id,1); flash('hit beyond window → Ref=1', p[0], SM_Y-40, 'good'); await sleep(1650);
-      }
-    }
-    else if(loc==='ghost'){
-      const gp=xy('ghost',ghost.indexOf(id)); situation('ghost');
-      say(`${key}'s key is in the Ghost FIFO — a Ghost hit means it was evicted too early and is actually hot.`);
-      pulse(id); flash('Ghost hit!', gp[0], GH_Y-40, 'good'); await sleep(1450);
-      ghost.splice(ghost.indexOf(id),1); layout();
-      say(`${key} is refilled and admitted DIRECTLY into the Main Clock, bypassing the Small FIFO.`);
-      await admitToMain(id); await sleep(1100);
-    }
-    else {
-      // cold miss
-      const nid=makeToken(key,color,0,[curChipX(),40]); byKey[key]=nid; // spawn right at the chip
-      situation('cold'); say(`${key} is a miss → it enters the Small FIFO head with Ref = 0.`);
-      await sleep(220);
-
-      if(small.length>=S){
-        const ev=small[small.length-1], et=tokens[ev], tx=xy('small',S-1)[0]; // peek the tail
-        // STEP 1 — bubble announcing where the tail will go (nothing moves yet)
-        if(et.ref===1){ situation('hot'); say(`${et.key} is at the tail with Ref = 1 → it will be promoted directly to the Main Clock.`);
-          flash('Ref = 1 → promote', tx, SM_Y-40, 'good'); }
-        else if(et.windowHit){ situation('corr'); say(`${et.key} was hit only inside the window → Ref stayed 0, so it goes to the Ghost FIFO, not the Main Clock.`);
-          flash('Ref = 0 → Ghost', tx, SM_Y-40, 'warn'); }
-        else { situation('cold'); say(`${et.key} reached the tail with Ref = 0 → it is demoted to the Ghost FIFO (key only).`);
-          flash('Ref = 0 → Ghost', tx, SM_Y-40, ''); }
-        await sleep(1050);
-
-        // STEP 2 — everything moves at once (no vacant slot)
-        small.pop(); let dropId=null;
-        if(et.ref===1){ et.ghost=false; et.ref=1; render(ev);
-          let slot=clock.indexOf(null); if(slot<0){ situation('evict'); slot=await sweepEvict(); }
-          clock[slot]=ev; handIdx=(slot+1)%M; setHand(handIdx); }
-        else { dropId=ghostInsertHead(ev); }
-        small.unshift(nid); layout();
-        await sleep(840);
-        if(dropId!==null){ delete byKey[tokens[dropId].key]; await trash(dropId); }
-      } else {
-        small.unshift(nid); layout(); await sleep(760);   // no eviction: single motion
-      }
-    }
-    await sleep(420);
-  }
-
-  function resetAll(){
-    Object.values(tokens).forEach(t=>t.el.remove());
-    for(const k in tokens) delete tokens[k];
-    for(const k in byKey) delete byKey[k];
-    small=[]; ghost=[]; clock=new Array(M).fill(null); handIdx=0; setHand(0);
-    document.querySelectorAll('#situations .st').forEach(s=>s.classList.remove('on','did'));
-    titleEl.textContent=''; say('');
-  }
-
-  async function run(){
-    while(true){
-      resetAll(); setReqStream(SEQ);
-      titleEl.textContent='Clock2Q+'; say('One request stream flows through the cache, demonstrating each situation in turn.');
-      await sleep(1500);
-      for(const r of SEQ){ await access(r.k, r.c); }
-      titleEl.textContent='Done'; say('All five situations shown. Restarting…');
-      await sleep(2400);
+  // overview
+  let overview=false;
+  function toggleOverview(){
+    overview=!overview;
+    if(overview){
+      document.body.style.overflow='auto';
+      deck.style.transform='none'; deck.style.width='100%'; deck.style.height='auto';
+      deck.style.display='grid'; deck.style.gridTemplateColumns='repeat(3,1fr)'; deck.style.gap='14px'; deck.style.padding='14px';
+      slides.forEach((s,i)=>{ s.style.position='relative'; s.style.opacity='1'; s.style.visibility='visible';
+        s.style.transform='scale(1)'; s.style.height='260px'; s.style.cursor='pointer'; s.classList.add('current');
+        frags(s).forEach(f=>f.classList.add('on'));
+        s.onclick=()=>{ toggleOverview(); goto(i); ci=i; fi=frags(s).length; apply(); }; });
+    } else {
+      document.body.style.overflow='hidden';
+      deck.style.display=''; deck.style.gridTemplateColumns=''; deck.style.gap=''; deck.style.padding='';
+      deck.style.width='1280px'; deck.style.height='720px';
+      slides.forEach(s=>{ s.style.position=''; s.style.height=''; s.style.cursor=''; s.onclick=null; });
+      resize(); apply();
     }
   }
-  run();
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='ArrowDown'){ e.preventDefault(); goto(ci+1); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); goto(ci-1); }
+    else if(e.key==='Home'){ goto(0); }
+    else if(e.key==='End'){ goto(mainCount-1); }
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+    else if(e.key==='o'||e.key==='O'){ toggleOverview(); }
+  });
+
+  resize(); apply();
 })();
 </script>
 </body>

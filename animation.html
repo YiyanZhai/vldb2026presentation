@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clock2Q+ Cache Replacement — Animated Explainer</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --paper:#ffffff; --ink:#1f2933; --muted:#69757f; --line:#3a4750;
+    --small-bg:#fff8e6; --small-edge:#f0b429;
+    --win-bg:#ffe6ad; --win-edge:#e8930c;
+    --ghost-bg:#eef1f4; --ghost-edge:#aab4bd;
+    --clock-bg:#eaf4fb; --clock-edge:#3e9fd6;
+    --evict:#e04b3a; --promote:#2f9e44; --warn:#c98a12;
+    --shadow:0 10px 26px rgba(31,41,51,.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{background:radial-gradient(1100px 640px at 50% 0%, #ffffff, var(--bg));
+    color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    display:grid; place-items:center; overflow:hidden;}
+  #stage{position:relative; width:1120px; height:600px; background:var(--paper);
+    border:1px solid #e4e8ec; border-radius:18px; box-shadow:var(--shadow);}
+
+  .region{position:absolute; border-radius:14px;}
+  .region .rlabel{position:absolute; top:-12px; left:16px; background:var(--paper);
+    padding:0 8px; font-size:13px; font-weight:700; color:var(--muted);}
+  #small{left:118px; top:150px; width:376px; height:92px; background:var(--small-bg); border:2px dashed var(--small-edge);}
+  #window{position:absolute; left:124px; top:156px; width:184px; height:80px;
+    background:var(--win-bg); border:2px solid var(--win-edge); border-radius:11px; opacity:.7;}
+  #window .wlabel{position:absolute; bottom:-27px; left:0; width:100%; text-align:center;
+    font-size:12px; font-weight:700; color:var(--win-edge);}
+  #ghost{left:118px; top:360px; width:376px; height:92px; background:var(--ghost-bg); border:2px dashed var(--ghost-edge);}
+  #clockbox{left:600px; top:165px; width:240px; height:240px; background:var(--clock-bg);
+    border:2px solid var(--clock-edge); border-radius:50%;}
+  #clockbox .rlabel{left:50%; transform:translateX(-50%);}
+
+  #hand{position:absolute; left:720px; top:283px; width:56px; height:4px; border-radius:3px;
+    background:linear-gradient(90deg,#d6480f,#f77f00); transform-origin:0 center; transform:rotate(-90deg);
+    transition:transform .8s cubic-bezier(.4,0,.2,1); box-shadow:0 1px 4px rgba(0,0,0,.2); z-index:6;}
+  #hand::after{content:""; position:absolute; right:-6px; top:-6px;
+    border-left:13px solid #f77f00; border-top:8px solid transparent; border-bottom:8px solid transparent;}
+  #handhub{position:absolute; left:720px; top:285px; width:15px; height:15px; margin:-7.5px 0 0 -7.5px;
+    border-radius:50%; background:#d6480f; box-shadow:0 1px 4px rgba(0,0,0,.3); z-index:7;}
+
+  .token{position:absolute; width:52px; height:52px; margin:-26px 0 0 -26px; z-index:5;
+    transition:left .7s cubic-bezier(.45,.05,.25,1), top .7s cubic-bezier(.45,.05,.25,1), opacity .45s;}
+  .token .inner{width:100%; height:100%; border-radius:50%; display:grid; place-items:center;
+    color:#fff; font-weight:800; font-size:18px; box-shadow:0 4px 10px rgba(0,0,0,.18);
+    border:2px solid rgba(255,255,255,.65); transition:transform .25s ease;}
+  .token.pulse .inner{animation:pulse .6s ease;}
+  @keyframes pulse{0%{transform:scale(1);}40%{transform:scale(1.28);}100%{transform:scale(1);}}
+  .token .ref{position:absolute; right:-8px; top:-8px; width:22px; height:22px; border-radius:50%;
+    background:#fff; border:2px solid var(--line); font-size:11px; font-weight:800; color:var(--line);
+    display:none; place-items:center; z-index:2;}
+  .token.has-ref .ref{display:grid;}
+  .token.ref1 .ref{background:#2f9e44; border-color:#1c7a30; color:#fff;}
+  .token.ghost .inner{opacity:.4; border-style:dashed; box-shadow:none;}
+  .token.ghost .ref{display:none;}
+  .token.trashing{opacity:0;}
+  .token.trashing .inner{transform:scale(.4) rotate(25deg);}
+  .token.enter{animation:drop-in .4s ease;}
+  @keyframes drop-in{from{opacity:0;}to{opacity:1;}}
+
+  #reqrow{position:absolute; left:0; top:40px; width:100%; height:56px;}
+  .chip{position:absolute; width:42px; height:42px; margin:-21px 0 0 -21px; border-radius:50%;
+    display:grid; place-items:center; color:#fff; font-weight:800; font-size:15px;
+    box-shadow:0 3px 7px rgba(0,0,0,.15);
+    transition:left .55s cubic-bezier(.4,0,.2,1), opacity .4s, transform .3s; opacity:.42;}
+  .chip.cur{opacity:1; transform:scale(1.16); box-shadow:0 5px 14px rgba(0,0,0,.28);
+    outline:3px solid rgba(31,41,51,.16); outline-offset:2px;}
+  .chip.done{opacity:.12;}
+  #reqlabel{position:absolute; left:36px; top:60px; font-size:12px; font-weight:700; color:var(--muted);}
+  #downarrow{position:absolute; left:155px; top:66px; z-index:3;
+    transition:left .5s cubic-bezier(.4,0,.2,1);}
+
+  .flash{position:absolute; z-index:9; transform:translate(-50%,-50%); background:var(--ink); color:#fff;
+    font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap;
+    box-shadow:0 4px 12px rgba(0,0,0,.25); animation:flash 1.7s ease forwards; pointer-events:none;}
+  .flash::after{content:""; position:absolute; left:50%; bottom:-6px; margin-left:-6px;
+    border-top:6px solid var(--ink); border-left:6px solid transparent; border-right:6px solid transparent;}
+  .flash.good{background:var(--promote);} .flash.good::after{border-top-color:var(--promote);}
+  .flash.bad{background:var(--evict);}     .flash.bad::after{border-top-color:var(--evict);}
+  .flash.warn{background:var(--warn);}     .flash.warn::after{border-top-color:var(--warn);}
+  @keyframes flash{0%{opacity:0; transform:translate(-50%,-30%);}
+    15%{opacity:1; transform:translate(-50%,-50%);} 80%{opacity:1; transform:translate(-50%,-60%);}
+    100%{opacity:0; transform:translate(-50%,-80%);}}
+
+  #trash{position:absolute; left:900px; top:300px; z-index:2;}
+  #trash .tl{position:absolute; left:-6px; top:62px; width:80px; text-align:center;
+    font-size:12px; font-weight:700; color:var(--evict);}
+
+  #titlebar{position:absolute; left:40px; top:474px; width:540px;}
+  #scene-title{font-size:21px; font-weight:800; margin:0 0 6px;}
+  #scene-desc{font-size:14px; line-height:1.42; color:var(--muted); min-height:40px;}
+
+  #situations{position:absolute; left:620px; top:460px; width:470px;
+    font-size:13px; display:flex; flex-direction:column; gap:6px;}
+  #situations .st{display:flex; align-items:center; gap:9px; color:#9aa5ad; font-weight:600; transition:color .3s;}
+  #situations .st .dot{width:11px; height:11px; border-radius:50%; background:#d7dde2; transition:all .3s;}
+  #situations .st.on{color:var(--ink);}
+  #situations .st.on .dot{background:var(--clock-edge); box-shadow:0 0 0 4px rgba(62,159,214,.2);}
+  #situations .st.did{color:#b3bcc4;} #situations .st.did .dot{background:#9fd6a6;}
+
+  #legend{position:absolute; right:26px; top:16px; display:flex; gap:15px; font-size:11.5px; color:var(--muted);}
+  #legend .li{display:flex; align-items:center; gap:6px;}
+  .badge-demo{width:19px;height:19px;border-radius:50%;background:#fff;border:2px solid var(--line);
+    font-size:10px;font-weight:800;color:var(--line);display:grid;place-items:center;}
+  .badge-demo.g{background:#2f9e44;border-color:#1c7a30;color:#fff;}
+  .swatch-ghost{width:16px;height:16px;border-radius:50%;border:2px dashed var(--ghost-edge);}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div id="reqrow"></div>
+  <svg id="downarrow" width="26" height="46" viewBox="0 0 26 46">
+    <path d="M13,46 L13,16" stroke="#1f2933" stroke-width="3"/><path d="M4,20 L13,4 L22,20 Z" fill="#1f2933"/>
+  </svg>
+
+  <div class="region" id="small"><span class="rlabel">Small FIFO</span></div>
+  <div id="window"><span class="wlabel">Correlation Window</span></div>
+
+  <div class="region" id="ghost"><span class="rlabel">Ghost FIFO</span></div>
+  <div class="region" id="clockbox"><span class="rlabel">Main Clock</span></div>
+  <div id="hand"></div><div id="handhub"></div>
+
+  <svg id="trash" width="64" height="58" viewBox="0 0 64 58">
+    <path d="M8,13 h48 l-5,40 a4,4 0 0 1 -4,4 h-30 a4,4 0 0 1 -4,-4 Z" fill="none" stroke="#e04b3a" stroke-width="3"/>
+    <path d="M4,13 h56" stroke="#e04b3a" stroke-width="3"/>
+    <path d="M24,13 v-5 a3,3 0 0 1 3,-3 h10 a3,3 0 0 1 3,3 v5" fill="none" stroke="#e04b3a" stroke-width="3"/>
+    <path d="M20,22 v27 M32,22 v27 M44,22 v27" stroke="#e04b3a" stroke-width="2.4"/>
+    <text class="tl" x="0" y="0"></text>
+  </svg>
+  <span style="position:absolute; left:894px; top:364px; width:76px; text-align:center; font-size:12px; font-weight:700; color:var(--evict);">Evicted</span>
+
+  <div id="titlebar"><div id="scene-title"></div><div id="scene-desc"></div></div>
+
+  <div id="situations">
+    <div class="st" data-k="cold"><span class="dot"></span>Cold block → Ghost</div>
+    <div class="st" data-k="corr"><span class="dot"></span>Correlated burst (filtered by window)</div>
+    <div class="st" data-k="hot"><span class="dot"></span>Hot block → promoted to Main Clock</div>
+    <div class="st" data-k="ghost"><span class="dot"></span>Ghost hit → admitted to Main Clock</div>
+    <div class="st" data-k="evict"><span class="dot"></span>Main Clock eviction (second chance)</div>
+  </div>
+
+  <div id="legend">
+    <div class="li"><span class="badge-demo">0</span> Ref = 0</div>
+    <div class="li"><span class="badge-demo g">1</span> Ref = 1</div>
+    <div class="li"><span class="swatch-ghost"></span> ghost (key only)</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const stage=document.getElementById('stage'), reqrow=document.getElementById('reqrow'), hand=document.getElementById('hand');
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+  // capacities
+  const S=4, W=2, M=3, G=4;
+
+  // geometry
+  const SLOT=92, SM_X0=168, SM_Y=196, GH_X0=168, GH_Y=406;
+  const CX=720, CY=285, RAD=64, REQ=[168,62], TRASH=[906,320];
+  const RING=[], RINGDEG=[];
+  for(let i=0;i<M;i++){ const deg=i*(360/M)-90; RINGDEG.push(deg);
+    const r=deg*Math.PI/180; RING.push([CX+RAD*Math.cos(r), CY+RAD*Math.sin(r)]); }
+
+  function xy(region,idx){
+    if(region==='small') return [SM_X0+idx*SLOT, SM_Y];
+    if(region==='ghost') return [GH_X0+idx*SLOT, GH_Y];
+    if(region==='clock') return RING[idx];
+    return REQ;
+  }
+
+  const tokens={}, byKey={};
+  let small=[], ghost=[], clock=new Array(M).fill(null), handIdx=0, uid=0;
+
+  function makeToken(key,color,ref,spawn){
+    const id='k'+(uid++);
+    const el=document.createElement('div'); el.className='token enter';
+    el.innerHTML=`<div class="inner" style="background:${color}">${key}</div><span class="ref">0</span>`;
+    stage.appendChild(el);
+    tokens[id]={el,key,color,ref:ref??null,ghost:false,windowHit:false};
+    const p=spawn||xy('req'); el.style.left=p[0]+'px'; el.style.top=p[1]+'px';
+    render(id); setTimeout(()=>el.classList.remove('enter'),500);
+    return id;
+  }
+  function render(id){const t=tokens[id]; if(!t)return; const e=t.el;
+    e.classList.toggle('has-ref', t.ref!==null && !t.ghost);
+    e.classList.toggle('ref1', t.ref===1);
+    e.classList.toggle('ghost', t.ghost);
+    if(t.ref!==null) e.querySelector('.ref').textContent=t.ref;}
+  function place(id,x,y){const t=tokens[id]; if(t){t.el.style.left=x+'px'; t.el.style.top=y+'px';}}
+  function layout(){
+    small.forEach((id,i)=>{const p=xy('small',i); place(id,p[0],p[1]);});
+    ghost.forEach((id,i)=>{const p=xy('ghost',i); place(id,p[0],p[1]);});
+    clock.forEach((id,i)=>{if(id){const p=RING[i]; place(id,p[0],p[1]);}});
+  }
+  function pulse(id){const t=tokens[id]; if(!t)return; t.el.classList.add('pulse'); setTimeout(()=>t.el.classList.remove('pulse'),600);}
+  function setRef(id,v){if(tokens[id]){tokens[id].ref=v; render(id);}}
+  function flash(text,x,y,cls){const f=document.createElement('div'); f.className='flash'+(cls?' '+cls:'');
+    f.textContent=text; f.style.left=x+'px'; f.style.top=y+'px'; stage.appendChild(f); setTimeout(()=>f.remove(),1700);}
+  function locate(id){ if(clock.indexOf(id)>=0)return'main'; if(small.indexOf(id)>=0)return'small'; if(ghost.indexOf(id)>=0)return'ghost'; return null; }
+  function setHand(i){ hand.style.transform=`rotate(${RINGDEG[i]}deg)`; }
+
+  async function trash(id){const t=tokens[id]; if(!t)return; place(id,TRASH[0],TRASH[1]); await sleep(300);
+    t.el.classList.add('trashing'); await sleep(600); t.el.remove(); delete tokens[id];}
+
+  function ghostInsertHead(id){
+    tokens[id].ghost=true; tokens[id].ref=null; render(id);
+    ghost.unshift(id); let drop=null; if(ghost.length>G) drop=ghost.pop();
+    return drop; // positioning handled by the single layout() call
+  }
+
+  async function sweepEvict(){
+    let i=handIdx;
+    for(let g=0; g<2*M+2; g++){
+      setHand(i); await sleep(720);
+      const id=clock[i]; if(!id) return i;
+      if(tokens[id].ref===1){
+        pulse(id); setRef(id,0); flash('Ref 1→0 · second chance', RING[i][0], RING[i][1]-38, 'warn'); await sleep(1050); i=(i+1)%M;
+      } else {
+        pulse(id); flash('evict · clean Ref=0', RING[i][0], RING[i][1]-38, 'bad'); await sleep(900);
+        delete byKey[tokens[id].key]; clock[i]=null; await trash(id); return i;
+      }
+    }
+    return i;
+  }
+  async function admitToMain(id){
+    tokens[id].ghost=false; tokens[id].ref=1; render(id);
+    let slot=clock.indexOf(null);
+    if(slot<0){ situation('evict'); say('The Main Clock is full — the hand sweeps for a victim.'); slot=await sweepEvict(); }
+    clock[slot]=id; place(id,RING[slot][0],RING[slot][1]); pulse(id);
+    handIdx=(slot+1)%M; setHand(handIdx); await sleep(400);
+  }
+
+  // request stream — chips stay put; the arrow moves to the current request
+  const downarrow=document.getElementById('downarrow');
+  const SP=50;
+  let reqCur=-1;
+  const curChipX=()=>REQ[0]+reqCur*SP;
+  function setReqStream(seq){ reqCur=-1; reqrow.innerHTML='';
+    seq.forEach((r,i)=>{const c=document.createElement('div'); c.className='chip'; c.textContent=r.k;
+      c.style.background=r.c; c.style.left=(REQ[0]+i*SP)+'px'; reqrow.appendChild(c);});
+    downarrow.style.left=(REQ[0]-13)+'px'; }
+  function advanceReq(){ reqCur++;
+    [...reqrow.children].forEach((c,i)=>{ c.classList.toggle('cur', i===reqCur); c.classList.toggle('done', i<reqCur); });
+    downarrow.style.left=(curChipX()-13)+'px'; }
+
+  // captions
+  const titleEl=document.getElementById('scene-title'), descEl=document.getElementById('scene-desc');
+  function say(t){ descEl.textContent=t; }
+  const NAMES={cold:'Cold block',corr:'Correlated burst',hot:'Hot block',ghost:'Ghost hit',evict:'Main Clock eviction'};
+  function situation(k){ titleEl.textContent=NAMES[k]||'';
+    document.querySelectorAll('#situations .st').forEach(s=>{const on=s.dataset.k===k; s.classList.toggle('on',on); if(on) s.classList.add('did');}); }
+
+  // palette — every object has its own color (labels are alphabetical by first appearance)
+  const COL={A:'#4c8bf5', B:'#f7931e', C:'#00c39a', D:'#9b5de5',
+             E:'#ef476f', F:'#118ab2', G:'#e07a5f', H:'#6a994e'};
+
+  // compact crafted stream (13 requests) — A cold, C correlated, D hot; B/E/F/G/H drive aging
+  const SEQ=['A','B','C','C','D','E','F','D','G','H','A','B','C'].map(k=>({k, c:COL[k]}));
+
+  async function access(key,color){
+    advanceReq(); await sleep(120); // chip slides concurrently with the object's motion below
+    const id=byKey[key], loc=id?locate(id):null;
+
+    if(loc==='main'){
+      const i=clock.indexOf(id); situation('hot');
+      say(`${key} is already in the Main Clock — a hit sets its Ref bit to 1.`);
+      pulse(id); setRef(id,1); flash('Main hit → Ref=1', RING[i][0], RING[i][1]-38, 'good'); await sleep(1400);
+    }
+    else if(loc==='small'){
+      const pos=small.indexOf(id), p=xy('small',pos);
+      if(pos<W){
+        tokens[id].windowHit=true; situation('corr');
+        say(`${key} is hit while still INSIDE the Correlation Window → treated as a correlated reference, so Ref stays 0.`);
+        pulse(id); flash('hit in window → Ref stays 0', p[0], SM_Y-40, 'warn'); await sleep(1650);
+      } else {
+        situation('hot');
+        say(`${key} is hit BEYOND the window → genuine reuse, so Clock2Q+ sets Ref = 1.`);
+        pulse(id); setRef(id,1); flash('hit beyond window → Ref=1', p[0], SM_Y-40, 'good'); await sleep(1650);
+      }
+    }
+    else if(loc==='ghost'){
+      const gp=xy('ghost',ghost.indexOf(id)); situation('ghost');
+      say(`${key}'s key is in the Ghost FIFO — a Ghost hit means it was evicted too early and is actually hot.`);
+      pulse(id); flash('Ghost hit!', gp[0], GH_Y-40, 'good'); await sleep(1450);
+      ghost.splice(ghost.indexOf(id),1); layout();
+      say(`${key} is refilled and admitted DIRECTLY into the Main Clock, bypassing the Small FIFO.`);
+      await admitToMain(id); await sleep(1100);
+    }
+    else {
+      // cold miss
+      const nid=makeToken(key,color,0,[curChipX(),40]); byKey[key]=nid; // spawn right at the chip
+      situation('cold'); say(`${key} is a miss → it enters the Small FIFO head with Ref = 0.`);
+      await sleep(220);
+
+      if(small.length>=S){
+        const ev=small[small.length-1], et=tokens[ev], tx=xy('small',S-1)[0]; // peek the tail
+        // STEP 1 — bubble announcing where the tail will go (nothing moves yet)
+        if(et.ref===1){ situation('hot'); say(`${et.key} is at the tail with Ref = 1 → it will be promoted directly to the Main Clock.`);
+          flash('Ref = 1 → promote', tx, SM_Y-40, 'good'); }
+        else if(et.windowHit){ situation('corr'); say(`${et.key} was hit only inside the window → Ref stayed 0, so it goes to the Ghost FIFO, not the Main Clock.`);
+          flash('Ref = 0 → Ghost', tx, SM_Y-40, 'warn'); }
+        else { situation('cold'); say(`${et.key} reached the tail with Ref = 0 → it is demoted to the Ghost FIFO (key only).`);
+          flash('Ref = 0 → Ghost', tx, SM_Y-40, ''); }
+        await sleep(1050);
+
+        // STEP 2 — everything moves at once (no vacant slot)
+        small.pop(); let dropId=null;
+        if(et.ref===1){ et.ghost=false; et.ref=1; render(ev);
+          let slot=clock.indexOf(null); if(slot<0){ situation('evict'); slot=await sweepEvict(); }
+          clock[slot]=ev; handIdx=(slot+1)%M; setHand(handIdx); }
+        else { dropId=ghostInsertHead(ev); }
+        small.unshift(nid); layout();
+        await sleep(840);
+        if(dropId!==null){ delete byKey[tokens[dropId].key]; await trash(dropId); }
+      } else {
+        small.unshift(nid); layout(); await sleep(760);   // no eviction: single motion
+      }
+    }
+    await sleep(420);
+  }
+
+  function resetAll(){
+    Object.values(tokens).forEach(t=>t.el.remove());
+    for(const k in tokens) delete tokens[k];
+    for(const k in byKey) delete byKey[k];
+    small=[]; ghost=[]; clock=new Array(M).fill(null); handIdx=0; setHand(0);
+    document.querySelectorAll('#situations .st').forEach(s=>s.classList.remove('on','did'));
+    titleEl.textContent=''; say('');
+  }
+
+  async function run(){
+    while(true){
+      resetAll(); setReqStream(SEQ);
+      titleEl.textContent='Clock2Q+'; say('One request stream flows through the cache, demonstrating each situation in turn.');
+      await sleep(1500);
+      for(const r of SEQ){ await access(r.k, r.c); }
+      titleEl.textContent='Done'; say('All five situations shown. Restarting…');
+      await sleep(2400);
+    }
+  }
+  run();
+})();
+</script>
+</body>
+</html>
