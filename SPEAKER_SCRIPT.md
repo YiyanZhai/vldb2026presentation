@@ -22,12 +22,12 @@ Delivery: ~130 words/min, pause on each figure reveal. Advance fragments (→) a
 
 ---
 
-## Slide 3 — Metadata has correlated references · ~1:15
-**Transition:** "And metadata doesn't just run hotter — it *behaves* differently."
+## Slide 3 — What is a correlated reference? · ~1:20
+**Transition:** "And metadata doesn't just run hotter — it *behaves* differently. Let me be concrete, because this is the crux of the talk."
 **Say:**
-> "Here's the key pattern. A single high-level operation — say, walking or updating an index — touches many entries that happen to live on the *same* metadata page. So that one page gets hit several times in a quick burst… and then it goes quiet, maybe for a long time. We call these **correlated references**. And the important thing is: a burst like that is *weak* evidence of long-term popularity. It's one operation, not a hot block. This plot makes it concrete — on the left, metadata pages get *multiple* re-references inside a short window; on the right, data pages are mostly one-hit wonders. Data caches and metadata caches genuinely live in different worlds."
+> "A single operation — say an index range scan, a join probe, or listing a directory — reads many keys. And in a B-tree a leaf page holds around 200 keys, so a lot of those keys sit on the *same* page. So that one page gets hit many times within a split second… and then it's done, maybe untouched for a long time. Here's the intuition: it's like grabbing five books off *one* shelf during a single errand — for a minute that shelf looks incredibly popular, but you won't be back for weeks. That's a correlated reference: many logical accesses collapsing onto one physical page, all clustered in time. And it matters because a burst like that is *weak* evidence of long-term popularity. This plot confirms it across real traces — metadata pages get these repeated re-references, while data pages are mostly one-hit wonders. The trap that every standard policy falls into is counting each hit in the burst as a separate vote for 'this page is hot.'"
 
-**Remember:** Correlated bursts *look* hot but aren't — this is the pattern the whole talk is about.
+**Remember:** A burst = one operation reading many keys on one page (the "five books, one shelf" errand) — not a hot block. Counting each hit as a hotness vote is the trap.
 
 ---
 
@@ -116,6 +116,6 @@ Delivery: ~130 words/min, pause on each figure reveal. Advance fragments (→) a
 ### Timing summary
 | Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | **Total** |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| min | 0:30 | 1:00 | 1:15 | 1:15 | 1:00 | 1:30 | 1:30 | 1:00 | 1:15 | 1:00 | 0:45 | 0:45 | **12:00** |
+| min | 0:30 | 1:00 | 1:20 | 1:15 | 1:00 | 1:30 | 1:30 | 1:00 | 1:15 | 1:00 | 0:45 | 0:45 | **12:05** |
 
 **If you're running long,** trim slide 6 to ~0:45 (let the animation carry the paths) and tighten slide 4 — that recovers ~1:00.

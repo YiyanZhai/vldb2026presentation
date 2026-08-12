@@ -6,7 +6,7 @@ One line to get in, one line to land. Full text in `SPEAKER_SCRIPT.md`; live ver
 |---|------|-----------------|------------------------|
 | **1** Title | 0:30 | Name + one-line; simple & deployed. | Simple, production idea — promise intuition. |
 | **2** Hot path | 1:00 | "Where this lives." | Metadata cache = hottest path; overhead & simplicity are first-class, not just miss ratio. |
-| **3** Correlated refs | 1:15 | "Metadata behaves differently." | Correlated bursts **look** hot but aren't — the pattern of the whole talk. |
+| **3** Correlated refs | 1:20 | "Metadata behaves differently — let me be concrete." | Burst = 1 op, many keys on **one** page (5 books off one shelf). Not a hot block; each hit looks like a hotness vote — the trap. |
 | **4** Why others fail | 1:15 | "How do the best policies handle a burst?" | S3-FIFO over-promotes; Clock2Q under-promotes. Want both. |
 | **5** Insight | 1:00 | "The insight — almost embarrassingly simple." | **Where** the re-hit happens is the signal. One-line change. |
 | **6** Design | 1:30 | "Put the window into the full picture." | 4 paths: cold/burst→Ghost · hot→Main direct · Ghost-hit→Main · Main=second-chance. |

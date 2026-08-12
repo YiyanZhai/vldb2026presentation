@@ -172,25 +172,56 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 3 · CORRELATED REFERENCES ============ -->
-<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:15">
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:20">
   <div class="accentbar"></div>
   <div class="kicker">The problem</div>
-  <h2 class="stitle">Metadata has <span class="hl-r">correlated references</span></h2>
-  <div class="cols" style="grid-template-columns:0.92fr 1.08fr;">
-    <div>
-      <div class="big frag" data-f="1" style="margin-bottom:14px;">One operation (e.g., an index traversal) touches many tuples on the <span class="hl-r">same metadata page</span>.</div>
-      <ul class="clean">
-        <li class="frag" data-f="2">→ a <b>dense burst</b> of hits, then the page goes cold.</li>
-        <li class="frag" data-f="3">A burst is <b>weak evidence</b> of long-term popularity.</li>
-      </ul>
-      <div class="callout r frag" data-f="4" style="margin-top:18px; font-size:19px;">
-        Data blocks are mostly <b>one-hit wonders</b>. Metadata blocks are <b>re-referenced in bursts</b> — a different world.
-      </div>
-    </div>
-    <figure class="frag" data-f="3">
-      <img src="assets/correlated.png" alt="correlated references" style="max-height:430px;">
-      <figcaption>Metadata pages see <b>multiple re-references</b> within a short window; data pages see <b>none</b>. (CloudPhysics w102, w47)</figcaption>
+  <h2 class="stitle">What is a <span class="hl-r">correlated reference</span>?</h2>
+  <div class="lead" style="max-width:none; margin-bottom:10px; font-size:20px;">
+    One operation reads many keys that live on the <b>same metadata page</b> — so the page is hit many times at once, then goes cold.</div>
+  <div class="cols" style="grid-template-columns:1.06fr 0.94fr; gap:26px; align-items:start;">
+    <figure>
+      <svg width="540" height="336" viewBox="0 0 540 336">
+        <defs><marker id="c3a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker></defs>
+        <!-- operation -->
+        <rect x="4" y="34" width="120" height="58" rx="10" fill="#fdeceb" stroke="#e04b3a" stroke-width="2"/>
+        <text x="64" y="60" text-anchor="middle" font-size="14" font-weight="800" fill="#c23a2b">1 operation</text>
+        <text x="64" y="79" text-anchor="middle" font-size="11" fill="#9a4b42">e.g. index range scan</text>
+        <path d="M126,63 L170,63" class="ln" marker-end="url(#c3a)"/>
+        <!-- leaf page with cells -->
+        <rect x="176" y="26" width="358" height="74" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2.2"/>
+        <g>
+          <rect x="186" y="42" width="36" height="42" rx="5" fill="#fffdf5" stroke="#e8c98f"/>
+          <rect x="228" y="42" width="36" height="42" rx="5" fill="#e8930c" stroke="#c87a08"/>
+          <rect x="270" y="42" width="36" height="42" rx="5" fill="#e8930c" stroke="#c87a08"/>
+          <rect x="312" y="42" width="36" height="42" rx="5" fill="#e8930c" stroke="#c87a08"/>
+          <rect x="354" y="42" width="36" height="42" rx="5" fill="#fffdf5" stroke="#e8c98f"/>
+          <rect x="396" y="42" width="36" height="42" rx="5" fill="#e8930c" stroke="#c87a08"/>
+          <rect x="438" y="42" width="36" height="42" rx="5" fill="#e8930c" stroke="#c87a08"/>
+          <rect x="480" y="42" width="36" height="42" rx="5" fill="#fffdf5" stroke="#e8c98f"/>
+        </g>
+        <text x="355" y="118" text-anchor="middle" font-size="12" fill="#8b6a12">one B-tree leaf page · holds ~200 keys · <tspan font-weight="800" fill="#c87a08">5 touched</tspan></text>
+        <!-- timeline (revealed) -->
+        <g class="frag" data-f="1">
+          <text x="8" y="182" font-size="14" font-weight="800" fill="#c23a2b">The page is hit 5× in a split second…</text>
+          <line x1="24" y1="286" x2="516" y2="286" stroke="#c2ccd4" stroke-width="2"/>
+          <text x="516" y="306" text-anchor="end" font-size="11" fill="#9aa5ad">time →</text>
+          <g stroke="#e8930c" stroke-width="3.4">
+            <line x1="60" y1="286" x2="60" y2="228"/><line x1="76" y1="286" x2="76" y2="222"/>
+            <line x1="92" y1="286" x2="92" y2="232"/><line x1="108" y1="286" x2="108" y2="224"/>
+            <line x1="124" y1="286" x2="124" y2="234"/>
+          </g>
+          <text x="92" y="214" text-anchor="middle" font-size="12.5" font-weight="800" fill="#e8930c">burst</text>
+          <text x="330" y="270" text-anchor="middle" font-size="13.5" fill="#6b7681">…then idle for a long time</text>
+        </g>
+      </svg>
     </figure>
+    <figure class="frag" data-f="2">
+      <img src="assets/correlated.png" alt="correlated references in real traces" style="max-height:292px;">
+      <figcaption>Real traces confirm it: metadata pages get repeated re-references in a short window; data pages are one-hit wonders.</figcaption>
+    </figure>
+  </div>
+  <div class="callout r frag" data-f="3" style="margin-top:12px; text-align:center; font-size:20px;">
+    The trap: counting each burst hit as a <b>vote for hotness</b>. A burst is <b>one operation</b>, not a hot block.
   </div>
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
 </section>
@@ -478,7 +509,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   const NOTES=[
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
     {t:'Where this lives.', r:'Metadata cache = hottest path; overhead & simplicity are first-class, not just miss ratio.'},
-    {t:'Metadata behaves differently, not just runs hotter.', r:'Correlated bursts LOOK hot but aren’t — the pattern of the whole talk.'},
+    {t:'Metadata behaves differently, not just runs hotter. Get concrete here.', r:'A burst = one op reading many keys on ONE page (analogy: 5 books off one shelf). Not a hot block — but every hit looks like a hotness vote.'},
     {t:'How do the best policies handle a burst?', r:'S3-FIFO over-promotes; Clock2Q under-promotes. We want both.'},
     {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},
     {t:'Put the window into the full picture.', r:'4 paths: cold/burst → Ghost · hot → Main direct · Ghost-hit → Main · Main = second-chance.'},
