@@ -181,9 +181,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <h2 class="stitle">What is a <span class="hl-r">correlated reference</span>?</h2>
   <div class="lead" style="max-width:none; margin-bottom:10px; font-size:20px;">
     One operation reads many keys that live on the <b>same metadata page</b> — so the page is hit many times at once, then goes cold.</div>
-  <div class="cols" style="grid-template-columns:1.06fr 0.94fr; gap:26px; align-items:start;">
-    <figure>
-      <svg width="540" height="336" viewBox="0 0 540 336">
+  <figure style="text-align:center; margin-top:6px;">
+      <svg width="560" height="330" viewBox="0 0 540 336">
         <defs><marker id="c3a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker></defs>
         <!-- operation -->
         <rect x="4" y="34" width="120" height="58" rx="10" fill="#fdeceb" stroke="#e04b3a" stroke-width="2"/>
@@ -218,12 +217,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         </g>
       </svg>
     </figure>
-    <figure class="frag" data-f="2">
-      <img src="assets/correlated.png" alt="correlated references in real traces" style="max-height:292px;">
-      <figcaption>Real traces confirm it: metadata pages get repeated re-references in a short window; data pages are one-hit wonders.</figcaption>
-    </figure>
-  </div>
-  <div class="callout r frag" data-f="3" style="margin-top:12px; text-align:center; font-size:20px;">
+  <div class="callout r frag" data-f="2" style="margin-top:16px; text-align:center; font-size:20px;">
     The trap: counting each burst hit as a <b>vote for hotness</b>. A burst is <b>one operation</b>, not a hot block.
   </div>
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
@@ -451,6 +445,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ BACKUP ============ -->
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — correlated references are real</div>
+  <h2 class="stitle">Bursts show up across production traces</h2>
+  <figure><img src="assets/correlated.png" alt="correlated references in real traces" style="max-height:430px;">
+    <figcaption>Metadata pages get <b>multiple re-references</b> within a short window; data pages are <b>one-hit wonders</b>. (CloudPhysics w102, w47)</figcaption></figure>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
 <section class="slide" data-sec="backup" data-secname="Backup" data-time="">
   <div class="accentbar" style="background:var(--faint)"></div>
   <div class="backup-mark">Backup</div>
