@@ -671,8 +671,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   let overview=false;
   function toggleOverview(){
     overview=!overview;
+    const vp=document.getElementById('viewport');
     if(overview){
       document.body.style.overflow='auto';
+      vp.style.overflow='auto'; vp.style.alignItems='start'; vp.style.justifyItems='stretch';
       deck.style.transform='none'; deck.style.width='100%'; deck.style.height='auto';
       deck.style.display='grid'; deck.style.gridTemplateColumns='repeat(3,1fr)'; deck.style.gap='14px'; deck.style.padding='14px';
       slides.forEach((s,i)=>{ s.style.position='relative'; s.style.opacity='1'; s.style.visibility='visible';
@@ -681,6 +683,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         s.onclick=()=>{ toggleOverview(); goto(i); ci=i; fi=frags(s).length; apply(); }; });
     } else {
       document.body.style.overflow='hidden';
+      vp.style.overflow=''; vp.style.alignItems=''; vp.style.justifyItems='';
       deck.style.display=''; deck.style.gridTemplateColumns=''; deck.style.gap=''; deck.style.padding='';
       deck.style.width='1280px'; deck.style.height='720px';
       slides.forEach(s=>{ s.style.position=''; s.style.height=''; s.style.cursor=''; s.style.opacity=''; s.style.visibility=''; s.style.transform=''; s.onclick=null; });
