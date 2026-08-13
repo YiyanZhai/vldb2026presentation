@@ -155,29 +155,40 @@
 (function(){
   "use strict";
   const stage=document.getElementById('stage'), reqrow=document.getElementById('reqrow'), hand=document.getElementById('hand');
-  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-
-  // ---- step control: auto-play by default; ?step=1 (or M / the Step button) enables manual stepping ----
+  // ---- run control: abortable sleeps/gates so scenario buttons can restart cleanly ----
+  class Abort{}
   const _params=new URLSearchParams(location.search);
   let MANUAL=_params.has('step')||_params.has('manual');
-  let _resolve=null;
-  function gate(ms){ if(!MANUAL) return sleep(ms); return new Promise(res=>{ _resolve=res; updateCtl(); }); }
-  function advance(){ if(_resolve){ const r=_resolve; _resolve=null; r(); updateCtl(); } }
+  let _resolve=null, runToken=0;
+  function sleep(ms){ const my=runToken; return new Promise((res,rej)=>setTimeout(()=> my===runToken?res():rej(new Abort()), ms)); }
+  function gate(ms){ if(!MANUAL) return sleep(ms); const my=runToken; return new Promise((res,rej)=>{ _resolve={res,rej,my}; updateCtl(); }); }
+  function advance(){ if(_resolve){ const g=_resolve; _resolve=null; g.res(); updateCtl(); } }
   function setManual(on){ MANUAL=on; if(!on) advance(); updateCtl(); }
+  function newRun(){ runToken++; if(_resolve){ const g=_resolve; _resolve=null; g.rej(new Abort()); } return runToken; }
+  if(_params.has('clean')) document.body.classList.add('clean');
+
   const _st=document.createElement('style'); _st.textContent=
-    '#ctl{position:fixed;right:14px;bottom:12px;display:flex;gap:8px;align-items:center;z-index:100;}'+
-    '#ctl button{font:700 12.5px ui-sans-serif,system-ui,sans-serif;padding:6px 13px;border-radius:20px;border:1px solid #cfd6dc;background:#fff;color:#33404a;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08);}'+
+    '#ctl{position:fixed;right:14px;bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:74%;z-index:100;}'+
+    '#ctl button{font:700 12.5px ui-sans-serif,system-ui,sans-serif;padding:6px 12px;border-radius:20px;border:1px solid #cfd6dc;background:#fff;color:#33404a;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08);}'+
     '#ctl button:hover{background:#f2f5f8;}'+
     '#ctl.manual #ctl-mode{background:#1f2933;color:#fff;border-color:#1f2933;}'+
     '#ctl-next{display:none;} #ctl.manual #ctl-next{display:inline-block;}'+
     '#ctl-next.ready{background:#2f9e44;color:#fff;border-color:#2f9e44;animation:ctlp 1.2s infinite;}'+
-    '@keyframes ctlp{0%,100%{box-shadow:0 0 0 0 rgba(47,158,68,.5);}50%{box-shadow:0 0 0 7px rgba(47,158,68,0);}}';
+    '#ctl .scn{background:#eaf4fb;border-color:#bcd8ec;color:#1f6fa8;}'+
+    '@keyframes ctlp{0%,100%{box-shadow:0 0 0 0 rgba(47,158,68,.5);}50%{box-shadow:0 0 0 7px rgba(47,158,68,0);}}'+
+    'body.clean #titlebar, body.clean #situations{display:none;}';
   document.head.appendChild(_st);
   const ctl=document.createElement('div'); ctl.id='ctl';
-  ctl.innerHTML='<button id="ctl-mode"></button><button id="ctl-next">Next ▶</button>';
+  ctl.innerHTML='<button id="ctl-corr" class="scn">▶ Correlated burst</button>'+
+                '<button id="ctl-hot" class="scn">▶ Hot block</button>'+
+                '<button id="ctl-full">Full run</button>'+
+                '<button id="ctl-mode"></button><button id="ctl-next">Next ▶</button>';
   document.body.appendChild(ctl);
   const _cmode=ctl.querySelector('#ctl-mode'), _cnext=ctl.querySelector('#ctl-next');
   _cmode.onclick=()=>setManual(!MANUAL); _cnext.onclick=()=>advance();
+  ctl.querySelector('#ctl-corr').onclick=()=>{ setManual(true); play(SEQ_CORR,false,'Correlated burst — filtered by the window'); };
+  ctl.querySelector('#ctl-hot').onclick=()=>{ setManual(true); play(SEQ_HOT,false,'Hot block — promoted to the Main Clock'); };
+  ctl.querySelector('#ctl-full').onclick=()=>{ play(SEQ,true); };
   function updateCtl(){ _cmode.textContent=MANUAL?'▶ Auto':'⏸ Step'; ctl.classList.toggle('manual',MANUAL); _cnext.classList.toggle('ready',!!_resolve); }
   document.addEventListener('keydown',e=>{ if(MANUAL&&(e.key==='ArrowRight'||e.key===' ')){ e.preventDefault(); advance(); } else if(e.key==='m'||e.key==='M'){ setManual(!MANUAL); } });
   stage.addEventListener('click',()=>{ if(MANUAL) advance(); });
@@ -288,6 +299,8 @@
 
   // compact crafted stream (13 requests) — A cold, C correlated, D hot; B/E/F/G/H drive aging
   const SEQ=['A','B','C','C','D','E','F','D','G','H','A','B','C'].map(k=>({k, c:COL[k]}));
+  const SEQ_CORR=['C','C','A','B','D','E'].map(k=>({k, c:COL[k]}));   // C hit inside the window, then ages out to Ghost
+  const SEQ_HOT =['H','A','B','H','C','D'].map(k=>({k, c:COL[k]}));   // H pushed beyond the window, hit -> Ref=1 -> promote
 
   async function access(key,color){
     advanceReq(); await sleep(120); // chip slides concurrently with the object's motion below
@@ -360,17 +373,22 @@
     titleEl.textContent=''; say('');
   }
 
-  async function run(){
-    while(true){
-      resetAll(); setReqStream(SEQ);
-      titleEl.textContent='Clock2Q+'; say('One request stream flows through the cache, demonstrating each situation in turn.');
-      await gate(1500);
-      for(const r of SEQ){ await access(r.k, r.c); }
-      titleEl.textContent='Done'; say('All five situations shown. Restarting…');
-      await gate(2400);
-    }
+  async function play(seq, loop, title){
+    const my=newRun();
+    try{
+      while(true){
+        resetAll(); setReqStream(seq);
+        titleEl.textContent = title || 'Clock2Q+';
+        say(title ? 'Stepping through this scenario…' : 'One request stream flows through the cache, demonstrating each situation in turn.');
+        await gate(1500);
+        for(const r of seq){ await access(r.k, r.c); }
+        if(!loop){ titleEl.textContent='Done'; say('Scenario complete.'); return; }
+        titleEl.textContent='Done'; say('All five situations shown. Restarting…');
+        await gate(2400);
+      }
+    }catch(e){ if(!(e instanceof Abort)) throw e; }
   }
-  run();
+  play(SEQ, true);
 })();
 </script>
 </body>
