@@ -38,6 +38,10 @@ h2.stitle{font-size:33px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
   border:1px solid #d7dde2; background:rgba(255,255,255,.9); color:#33404a; font:700 20px/1 ui-sans-serif,system-ui,sans-serif;
   cursor:pointer; z-index:60; box-shadow:0 2px 6px rgba(0,0,0,.12);}
 #nav-prev{right:60px;} #nav-next{right:18px;} #nav-prev:hover,#nav-next:hover{background:#fff;}
+  .demobtn{font:700 13px ui-sans-serif,system-ui,sans-serif; padding:8px 14px; border-radius:20px; border:1px solid #cfd6dc; background:#fff; color:#33404a; cursor:pointer; margin:0 5px;}
+  .demobtn:hover{background:#eaf4fb; border-color:#bcd8ec;}
+  @keyframes blkpulse6{0%{transform:scale(1);}40%{transform:scale(1.32);}100%{transform:scale(1);}}
+  .blkpulse6{transform-box:fill-box; transform-origin:center; animation:blkpulse6 .55s ease;}
 /* progress */
 #prog{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0; z-index:50; transition:width .3s;}
 #pager{position:fixed; right:14px; bottom:12px; font-size:12px; color:#8b96a0; z-index:50;
@@ -337,7 +341,13 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <rect x="28" y="52" width="140" height="64" rx="9" fill="#ffe6ad" stroke="#e8930c" stroke-width="2"/>
         <text x="98" y="140" text-anchor="middle" font-size="12" font-weight="800" fill="#e8930c">Correlation Window</text>
       </g>
-      <text x="266" y="90" text-anchor="middle" font-size="14" font-weight="800" fill="#b9860f">Small FIFO</text>
+      <g id="demo6" style="transition:transform .5s ease">
+        <circle id="demoBlk6" cx="98" cy="82" r="17" fill="#4c8bf5" stroke="#fff" stroke-width="2"/>
+        <text x="98" y="88" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">B</text>
+        <circle id="demoRefBg6" cx="113" cy="66" r="10" fill="#fff" stroke="#3a4750" stroke-width="2"/>
+        <text id="demoRef6" x="113" y="70" text-anchor="middle" font-size="11" font-weight="800" fill="#3a4750">0</text>
+      </g>
+      <text x="310" y="38" text-anchor="middle" font-size="12" font-weight="800" fill="#b9860f">Small FIFO</text>
       <text x="472" y="46" text-anchor="middle" font-size="15" font-weight="800" fill="#1f6fa8">Main Clock</text>
       <circle cx="472" cy="150" r="92" fill="#eaf4fb" stroke="#3e9fd6" stroke-width="2.6"/>
       <circle cx="472" cy="88" r="13" fill="#4c8bf5"/><circle cx="526" cy="119" r="13" fill="#00c39a"/><circle cx="526" cy="181" r="13" fill="#9b5de5"/><circle cx="472" cy="212" r="13" fill="#e07a5f"/><circle cx="418" cy="181" r="13" fill="#6a994e"/><circle cx="418" cy="119" r="13" fill="#f7931e"/>
@@ -354,12 +364,12 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     </svg>
     <div>
       <div class="callout i" style="font-size:19px; margin-bottom:16px;"><b>Where</b> a re-hit happens tells you what it means.</div>
-      <ul class="clean" style="font-size:17px;">
-        <li class="frag"><b>Inside</b> the window &rarr; the hit does <b>not</b> set Ref <i>(S3-FIFO would)</i> &rarr; the correlated burst ages out to <b>Ghost</b>.</li>
-        <li class="frag"><b>Beyond</b> the window &rarr; the hit sets <b>Ref = 1</b> &rarr; promoted <b>directly to Main</b>.</li>
-      </ul>
+      <div style="text-align:center; margin:6px 0 2px;">
+        <button id="btn-in6" class="demobtn">Hit inside the window</button>
+        <button id="btn-out6" class="demobtn">Hit beyond the window</button>
+      </div>
+      <div id="demoMsg6" style="min-height:48px; font-size:16px; line-height:1.35; margin-top:8px; color:#5f6b76;">Click a button — watch block <b>B</b>'s Ref bit in the diagram.</div>
       <div class="sub frag" style="margin-top:12px;">Everything else is unchanged: a <b>Ghost hit</b> admits to Main; the <b>Main Clock</b> gives Ref a second chance before eviction.</div>
-      <div class="sub frag" style="margin-top:10px; color:var(--design); font-weight:800;">The only change vs. S3-FIFO &mdash; no new knobs.</div>
     </div>
   </div>
   <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
@@ -643,13 +653,24 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   document.getElementById('nav-prev').onclick=function(){ prev(); };
   document.getElementById('nav-next').onclick=function(){ next(); };
   resize(); apply();
-  // slide 6: start as S3-FIFO; click the diagram to add the correlation window -> Clock2Q+
-  const _cw=document.getElementById('cw6'), _pol=document.getElementById('policy6'), _svg6=document.getElementById('svg6'), _hint6=document.getElementById('hint6');
+  // slide 6: window toggle (click diagram) + hit inside/beyond Ref-bit demo (buttons)
+  const _cw=document.getElementById('cw6'), _pol=document.getElementById('policy6'), _svg6=document.getElementById('svg6');
   if(_cw&&_pol&&_svg6){
     let _on=false;
-    function _setPolicy(on){ _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a'); if(_hint6) _hint6.textContent=on?'click: remove the window (\u2192 S3-FIFO)':'click: add the correlation window (\u2192 Clock2Q+)'; }
+    function _setPolicy(on){ _on=on; _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a'); }
     _setPolicy(false); _svg6.style.cursor='pointer';
-    _svg6.addEventListener('click', function(){ _on=!_on; _setPolicy(_on); });
+    _svg6.addEventListener('click', function(){ _setPolicy(!_on); });
+    const _dg=document.getElementById('demo6'), _db=document.getElementById('demoBlk6'), _drb=document.getElementById('demoRefBg6'), _dr=document.getElementById('demoRef6'), _dm=document.getElementById('demoMsg6');
+    function _hit(inside){
+      if(!_on) _setPolicy(true);
+      if(_dg) _dg.setAttribute('transform', inside?'translate(0,0)':'translate(166,0)');
+      if(_db){ _db.classList.remove('blkpulse6'); _db.getBoundingClientRect(); _db.classList.add('blkpulse6'); }
+      if(inside){ if(_drb){_drb.setAttribute('fill','#fff'); _drb.setAttribute('stroke','#3a4750');} if(_dr){_dr.textContent='0'; _dr.setAttribute('fill','#3a4750');} if(_dm) _dm.innerHTML='<b style=\'color:#e8930c\'>Inside the window</b> — same burst, so <b>Ref stays 0</b> → ages out to Ghost.'; }
+      else { if(_drb){_drb.setAttribute('fill','#2f9e44'); _drb.setAttribute('stroke','#1c7a30');} if(_dr){_dr.textContent='1'; _dr.setAttribute('fill','#fff');} if(_dm) _dm.innerHTML='<b style=\'color:#2f9e44\'>Beyond the window</b> — real reuse, so <b>Ref = 1</b> → promoted to Main.'; }
+    }
+    const _bi=document.getElementById('btn-in6'), _bo=document.getElementById('btn-out6');
+    if(_bi) _bi.onclick=function(){ _hit(true); };
+    if(_bo) _bo.onclick=function(){ _hit(false); };
   }
 })();
 </script>
