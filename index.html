@@ -34,6 +34,10 @@ h2.stitle{font-size:33px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
 .foot .sec{font-weight:800; letter-spacing:.08em; text-transform:uppercase;}
 .accentbar{position:absolute; left:0; top:0; width:8px; height:100%; background:var(--accent);}
 
+#nav-prev,#nav-next{position:fixed; bottom:9px; width:34px; height:34px; border-radius:50%;
+  border:1px solid #d7dde2; background:rgba(255,255,255,.9); color:#33404a; font:700 20px/1 ui-sans-serif,system-ui,sans-serif;
+  cursor:pointer; z-index:60; box-shadow:0 2px 6px rgba(0,0,0,.12);}
+#nav-prev{right:60px;} #nav-next{right:18px;} #nav-prev:hover,#nav-next:hover{background:#fff;}
 /* progress */
 #prog{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0; z-index:50; transition:width .3s;}
 #pager{position:fixed; right:14px; bottom:12px; font-size:12px; color:#8b96a0; z-index:50;
@@ -536,6 +540,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 
 <div id="prog"></div>
 <div id="pager"></div>
+<button id="nav-prev" title="Previous slide">‹</button><button id="nav-next" title="Next slide">›</button>
 <div id="notes-panel"></div>
 <div class="hint">← → navigate · F fullscreen · O overview · S notes</div>
 
@@ -635,6 +640,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     try{ if(ifr.contentDocument && ifr.contentDocument.readyState==='complete') attachFwd(ifr); }catch(_){}
   });
 
+  document.getElementById('nav-prev').onclick=function(){ prev(); };
+  document.getElementById('nav-next').onclick=function(){ next(); };
   resize(); apply();
   // slide 6: animate the correlation window — with it = Clock2Q+, without = S3-FIFO
   const _cw=document.getElementById('cw6'), _pol=document.getElementById('policy6');
