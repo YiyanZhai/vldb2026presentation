@@ -237,11 +237,12 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker">Why existing policies fall short</div>
   <h2 class="stitle">Filter too loosely, or too aggressively</h2>
   <div class="sub" style="text-align:center; margin:-2px 0 14px; font-size:15.5px;">
-    New blocks wait in a small queue, each with a <b>reference bit</b> (0/1) &mdash; "hit again since it arrived?"
+    Both keep new blocks in a small <b>admission queue</b> &mdash; when should one be promoted into the main cache?
   </div>
   <div class="cols">
     <div class="card frag" style="border-color:#f3c9c3;">
       <h3 style="color:var(--problem); margin:0 0 8px;">S3-FIFO &mdash; admits cold blocks</h3>
+      <p style="margin:-2px 0 6px; font-size:12.5px; color:var(--muted);">uses a <b>reference bit</b> (0/1 = "hit again?") &mdash; set on <b>any</b> re-hit</p>
       <svg viewBox="0 0 520 176" width="100%">
         <defs><marker id="a5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa5ad"/></marker></defs>
         <rect x="6" y="44" width="150" height="76" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
@@ -262,6 +263,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     </div>
     <div class="card frag" style="border-color:#cdd6de;">
       <h3 style="color:var(--muted); margin:0 0 8px;">Clock2Q / 2Q &mdash; delays hot blocks</h3>
+      <p style="margin:-2px 0 6px; font-size:12.5px; color:var(--muted);"><b>no</b> admission bit &mdash; must be dropped, then re-requested</p>
       <svg viewBox="0 0 520 176" width="100%">
         <defs><marker id="a5b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa5ad"/></marker>
           <marker id="a5r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e04b3a"/></marker></defs>
@@ -554,7 +556,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
     {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of mapping tuples. Distinct keys co-reside (L1 & L5 → leaf m4), so accesses hit the same page by structure, not popularity.'},
     {t:'That packing shows up directly in the access stream.', r:'Burst = unrelated accesses landing on the SAME page (keys co-reside) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
-    {t:'Both share one mechanism — define it, THEN show the failure.', r:'Ref bit = 1/0 “hit again since arrival?”. S3-FIFO: ANY re-hit sets it → a burst admits a cold page. Clock2Q: promotes only after drop + re-ask → delays every hot block (extra miss).'},
+    {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit = 1/0 “hit again?” — any re-hit sets it → a burst admits a cold page. Clock2Q/2Q have NO admission bit → promote only after drop + re-ask → delays every hot block (extra miss).'},
     {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},
     {t:'Put the window into the full picture.', r:'4 paths: cold/burst → Ghost · hot → Main direct · Ghost-hit → Main · Main = second-chance.'},
     {t:'Rather than a static trace — let’s watch it. (Step with Next ▶ / click.)', r:'Window silently filters bursts; the fast path is untouched.'},

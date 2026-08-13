@@ -43,9 +43,9 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ## Slide 5 — Why existing policies fall short · ~1:05
 **Transition:** "So how do today's best policies handle a burst? They share one basic mechanism — let me define it, then show how each one trips."
 **Say:**
-> "Both policies I'll compare against work the same basic way: new blocks sit in a small admission queue, and each carries a **reference bit** — just a single yes/no flag recording whether the block has been hit *again* since it arrived. Earn that bit and you're promoted into the main cache; otherwise you're dropped. Now the failure. S3-FIFO — the recent state of the art — flips that bit on *any* re-hit. So a correlated burst flips it on a stone-cold page, and that page gets promoted — pure pollution. The classics, 2Q and Clock2Q, overcorrect: a genuinely hot block can't get promoted until it's been dropped once and *then* asked for again — so every hot block pays one extra miss. Promote on any hit, and you keep cold blocks; demand an extra miss first, and you make the hot blocks wait."
+> "Both policies keep new blocks in a small admission queue, and the question is the same: when should a block graduate into the main cache? S3-FIFO — the recent state of the art — answers with a **reference bit**: a single yes/no flag, 'has this block been hit *again* since it arrived?' Any re-hit flips it, and the block is promoted. So a correlated burst flips it on a stone-cold page — promoted, pure pollution. The classics, 2Q and Clock2Q, have *no* such bit: a hot block can't be promoted until it's been dropped to a ghost list and *then* requested again — so every hot block pays one extra miss. Promote on any hit, and you keep cold blocks; demand an extra miss first, and you make the hot blocks wait."
 
-**Remember:** Reference bit = 1/0 "hit again since it arrived?" S3-FIFO sets it on any re-hit → over-promotes bursts; Clock2Q needs a drop-and-re-ask → under-promotes. Want both.
+**Remember:** The reference bit is S3-FIFO's — 1/0 "hit again?", set on any re-hit → over-promotes bursts. Clock2Q/2Q have no such bit → need a drop-and-re-ask → under-promote. Want both.
 
 ---
 
