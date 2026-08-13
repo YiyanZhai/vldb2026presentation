@@ -236,9 +236,24 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="accentbar"></div>
   <div class="kicker">Why existing policies fall short</div>
   <h2 class="stitle">Filter too loosely, or too aggressively</h2>
-  <div class="sub" style="text-align:center; margin:-2px 0 14px; font-size:15.5px;">
-    Both keep new blocks in a small <b>admission queue</b> &mdash; when should one be promoted into the main cache?
-  </div>
+  <figure style="text-align:center; margin:2px 0 14px;">
+    <svg viewBox="0 0 900 116" width="86%" style="max-height:110px;">
+      <defs><marker id="p5" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5f6b76"/></marker></defs>
+      <g class="frag">
+        <rect x="516" y="26" width="364" height="70" rx="12" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2"/>
+        <text x="698" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="#5f6b76">Main cache</text>
+        <circle cx="576" cy="61" r="17" fill="#4c8bf5"/><circle cx="636" cy="61" r="17" fill="#00c39a"/>
+        <circle cx="696" cy="61" r="17" fill="#9b5de5"/><circle cx="756" cy="61" r="17" fill="#e07a5f"/><circle cx="816" cy="61" r="17" fill="#6a994e"/>
+      </g>
+      <g class="frag">
+        <rect x="20" y="26" width="210" height="70" rx="12" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="125" y="19" text-anchor="middle" font-size="13" font-weight="700" fill="#8b6a12">Small admission queue</text>
+        <circle cx="70" cy="61" r="17" fill="#c0c8cf"/><circle cx="125" cy="61" r="17" fill="#c0c8cf"/><circle cx="180" cy="61" r="17" fill="#c0c8cf"/>
+        <path d="M234,61 L512,61" stroke="#5f6b76" stroke-width="2.6" fill="none" marker-end="url(#p5)"/>
+        <text x="373" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#3a4750">promote?</text>
+      </g>
+    </svg>
+  </figure>
   <div class="cols">
     <div class="card frag" style="border-color:#f3c9c3;">
       <h3 style="color:var(--problem); margin:0 0 8px;">S3-FIFO &mdash; admits cold blocks</h3>
