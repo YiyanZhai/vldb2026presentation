@@ -88,7 +88,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ## Slide 10 — How vSAN's cache evolved · ~0:45
 **Transition:** "And Clock2Q+ didn't appear from nowhere."
 **Say:**
-> "It's the latest step in nearly a decade of evolving vSAN's cache. It began with **2Q** — a small FIFO ahead of a main LRU. **Clock2Q** swapped that LRU for a **Main Clock** — the same idea at far lower CPU — and shipped across vSAN OSA, VDFS, and early ESA. Then **S3-FIFO** added the **reference bit**, so hot blocks promote directly — but, as we saw, it over-promotes correlated bursts. **Clock2Q+** is Clock2Q plus that bit plus the correlation window that filters the bursts — and it's what runs in vSAN ESA and File Services today. Through all of it, simplicity stayed a hard requirement."
+> "It's the latest step in nearly a decade of evolving vSAN's cache. It began with **2Q** — a small FIFO ahead of a main LRU. **Clock2Q** swapped that LRU for a **Main Clock** — the same idea at far lower CPU — and shipped across vSAN OSA, VDFS, and early ESA. Then **S3-FIFO** added the **reference bit**, so hot blocks promote directly — but, as we saw, it over-promotes correlated bursts. **Clock2Q+** is Clock2Q plus that bit plus the correlation window that filters the bursts — and it's what runs in vSAN and vSAN File Services today. Through all of it, simplicity stayed a hard requirement."
 
 **Remember:** 2Q → Clock2Q (Main Clock) → S3-FIFO (Ref bit) → Clock2Q+ (+ window). ~A decade in vSAN; simplicity throughout.
 
