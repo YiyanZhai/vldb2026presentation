@@ -41,11 +41,11 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ---
 
 ## Slide 5 — Why existing policies fall short · ~1:05
-**Transition:** "So how do today's best policies handle a burst? Two camps, and both stumble."
+**Transition:** "So how do today's best policies handle a burst? They share one basic mechanism — let me define it, then show how each one trips."
 **Say:**
-> "S3-FIFO — the recent state of the art — uses a small admission queue with a reference bit: re-hit a block while it's in that queue, the bit flips, and it's promoted. But under a correlated burst, a *cold* page gets hit a few times near the head, its bit flips, and it's promoted into the main cache — where it just sits as pollution. The older 2Q and Clock2Q go the opposite way: a genuinely hot block only reaches main *after* it's been evicted and requested again — so every hot block pays one extra, avoidable miss. So we're stuck: filter too loosely and you admit junk; filter too aggressively and you miss real hot blocks. We want S3-FIFO's fast direct promotion *without* swallowing the bursts."
+> "Both policies I'll compare against work the same basic way: new blocks sit in a small admission queue, and each carries a **reference bit** — just a single yes/no flag recording whether the block has been hit *again* since it arrived. Earn that bit and you're promoted into the main cache; otherwise you're dropped. Now the failure. S3-FIFO — the recent state of the art — flips that bit on *any* re-hit. So a correlated burst flips it on a stone-cold page, and that page gets promoted — pure pollution. The classics, 2Q and Clock2Q, overcorrect: a genuinely hot block can't get promoted until it's been dropped once and *then* asked for again — so every hot block pays one extra miss. Too loose, you swallow the bursts; too strict, you punish the real hits."
 
-**Remember:** Over-promote (S3-FIFO) vs. under-promote (Clock2Q) — we want the best of both.
+**Remember:** Reference bit = 1/0 "hit again since it arrived?" S3-FIFO sets it on any re-hit → over-promotes bursts; Clock2Q needs a drop-and-re-ask → under-promotes. Want both.
 
 ---
 
