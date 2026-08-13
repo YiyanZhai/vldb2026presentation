@@ -1,6 +1,6 @@
 # Clock2Q+ — 12-Minute Speaker Script (VLDB 2026)
 
-Aligned slide-by-slide with `index.html` (12 main slides). Target ≈ **11:30 spoken**, buffer for pacing.
+Aligned slide-by-slide with `index.html` (11 main slides). Target ≈ **11:30 spoken**, buffer for pacing.
 Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragments (→) as you reach the matching sentence.
 
 ---
@@ -85,16 +85,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 10 — Why it works · ~0:55
-**Transition:** "Let me show the mechanism behind that number."
-**Say:**
-> "This table counts how many blocks each policy promotes from the small queue into the Main Clock. S3-FIFO promotes about 88,000; Clock2Q+ promotes about 21,000 — under a quarter as many. We're far more selective, because the window filters correlated bursts before they can be promoted. And it's not just fewer — it's the *right* ones: the blocks we promote have short reuse distances, so they're genuinely hot, while the ones we ghost have long ones."
-
-**Remember:** We promote under ¼ as many blocks — and they're the genuinely hot ones.
-
----
-
-## Slide 11 — Engineered for production · ~0:40
+## Slide 10 — Engineered for production · ~0:40
 **Transition:** "And because this ships in vSAN, miss ratio was never the only requirement."
 **Say:**
 > "Everything is array-based, no allocation, so the hit path is just a hash lookup and at most flipping one bit. It scales with fine-grained locks. It handles dirty pages by skipping them until they're flushed. It bounds the work per eviction, so no CPU spikes. And it resizes online. All of it came out of nearly a decade of evolving vSAN's cache — with simplicity treated as a hard requirement."
@@ -103,7 +94,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 12 — Takeaways · ~0:40
+## Slide 11 — Takeaways · ~0:40
 **Transition:** "So, to wrap up."
 **Say:**
 > "Correlated references are a real, costly pattern in metadata caches, and they defeat the usual one-hit-wonder filters. The correlation window is a tiny change that fixes it — filter the bursts, still promote truly hot blocks instantly. The payoff is the best miss ratio among state-of-the-art policies, and it's running in VMware vSAN today. And it's all reproducible in libCacheSim. Thank you — happy to take questions."
@@ -113,8 +104,17 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ---
 
 ### Timing summary
-| Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | **Total** |
+| Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | **Total** |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| min | 0:30 | 0:55 | 0:55 | 1:05 | 1:05 | 1:30 | 1:15 | 0:50 | 1:10 | 0:55 | 0:40 | 0:40 | **11:30** |
+| min | 0:30 | 0:55 | 0:55 | 1:05 | 1:05 | 1:30 | 1:15 | 0:50 | 1:10 | 0:40 | 0:40 | **10:35** |
 
 **If you're running long,** the animation (slide 7) and the design slide (6) are the easiest to compress — let the visuals carry them.
+
+
+---
+
+## Backup — Why it works · (on demand)
+**Say (if asked why it wins):**
+> "This table counts how many blocks each policy promotes from the small queue into the Main Clock. S3-FIFO promotes about 88,000; Clock2Q+ about 21,000 — under a quarter as many. We're far more selective, because the window filters correlated bursts before they can be promoted. And it's the *right* ones: promoted blocks have short reuse distances (genuinely hot); ghosted ones have long distances (cold)."
+
+**Remember:** Under ¼ as many promotions — and the genuinely hot ones.

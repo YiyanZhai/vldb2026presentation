@@ -413,35 +413,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="foot"><span class="sec">Results</span><span class="tm"></span></div>
 </section>
 
-<!-- ============ 10 · WHY IT WORKS ============ -->
-<section class="slide" data-sec="results" data-secname="Results" data-time="0:55">
-  <div class="accentbar" style="background:var(--results)"></div>
-  <div class="kicker" style="color:var(--results)">Result — why it works</div>
-  <h2 class="stitle">It promotes far fewer blocks — and the right ones</h2>
-  <div class="cols">
-    <div class="frag" data-f="1">
-      <table class="tbl">
-        <thead><tr><th>Small FIFO →</th><th>Main</th><th>Ghost</th></tr></thead>
-        <tbody>
-          <tr><td>S3-FIFO</td><td>88,529</td><td>126,897</td></tr>
-          <tr class="win"><td>Clock2Q+</td><td>20,762</td><td>186,959</td></tr>
-        </tbody>
-      </table>
-      <div class="big" style="margin-top:16px;">Clock2Q+ promotes <span class="hl-g">&lt; ¼</span> as many Small-FIFO blocks into Main.</div>
-      <div class="sub" style="margin-top:8px;">Correlated bursts are filtered out instead of polluting Main.</div>
-    </div>
-    <figure class="frag" data-f="2">
-      <div class="cols" style="gap:12px;">
-        <img src="assets/nrd_main.png" alt="reuse distance main" style="max-height:250px;">
-        <img src="assets/nrd_ghost.png" alt="reuse distance ghost" style="max-height:250px;">
-      </div>
-      <figcaption>Promoted blocks have <b>short</b> next-reuse distance (hot); ghosted blocks have <b>long</b> distance (cold).</figcaption>
-    </figure>
-  </div>
-  <div class="foot"><span class="sec">Results</span><span class="tm"></span></div>
-</section>
 
-<!-- ============ 11 · PRODUCTION ============ -->
+<!-- ============ 10 · PRODUCTION ============ -->
 <section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:40">
   <div class="accentbar" style="background:var(--deploy)"></div>
   <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
@@ -457,7 +430,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="foot"><span class="sec">Deployment</span><span class="tm"></span></div>
 </section>
 
-<!-- ============ 12 · TAKEAWAYS ============ -->
+<!-- ============ 11 · TAKEAWAYS ============ -->
 <section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:40">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
@@ -475,6 +448,34 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ BACKUP ============ -->
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — why it works</div>
+  <h2 class="stitle">It promotes far fewer blocks — and the right ones</h2>
+  <div class="cols">
+    <div>
+      <table class="tbl">
+        <thead><tr><th>Small FIFO →</th><th>Main</th><th>Ghost</th></tr></thead>
+        <tbody>
+          <tr><td>S3-FIFO</td><td>88,529</td><td>126,897</td></tr>
+          <tr class="win"><td>Clock2Q+</td><td>20,762</td><td>186,959</td></tr>
+        </tbody>
+      </table>
+      <div class="big" style="margin-top:16px;">Clock2Q+ promotes <span class="hl-g">&lt; ¼</span> as many Small-FIFO blocks into Main.</div>
+      <div class="sub" style="margin-top:8px;">Correlated bursts are filtered out instead of polluting Main.</div>
+    </div>
+    <figure>
+      <div class="cols" style="gap:12px;">
+        <img src="assets/nrd_main.png" alt="reuse distance main" style="max-height:250px;">
+        <img src="assets/nrd_ghost.png" alt="reuse distance ghost" style="max-height:250px;">
+      </div>
+      <figcaption>Promoted blocks have <b>short</b> next-reuse distance (hot); ghosted blocks have <b>long</b> distance (cold).</figcaption>
+    </figure>
+  </div>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
 <section class="slide" data-sec="backup" data-secname="Backup" data-time="">
   <div class="accentbar" style="background:var(--faint)"></div>
   <div class="backup-mark">Backup</div>
@@ -553,7 +554,6 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
-    {t:'The mechanism behind that number.', r:'Promotes <¼ as many blocks — and the genuinely hot ones (short reuse distance).'},
     {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
     {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
   ];
