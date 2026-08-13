@@ -136,16 +136,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 2 · MOTIVATION ============ -->
-<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:00">
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="0:55">
   <div class="accentbar"></div>
   <div class="kicker">The setting</div>
-  <h2 class="stitle">The metadata cache is on the hottest path</h2>
+  <h2 class="stitle">What is a <span class="hl">metadata cache</span>?</h2>
   <div class="cols">
     <div>
       <ul class="clean">
         <li class="frag" data-f="1">A block cache keeps hot pages in <b>DRAM</b> to avoid <b>SSD/HDD</b> I/O.</li>
-        <li class="frag" data-f="2">vSAN caches <b>data</b> and <b>metadata</b> separately — metadata is consulted to <i>locate</i> data.</li>
-        <li class="frag" data-f="3">So the metadata policy runs at <b>extreme frequency</b>, <b>high concurrency</b>, hit ratios near <b>100%</b>.</li>
+        <li class="frag" data-f="2"><b>Data cache</b> holds the payload; the <b>metadata cache</b> holds the <b>index that locates data</b> — e.g. B-trees mapping LBN→PBN.</li>
+        <li class="frag" data-f="3">It sits on the <b>hottest path</b> — consulted for almost every data access → extreme frequency, high concurrency, hit ratios near <b>100%</b>.</li>
       </ul>
       <div class="callout frag" data-f="4" style="margin-top:20px; font-size:19px;">
         Judged not only on miss ratio, but on <span class="hl">CPU overhead, scalability, and simplicity</span>.
@@ -175,12 +175,29 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 3 · CORRELATED REFERENCES ============ -->
-<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:20">
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="0:55">
+  <div class="accentbar"></div>
+  <div class="kicker">Why metadata is different</div>
+  <h2 class="stitle"><span class="hl-r">Structural locality</span>: a page packs many keys</h2>
+  <div class="cols" style="grid-template-columns:1.05fr 0.95fr; gap:30px; align-items:center;">
+    <figure><img src="assets/btree.png" alt="B-tree mapping LBN to PBN" style="max-height:290px;">
+      <figcaption>vSAN maps LBN→PBN through B-trees; each <b>leaf</b> holds hundreds of mapping tuples.</figcaption></figure>
+    <ul class="clean" style="font-size:19px;">
+      <li class="frag" data-f="1">A metadata page isn't one key — a B-tree <b>leaf packs ~200 tuples</b>.</li>
+      <li class="frag" data-f="2"><b>L1</b> and <b>L5</b> both live in leaf <b>m4</b> → two lookups hit <b>m4</b> twice.</li>
+      <li class="frag" data-f="3">Different accesses repeatedly hit the <b>same page</b> — by structure, not popularity.</li>
+      <li class="frag" data-f="4">Internal nodes m1–m3 are hit by <i>every</i> lookup → effectively pinned; we focus on leaves.</li>
+    </ul>
+  </div>
+  <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
+</section>
+
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:05">
   <div class="accentbar"></div>
   <div class="kicker">The problem</div>
   <h2 class="stitle">What is a <span class="hl-r">correlated reference</span>?</h2>
   <div class="lead" style="max-width:none; margin-bottom:10px; font-size:20px;">
-    One operation reads many keys that live on the <b>same metadata page</b> — so the page is hit many times at once, then goes cold.</div>
+    Because a page packs many keys, one operation touches many of them on the <b>same page</b> — so the page is hit many times at once, then goes cold.</div>
   <figure style="text-align:center; margin-top:6px;">
       <svg width="560" height="330" viewBox="0 0 540 336">
         <defs><marker id="c3a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker></defs>
@@ -224,7 +241,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 4 · WHY EXISTING FAIL ============ -->
-<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:15">
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="1:05">
   <div class="accentbar"></div>
   <div class="kicker">Why existing policies fall short</div>
   <h2 class="stitle">Filter too loosely, or too aggressively</h2>
@@ -253,7 +270,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 5 · KEY INSIGHT ============ -->
-<section class="slide" data-sec="insight" data-secname="Key insight" data-time="1:00">
+<section class="slide" data-sec="insight" data-secname="Key insight" data-time="0:55">
   <div class="accentbar" style="background:var(--insight)"></div>
   <div class="kicker" style="color:var(--insight)">Key insight</div>
   <h2 class="stitle"><span class="hl-i">Where</span> a re-hit happens tells you what it means</h2>
@@ -278,7 +295,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 6 · DESIGN / ARCHITECTURE ============ -->
-<section class="slide" data-sec="design" data-secname="Design" data-time="1:30">
+<section class="slide" data-sec="design" data-secname="Design" data-time="1:05">
   <div class="accentbar" style="background:var(--design)"></div>
   <div class="kicker" style="color:var(--design)">Clock2Q+ design</div>
   <h2 class="stitle">Three queues + a correlation window</h2>
@@ -328,7 +345,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 7 · LIVE ANIMATION ============ -->
-<section class="slide" data-sec="design" data-secname="Design" data-time="1:30" style="padding:34px 40px 54px;">
+<section class="slide" data-sec="design" data-secname="Design" data-time="1:15" style="padding:34px 40px 54px;">
   <div class="accentbar" style="background:var(--design)"></div>
   <div class="kicker" style="color:var(--design); padding-left:24px;">Clock2Q+ in action</div>
   <iframe class="anim" src="animation.html?step=1" title="Clock2Q+ animation" loading="lazy" style="margin-top:6px;"></iframe>
@@ -336,7 +353,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 8 · METHOD / TRACES ============ -->
-<section class="slide" data-sec="method" data-secname="Method" data-time="1:00">
+<section class="slide" data-sec="method" data-secname="Method" data-time="0:50">
   <div class="accentbar" style="background:var(--accent)"></div>
   <div class="kicker">Evaluating a metadata policy</div>
   <h2 class="stitle">Turning public block traces into metadata traces</h2>
@@ -363,7 +380,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 9 · RESULTS: MISS RATIO ============ -->
-<section class="slide" data-sec="results" data-secname="Results" data-time="1:15">
+<section class="slide" data-sec="results" data-secname="Results" data-time="1:10">
   <div class="accentbar" style="background:var(--results)"></div>
   <div class="kicker" style="color:var(--results)">Result — miss ratio</div>
   <h2 class="stitle">Lowest miss ratio across 10 SOTA policies</h2>
@@ -384,7 +401,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 10 · WHY IT WORKS ============ -->
-<section class="slide" data-sec="results" data-secname="Results" data-time="1:00">
+<section class="slide" data-sec="results" data-secname="Results" data-time="0:55">
   <div class="accentbar" style="background:var(--results)"></div>
   <div class="kicker" style="color:var(--results)">Result — why it works</div>
   <h2 class="stitle">It promotes far fewer blocks — and the right ones</h2>
@@ -412,7 +429,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 11 · PRODUCTION ============ -->
-<section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:45">
+<section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:40">
   <div class="accentbar" style="background:var(--deploy)"></div>
   <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
   <h2 class="stitle">Simplicity as a first-class requirement</h2>
@@ -428,7 +445,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ 12 · TAKEAWAYS ============ -->
-<section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:45">
+<section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:40">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
   <h2 class="stitle">Clock2Q+</h2>
@@ -452,24 +469,6 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <h2 class="stitle">Bursts show up across production traces</h2>
   <figure><img src="assets/correlated.png" alt="correlated references in real traces" style="max-height:430px;">
     <figcaption>Metadata pages get <b>multiple re-references</b> within a short window; data pages are <b>one-hit wonders</b>. (CloudPhysics w102, w47)</figcaption></figure>
-  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
-</section>
-
-<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
-  <div class="accentbar" style="background:var(--faint)"></div>
-  <div class="backup-mark">Backup</div>
-  <div class="kicker" style="color:var(--faint)">Backup — why the same page?</div>
-  <h2 class="stitle">Structural locality: a leaf packs many keys</h2>
-  <div class="cols" style="grid-template-columns:1.08fr 0.92fr; gap:30px; align-items:center;">
-    <figure><img src="assets/btree.png" alt="B-tree mapping LBN to PBN" style="max-height:280px;">
-      <figcaption>vSAN maps LBN→PBN through B-trees; each <b>leaf</b> holds hundreds of mapping tuples.</figcaption></figure>
-    <ul class="clean" style="font-size:18px;">
-      <li>A leaf isn't one key — it packs <b>~200 tuples</b>.</li>
-      <li><b>L1</b> and <b>L5</b> both live in leaf <b>m4</b> → looking up LBN 1 then 5 hits <b>m4 twice</b>.</li>
-      <li>Even distinct one-time LBAs collapse onto the same leaf — that's the burst.</li>
-      <li>Internal nodes m1–m3 are hit by <i>every</i> lookup → effectively pinned; we focus on leaves.</li>
-    </ul>
-  </div>
   <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
 </section>
 
@@ -533,12 +532,13 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   // speaker notes, index-aligned to slides[]  (t = transition cue, r = remember)
   const NOTES=[
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
-    {t:'Where this lives.', r:'Metadata cache = hottest path; overhead & simplicity are first-class, not just miss ratio.'},
-    {t:'Metadata behaves differently, not just runs hotter. Get concrete here.', r:'A burst = one op reading many keys on ONE page (analogy: 5 books off one shelf). Not a hot block — but every hit looks like a hotness vote.'},
+    {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
+    {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs ~200 keys. Distinct keys co-reside (L1 & L5 → leaf m4), so accesses hit the same page by structure, not popularity.'},
+    {t:'That structure produces a distinctive access pattern.', r:'Burst = many keys on one page hit at once, then cold. Not a hot block; each hit looks like a hotness vote — the trap.'},
     {t:'How do the best policies handle a burst?', r:'S3-FIFO over-promotes; Clock2Q under-promotes. We want both.'},
     {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},
     {t:'Put the window into the full picture.', r:'4 paths: cold/burst → Ghost · hot → Main direct · Ghost-hit → Main · Main = second-chance.'},
-    {t:'Rather than a static trace — let’s watch it.', r:'Window silently filters bursts; the fast path is untouched. (Let one scenario finish.)'},
+    {t:'Rather than a static trace — let’s watch it. (Step with Next ▶ / click.)', r:'Window silently filters bursts; the fast path is untouched.'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
     {t:'The mechanism behind that number.', r:'Promotes <¼ as many blocks — and the genuinely hot ones (short reuse distance).'},

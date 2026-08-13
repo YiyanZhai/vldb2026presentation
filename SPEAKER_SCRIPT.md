@@ -1,121 +1,129 @@
 # Clock2Q+ — 12-Minute Speaker Script (VLDB 2026)
 
-Aligned slide-by-slide with `index.html`. Target ≈ **11:45 spoken**, leaving buffer for pacing.
-Delivery: ~130 words/min, pause on each figure reveal. Advance fragments (→) as you reach the matching sentence.
+Aligned slide-by-slide with `index.html` (13 main slides). Target ≈ **11:30 spoken**, buffer for pacing.
+Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragments (→) as you reach the matching sentence.
 
 ---
 
 ## Slide 1 — Title · ~0:30
 **Say:**
-> "Hi everyone, I'm Yiyan Zhai from Carnegie Mellon — this is joint work with collaborators at Harvard and Broadcom. I'll talk about **Clock2Q+**, a cache replacement algorithm we built for *metadata* caches, and that's running in production in **VMware vSAN**. The idea is simple, so my goal is that by the end you'll understand exactly *why* it works."
+> "Hi everyone, I'm Yiyan Zhai from Carnegie Mellon — joint work with collaborators at Harvard and Broadcom. I'll talk about **Clock2Q+**, a cache replacement algorithm we built for *metadata* caches, and that's running in production in **VMware vSAN**. The idea is simple, so my goal is that by the end you'll understand exactly *why* it works."
 
 **Remember:** A simple, production-deployed idea — set the expectation that it's intuitive.
 
 ---
 
-## Slide 2 — The metadata cache is the hot path · ~1:00
-**Transition:** "Let me start with where this lives."
+## Slide 2 — What is a metadata cache? · ~0:55
+**Transition:** "Let me start with what we're actually caching."
 **Say:**
-> "Caches sit between fast memory and slow storage — keep the hot pages in DRAM, avoid going to SSD or disk. Now, vSAN keeps *two* kinds of cache: one for data, and one for metadata. And metadata is special, because metadata is what you consult to *find* the data in the first place. So the metadata cache is on the hottest path in the system — its replacement policy runs constantly, under heavy concurrency, often when the hit ratio is already near 100%. That changes what 'a good policy' means: it's not just miss ratio. A tiny per-hit cost, a lock bottleneck, or one rare corner case turns straight into lost throughput. So overhead, scalability, and *simplicity* matter just as much."
+> "A block cache keeps hot pages in DRAM so you avoid going to SSD or disk. Systems keep two kinds. A **data cache** holds the actual payload — file or disk blocks. A **metadata cache** holds the *index* the system uses to **locate** that data — in vSAN, that's B-trees mapping a logical block number to a physical one. That distinction matters, because the metadata cache is on the **hottest path**: you consult it to find almost every piece of data. So it runs at extreme frequency, under high concurrency, often with hit ratios already near 100%. Which means we judge its policy not only by miss ratio, but by **CPU overhead, scalability, and simplicity**."
 
-**Remember:** For a production metadata cache, miss ratio is necessary but not sufficient — overhead and simplicity are first-class.
+**Remember:** Metadata cache = the index (B-trees) that locates data; hottest path → overhead & simplicity are first-class.
 
 ---
 
-## Slide 3 — What is a correlated reference? · ~1:20
-**Transition:** "And metadata doesn't just run hotter — it *behaves* differently. Let me be concrete, because this is the crux of the talk."
+## Slide 3 — Structural locality: a page packs many keys · ~0:55
+**Transition:** "So why does a metadata cache behave differently from a data cache? It starts with structure."
 **Say:**
-> "A single operation — traversing or updating an index — reads many keys. And in a B-tree a leaf page holds around 200 keys, so a lot of those keys sit on the *same* page. So that one page gets hit many times within a split second… and then it's done, maybe untouched for a long time. Here's the intuition: it's like grabbing five books off *one* shelf during a single errand — for a minute that shelf looks incredibly popular, but you won't be back for weeks. That's a correlated reference: many logical accesses collapsing onto one physical page, all clustered in time. And it matters because a burst like that is *weak* evidence of long-term popularity. This plot confirms it across real traces — metadata pages get these repeated re-references, while data pages are mostly one-hit wonders. The trap that every standard policy falls into is counting each hit in the burst as a separate vote for 'this page is hot.'"
+> "A metadata page isn't a single key — a B-tree **leaf packs hundreds of mapping tuples**; in vSAN, around 200. So many different keys physically co-reside on the same page. In this example, **L1 and L5 both live in leaf m4**, so two completely unrelated lookups both hit m4. Different accesses land on the same page not because it's popular, but because of how keys are packed — that's **structural locality**. One note: the internal nodes near the root are touched by *every* lookup, so they're effectively pinned; the interesting action is at the leaves, which are 99% of the tree."
 
-**Remember:** A burst = one operation reading many keys on one page (the "five books, one shelf" errand) — not a hot block. Counting each hit as a hotness vote is the trap.
+**Remember:** A leaf packs ~200 keys; distinct keys co-reside → accesses hit the same page by structure, not popularity.
 
 ---
 
-## Slide 4 — Why existing policies fall short · ~1:15
-**Transition:** "So how do today's best policies handle a burst like that? There are two camps, and both stumble."
+## Slide 4 — What is a correlated reference? · ~1:05
+**Transition:** "That packing produces a very distinctive access pattern."
 **Say:**
-> "S3-FIFO — the recent state of the art — uses a small admission queue with a reference bit: re-hit a block while it's in that queue, the bit flips, and it gets promoted. But under a correlated burst, a *cold* page gets hit a few times near the head, its bit flips, and it's promoted into the main cache — where it just sits there as pollution. The older policies, 2Q and Clock2Q, go the opposite way: a genuinely hot block can only reach main *after* it's been evicted and then requested again — so every hot block pays one extra, avoidable miss. So we're stuck: filter too loosely and you admit junk; filter too aggressively and you miss real hot blocks. We want S3-FIFO's fast direct promotion *without* swallowing the bursts."
+> "Because a page holds many keys, a single operation — traversing or updating an index — touches many of them on the *same* page. So that one page gets hit many times within a split second, and then it goes cold, maybe untouched for a long time. Here's the intuition: it's like grabbing five books off *one* shelf during a single errand — for a minute the shelf looks incredibly popular, but you won't be back for weeks. That's a **correlated reference**: many accesses collapsing onto one page, clustered in time. And it matters because a burst like that is *weak* evidence of long-term popularity. The trap every standard policy falls into is counting each hit in the burst as a separate vote for 'this page is hot.'"
+
+**Remember:** A burst = one operation over many keys on one page — not a hot block. Counting each hit as a hotness vote is the trap.
+
+---
+
+## Slide 5 — Why existing policies fall short · ~1:05
+**Transition:** "So how do today's best policies handle a burst? Two camps, and both stumble."
+**Say:**
+> "S3-FIFO — the recent state of the art — uses a small admission queue with a reference bit: re-hit a block while it's in that queue, the bit flips, and it's promoted. But under a correlated burst, a *cold* page gets hit a few times near the head, its bit flips, and it's promoted into the main cache — where it just sits as pollution. The older 2Q and Clock2Q go the opposite way: a genuinely hot block only reaches main *after* it's been evicted and requested again — so every hot block pays one extra, avoidable miss. So we're stuck: filter too loosely and you admit junk; filter too aggressively and you miss real hot blocks. We want S3-FIFO's fast direct promotion *without* swallowing the bursts."
 
 **Remember:** Over-promote (S3-FIFO) vs. under-promote (Clock2Q) — we want the best of both.
 
 ---
 
-## Slide 5 — Key insight: the correlation window · ~1:00
+## Slide 6 — Key insight: the correlation window · ~0:55
 **Transition:** "Here's the insight — and it's almost embarrassingly simple."
 **Say:**
-> "The realization is that *where* a re-hit happens tells you what it means. If a block gets re-hit right after it's inserted — near the head of the small queue — that's almost certainly part of the *same* burst, so we should ignore it. But if it's re-hit later, after it's aged a bit, that's real reuse worth acting on. So we add a **correlation window** at the head of the small queue: hits *inside* the window do **not** set the reference bit; hits *beyond* it do. Inside the window, bursts are filtered out. Beyond it, genuinely hot blocks still get promoted directly. And that's it — a one-line change, no new tuning knobs, no ordered LRU list."
+> "The realization is that *where* a re-hit happens tells you what it means. If a block is re-hit right after it's inserted — near the head of the small queue — that's almost certainly part of the *same* burst, so ignore it. If it's re-hit later, after it's aged a bit, that's real reuse worth acting on. So we add a **correlation window** at the head of the small queue: hits *inside* the window do **not** set the reference bit; hits *beyond* it do. Inside, bursts are filtered out. Beyond, genuinely hot blocks still get promoted directly. That's it — a one-line change to S3-FIFO, no new tuning knobs."
 
 **Remember:** *Where* the re-hit happens is the signal — one small change to S3-FIFO.
 
 ---
 
-## Slide 6 — Clock2Q+ design · ~1:30
+## Slide 7 — Clock2Q+ design · ~1:05
 **Transition:** "Let me put that window into the full picture."
 **Say:**
-> "There are three queues. New blocks come into the **Small FIFO**, and its head portion is the correlation window. Now follow the paths. If a block reaches the tail *without* earning a reference bit — because it was cold, or it was just a burst inside the window — it ages out into the **Ghost** queue, which stores only the key, not the data. If instead it earned Ref = 1 *beyond* the window, it's promoted straight into the **Main Clock** — no extra miss. If a key that's sitting in Ghost gets requested again, that's proven reuse, so we admit it directly to Main. And the Main Clock itself uses the classic second-chance rule: the reference bit buys a block one more pass of the clock hand before it's evicted. For sizing, the Small FIFO is 10% of the cache, the Main Clock 90%, and Ghost is 50%."
+> "Three queues. New blocks enter the **Small FIFO**, whose head portion is the correlation window. Follow the paths. If a block reaches the tail *without* earning a reference bit — cold, or just a burst inside the window — it ages out to the **Ghost** queue, which keeps only the key. If it earned Ref = 1 *beyond* the window, it's promoted straight into the **Main Clock** — no extra miss. If a key sitting in Ghost is requested again, that's proven reuse, so we admit it directly to Main. And the Main Clock uses the classic second-chance rule: the reference bit buys one more pass of the clock hand before eviction."
 
 **Remember:** Four clean paths — cold/burst → Ghost, hot → Main directly, Ghost-hit → Main, Main uses second-chance.
 
 ---
 
-## Slide 7 — Clock2Q+ in action · ~1:30
-**Transition:** "Rather than trace that on a static diagram, let's just watch it."
-**Say (narrate over the animation as each scenario plays):**
-> "Watch the small queue. A **cold** block ages to the tail with its bit still zero, and drops into Ghost. Now a **correlated burst** — it gets hit, but *inside the window*, so the bit stays zero; it also ages out to Ghost. That's the whole point: the burst never touches the Main Clock. Here's a **hot** block — it's hit *beyond* the window, so it earns Ref = 1, and when it reaches the tail it's promoted straight to Main. Now a **Ghost hit** — a key we remembered comes back, and we admit it directly to Main. And finally, in the **Main Clock**, a block with the bit set gets a second chance; the hand clears it and moves on, and evicts a cold one. The window is doing quiet work in the background while the fast path stays fast."
+## Slide 8 — Clock2Q+ in action · ~1:15
+**Transition:** "Rather than trace that on a static diagram, let's step through it." *(Animation is in step mode — advance with Next ▶ / click / →.)*
+**Say (narrate as you step each move):**
+> "A **cold** block ages to the tail with its bit still zero, and drops into Ghost. Now a **correlated burst** — it's hit, but *inside the window*, so the bit stays zero; it also ages out to Ghost — the burst never touches Main. Here's a **hot** block — hit *beyond* the window, so it earns Ref = 1, and when it reaches the tail it's promoted straight to Main. Now a **Ghost hit** — a key we remembered comes back, admitted directly to Main. And in the **Main Clock**, a block with the bit set gets a second chance — the hand clears it and moves on, then evicts a cold one. The window does quiet work while the fast path stays fast."
 
 **Remember:** The window silently filters bursts; the direct-promotion fast path is untouched.
-*(Let the loop finish one scenario set, then advance.)*
 
 ---
 
-## Slide 8 — Evaluating metadata caches · ~1:00
-**Transition:** "Now, how do you even evaluate a metadata policy? That turns out to be hard."
+## Slide 9 — Evaluating a metadata policy · ~0:50
+**Transition:** "How do you even evaluate a metadata policy? That's surprisingly hard."
 **Say:**
-> "There are no public metadata-cache traces, and production traces can't be shared. So here's our trick: take *any* public block trace, and divide each block number by the B-tree fan-out — around 200. That reconstructs the sequence of leaf-page accesses a real metadata cache would see. We validated it against a real B-tree trace and the miss-ratio curves match to within one-hundredth of a percent. So now anyone can regenerate metadata-cache results from public data — it's fully reproducible. On top of that we ran 106 CloudPhysics traces — over two billion requests — against ten state-of-the-art policies."
+> "There are no public metadata-cache traces, and production traces can't be shared. So here's the trick: take *any* public block trace and divide each block number by the B-tree fan-out — around 200. That reconstructs the sequence of leaf-page accesses a real metadata cache would see. We validated it against a real B-tree trace, and the miss-ratio curves match to within one-hundredth of a percent. So anyone can regenerate metadata results from public data. We ran 106 CloudPhysics traces — over two billion requests — against ten state-of-the-art policies."
 
 **Remember:** A simple, validated recipe makes metadata-cache evaluation reproducible for everyone.
 
 ---
 
-## Slide 9 — Miss ratio vs. 10 SOTA policies · ~1:15
+## Slide 10 — Miss ratio vs. 10 SOTA policies · ~1:10
 **Transition:** "So — does the window actually pay off?"
 **Say:**
-> "These box plots show relative miss-ratio improvement, and we've put **Clock2Q+ as the zero line** — every other policy is measured against us. On metadata, on the left, every competitor's box sits *below* the line, meaning worse than Clock2Q+. On data traces, on the right, it's the same story. Across every cache size we tested, Clock2Q+ has the best **median and mean** improvement — and on some metadata traces we beat S3-FIFO, the strongest competitor, by up to **28.5%**. The headline isn't one lucky trace, though — it's that we win *across the board*, on both metadata and data."
+> "These box plots show relative miss-ratio improvement, with **Clock2Q+ as the zero line** — every other policy is measured against us. On metadata, on the left, every competitor's box sits *below* the line — worse than Clock2Q+. On data traces, on the right, same story. Across every cache size we tested, Clock2Q+ has the best **median and mean** — and on some metadata traces we beat S3-FIFO, the strongest competitor, by up to **28.5%**. The headline isn't one lucky trace — it's that we win *across the board*, on metadata and data."
 
 **Remember:** Best median and mean at every cache size, on metadata *and* data.
 
 ---
 
-## Slide 10 — Why it works · ~1:00
-**Transition:** "Let me show you the mechanism behind that number."
+## Slide 11 — Why it works · ~0:55
+**Transition:** "Let me show the mechanism behind that number."
 **Say:**
-> "This table counts how many blocks each policy promotes from the small queue into the Main Clock. S3-FIFO promotes about 88,000; Clock2Q+ promotes about 21,000 — under a quarter as many. We're far more selective, because the window is filtering the correlated bursts before they can be promoted. And it's not just fewer — it's the *right* ones: the blocks we promote have short reuse distances, so they're genuinely hot, while the ones we send to Ghost have long reuse distances. So the window filters more, and it filters correctly."
+> "This table counts how many blocks each policy promotes from the small queue into the Main Clock. S3-FIFO promotes about 88,000; Clock2Q+ promotes about 21,000 — under a quarter as many. We're far more selective, because the window filters correlated bursts before they can be promoted. And it's not just fewer — it's the *right* ones: the blocks we promote have short reuse distances, so they're genuinely hot, while the ones we ghost have long ones."
 
 **Remember:** We promote under ¼ as many blocks — and they're the genuinely hot ones.
 
 ---
 
-## Slide 11 — Engineered for production · ~0:45
-**Transition:** "And because this actually ships in vSAN, miss ratio was never the only requirement."
+## Slide 12 — Engineered for production · ~0:40
+**Transition:** "And because this ships in vSAN, miss ratio was never the only requirement."
 **Say:**
-> "Everything is array-based with no allocation, so the hit path is just a hash lookup and at most flipping one bit. It scales with fine-grained locks instead of a global one. It handles dirty pages by simply skipping them until they're flushed. It bounds the work per eviction, so there are no CPU spikes. And it resizes online. All of this came out of nearly a decade of evolving vSAN's cache — and throughout, simplicity was treated as a hard requirement, not a nice-to-have."
+> "Everything is array-based, no allocation, so the hit path is just a hash lookup and at most flipping one bit. It scales with fine-grained locks. It handles dirty pages by skipping them until they're flushed. It bounds the work per eviction, so no CPU spikes. And it resizes online. All of it came out of nearly a decade of evolving vSAN's cache — with simplicity treated as a hard requirement."
 
 **Remember:** Low overhead, scalable, dirty-aware, bounded, resizable — simplicity by design.
 
 ---
 
-## Slide 12 — Takeaways · ~0:45
+## Slide 13 — Takeaways · ~0:40
 **Transition:** "So, to wrap up."
 **Say:**
-> "Correlated references are a real and costly pattern in metadata caches, and they defeat the usual one-hit-wonder filters. The correlation window is a tiny change that fixes it — filter the bursts, but still promote truly hot blocks instantly. The payoff is the best miss ratio among state-of-the-art policies, and it's running in VMware vSAN today. And all of it — the algorithm and the metadata-trace method — is reproducible in libCacheSim. Thank you, and I'm happy to take questions."
+> "Correlated references are a real, costly pattern in metadata caches, and they defeat the usual one-hit-wonder filters. The correlation window is a tiny change that fixes it — filter the bursts, still promote truly hot blocks instantly. The payoff is the best miss ratio among state-of-the-art policies, and it's running in VMware vSAN today. And it's all reproducible in libCacheSim. Thank you — happy to take questions."
 
 **Remember:** One simple, correlation-aware idea — best miss ratio, and deployed.
 
 ---
 
 ### Timing summary
-| Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | **Total** |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| min | 0:30 | 1:00 | 1:20 | 1:15 | 1:00 | 1:30 | 1:30 | 1:00 | 1:15 | 1:00 | 0:45 | 0:45 | **12:05** |
+| Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | **Total** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| min | 0:30 | 0:55 | 0:55 | 1:05 | 1:05 | 0:55 | 1:05 | 1:15 | 0:50 | 1:10 | 0:55 | 0:40 | 0:40 | **12:00** |
 
-**If you're running long,** trim slide 6 to ~0:45 (let the animation carry the paths) and tighten slide 4 — that recovers ~1:00.
+**If you're running long,** the animation (slide 8) and the design slide (7) are the easiest to compress — let the visuals carry them.
