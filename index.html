@@ -147,7 +147,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="cols">
     <div>
       <ul class="clean" style="font-size:20px;">
-        <li class="frag"><b>Data cache</b> = the payload. <b>Metadata cache</b> = the index that <b>locates</b> it (B-trees).</li>
+        <li class="frag"><b>Data cache</b> = the payload.</li>
+        <li class="frag"><b>Metadata cache</b> = the index that <b>locates</b> it. Maps logical addresses → physical addresses.</li>
         <li class="frag">The metadata cache is the <b>hot path</b> &mdash; touched on almost every access; hit ratios near <b>100%</b>.</li>
       </ul>
       <div class="callout frag" style="margin-top:18px; font-size:19px;">
@@ -344,7 +345,6 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <circle cx="472" cy="150" r="5" fill="#d6480f"/>
       <rect x="20" y="250" width="340" height="64" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.4" stroke-dasharray="7 5"/>
       <text x="190" y="330" text-anchor="middle" font-size="14" font-weight="800" fill="#6b7681">Ghost FIFO (keys only)</text>
-      <text id="hint6" x="290" y="392" text-anchor="middle" font-size="12" font-style="italic" fill="#9aa5ad">click: add the correlation window (Clock2Q+)</text>
       <path d="M360,82 L392,116" fill="none" stroke="#2f9e44" stroke-width="2.4" marker-end="url(#d6)"/>
       <text x="372" y="74" font-size="12.5" font-weight="700" fill="#2f9e44">Ref=1</text>
       <path d="M190,126 L190,246" fill="none" stroke="#9aa5ad" stroke-width="2.4" marker-end="url(#d6g)"/>
