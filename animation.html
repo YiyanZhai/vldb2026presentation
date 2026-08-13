@@ -190,7 +190,7 @@
   ctl.querySelector('#ctl-hot').onclick=()=>{ setManual(true); play(SEQ_HOT,false,'Hot block — promoted to the Main Clock'); };
   ctl.querySelector('#ctl-full').onclick=()=>{ play(SEQ,true); };
   function updateCtl(){ _cmode.textContent=MANUAL?'▶ Auto':'⏸ Step'; ctl.classList.toggle('manual',MANUAL); _cnext.classList.toggle('ready',!!_resolve); }
-  document.addEventListener('keydown',e=>{ if(MANUAL&&(e.key==='ArrowRight'||e.key===' ')){ e.preventDefault(); advance(); } else if(e.key==='m'||e.key==='M'){ setManual(!MANUAL); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='m'||e.key==='M'){ setManual(!MANUAL); } });  // arrows/space are left for the deck to change slides; step via click / Next / scenario buttons
   stage.addEventListener('click',()=>{ if(MANUAL) advance(); });
   updateCtl();
 

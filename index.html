@@ -628,11 +628,11 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   }
   document.addEventListener('keydown', onKey);
   // let slide-nav keys work even when the animation iframe has focus (arrows/space stay with the animation)
-  const FWD=['ArrowDown','ArrowUp','PageDown','PageUp','Home','End','o','O','f','F'];
+  const FWD=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','PageDown','PageUp','Home','End',' ','o','O','f','F'];
+  function attachFwd(ifr){ try{ ifr.contentWindow.addEventListener('keydown', function(e){ if(FWD.indexOf(e.key)>=0) onKey(e); }); }catch(_){} }
   document.querySelectorAll('iframe.anim').forEach(function(ifr){
-    ifr.addEventListener('load', function(){
-      try{ ifr.contentWindow.addEventListener('keydown', function(e){ if(FWD.indexOf(e.key)>=0) onKey(e); }); }catch(_){}
-    });
+    ifr.addEventListener('load', function(){ attachFwd(ifr); });
+    try{ if(ifr.contentDocument && ifr.contentDocument.readyState==='complete') attachFwd(ifr); }catch(_){}
   });
 
   resize(); apply();
