@@ -8,7 +8,7 @@ One line to get in, one line to land. Full text in `SPEAKER_SCRIPT.md`; live ver
 | **2** Metadata cache | 0:55 | "What we're actually caching." | Data cache = payload; **metadata cache = the index (B-trees) that locates data**. Hottest path → overhead & simplicity matter too. |
 | **3** Structural locality | 0:55 | "Why is metadata different? Start with structure." | A leaf packs **hundreds of mapping tuples**; L1 & L5 → leaf m4. Same page by **structure, not popularity**. |
 | **4** Correlated ref | 1:05 | "That packing shows up in the access stream." | Burst = **unrelated accesses on the same page** (keys co-reside; L1,L5,L8 → m4). Busy by structure, not popularity — each hit looks like a vote (the trap). |
-| **5** Why others fail | 1:05 | "Both share one mechanism — define it first." | **Ref bit** = 1/0 "hit again since arrival?" S3-FIFO: any re-hit sets it → burst promotes a cold page (too loose). Clock2Q: only after drop + re-ask → extra miss (too strict). |
+| **5** Why others fail | 1:05 | "Both share one mechanism — define it first." | **Ref bit** = 1/0 "hit again since arrival?" S3-FIFO: any re-hit sets it → admits a cold page. Clock2Q: only after drop + re-ask → delays hot blocks (extra miss). |
 | **6** Insight | 0:55 | "The insight — almost embarrassingly simple." | **Where** the re-hit happens is the signal. One-line change. |
 | **7** Design | 1:05 | "Put the window into the full picture." | 4 paths: cold/burst→Ghost · hot→Main direct · Ghost-hit→Main · Main=second-chance. |
 | **8** Animation | 1:15 | "Let's step through it." *(Next ▶ / click / →)* | Window silently filters bursts; fast path untouched. |
