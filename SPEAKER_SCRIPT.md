@@ -52,9 +52,9 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ## Slide 6 — Clock2Q+: add a correlation window · ~1:30
 **Transition:** "Here's the fix — and it's almost embarrassingly simple. It comes down to *where* a re-hit happens."
 **Say:**
-> "Clock2Q+ keeps exactly S3-FIFO's three queues — a Small FIFO, a Main Clock, and a Ghost — and adds one thing: a **correlation window** at the head of the Small FIFO. The rule: a hit *inside* that window does **not** set the reference bit. Why? A re-hit right after a block arrives is almost certainly the same correlated burst — so we ignore it, and the block ages out to Ghost. But a re-hit *beyond* the window is genuine reuse — it sets Ref = 1 and the block is promoted straight to the Main Clock, no extra miss. Everything else is untouched: a ghost hit still admits to Main, and the Main Clock still gives a block a second chance before eviction. That's the whole contribution — one rule on top of S3-FIFO, no new knobs."
+> "Clock2Q+ keeps exactly S3-FIFO's three queues — a Small FIFO, a Main Clock, and a Ghost — and adds one thing: a **correlation window** at the head of the Small FIFO, where a re-hit does **not** set the reference bit. *(Click the diagram to toggle the window on and off.)* Here's the whole comparison in a single bit. In **S3-FIFO** — window off — *any* re-hit sets Ref = 1, even a burst right at the head, so a cold page gets promoted and pollutes the cache. Turn the window on — that's **Clock2Q+** — and the same in-window hit stays at **0**, so the burst just ages out to Ghost. A re-hit *beyond* the window is genuine reuse, so it does set Ref = 1 and goes straight to Main, no extra miss. *(The two buttons demo exactly that — hit inside vs. beyond.)* That's the entire contribution: one rule on top of S3-FIFO, no new knobs."
 
-**Remember:** The insight *is* the design — a correlation window where in-window hits don't set Ref. Inside → Ghost; beyond → Main. One change to S3-FIFO.
+**Remember:** One bit tells the whole story — S3-FIFO sets Ref = 1 on any hit (burst → pollution); Clock2Q+ keeps in-window hits at 0. Inside → Ghost, beyond → Main. That window is the only change.
 
 ---
 
