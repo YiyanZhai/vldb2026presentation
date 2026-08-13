@@ -655,21 +655,25 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   document.getElementById('nav-prev').onclick=function(){ prev(); };
   document.getElementById('nav-next').onclick=function(){ next(); };
   resize(); apply();
-  // slide 6: window toggle (click diagram) + hit inside/beyond Ref-bit demo (buttons)
+  // slide 6: click diagram = S3-FIFO <-> Clock2Q+ ; buttons = hit inside/beyond the window
   const _cw=document.getElementById('cw6'), _pol=document.getElementById('policy6'), _svg6=document.getElementById('svg6');
   if(_cw&&_pol&&_svg6){
-    let _on=false;
-    function _setPolicy(on){ _on=on; _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a'); }
-    _setPolicy(false); _svg6.style.cursor='pointer';
-    _svg6.addEventListener('click', function(){ _setPolicy(!_on); });
-    const _dg=document.getElementById('demo6'), _db=document.getElementById('demoBlk6'), _drb=document.getElementById('demoRefBg6'), _dr=document.getElementById('demoRef6'), _dm=document.getElementById('demoMsg6');
-    function _hit(inside){
-      if(!_on) _setPolicy(true);
-      if(_dg) _dg.setAttribute('transform', inside?'translate(0,0)':'translate(166,0)');
-      if(_db){ _db.classList.remove('blkpulse6'); _db.getBoundingClientRect(); _db.classList.add('blkpulse6'); }
-      if(inside){ if(_drb){_drb.setAttribute('fill','#fff'); _drb.setAttribute('stroke','#3a4750');} if(_dr){_dr.textContent='0'; _dr.setAttribute('fill','#3a4750');} if(_dm) _dm.innerHTML='<b style=\'color:#e8930c\'>Inside the window</b> — same burst, so <b>Ref stays 0</b> → ages out to Ghost.'; }
-      else { if(_drb){_drb.setAttribute('fill','#2f9e44'); _drb.setAttribute('stroke','#1c7a30');} if(_dr){_dr.textContent='1'; _dr.setAttribute('fill','#fff');} if(_dm) _dm.innerHTML='<b style=\'color:#2f9e44\'>Beyond the window</b> — real reuse, so <b>Ref = 1</b> → promoted to Main.'; }
+    const _dg=document.getElementById('demo6'), _db=document.getElementById('demoBlk6'),
+          _drb=document.getElementById('demoRefBg6'), _dr=document.getElementById('demoRef6'), _dm=document.getElementById('demoMsg6');
+    let _on=false, _pos='in';
+    function _badge(ref){ if(ref===1){ if(_drb){_drb.setAttribute('fill','#2f9e44'); _drb.setAttribute('stroke','#1c7a30');} if(_dr){_dr.textContent='1'; _dr.setAttribute('fill','#fff');} }
+      else { if(_drb){_drb.setAttribute('fill','#fff'); _drb.setAttribute('stroke','#3a4750');} if(_dr){_dr.textContent='0'; _dr.setAttribute('fill','#3a4750');} } }
+    function _refresh(){
+      _badge(_on ? (_pos==='in'?0:1) : 1);   // S3-FIFO: ANY re-hit sets Ref=1
+      if(_dm){ if(!_on) _dm.innerHTML='<b style="color:#e04b3a">S3-FIFO</b>: <b>any</b> re-hit sets <b>Ref = 1</b> \u2014 even a burst near the head \u2192 promoted (pollution).';
+        else if(_pos==='in') _dm.innerHTML='<b style="color:#e8930c">Clock2Q+, inside the window</b>: same burst, so <b>Ref stays 0</b> \u2192 ages out to Ghost.';
+        else _dm.innerHTML='<b style="color:#2f9e44">Clock2Q+, beyond the window</b>: real reuse, so <b>Ref = 1</b> \u2192 promoted to Main.'; }
     }
+    function _setPolicy(on){ _on=on; _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a'); _refresh(); }
+    function _pulse(){ if(_db){ _db.classList.remove('blkpulse6'); _db.getBoundingClientRect(); _db.classList.add('blkpulse6'); } }
+    function _hit(inside){ _pos=inside?'in':'out'; if(_dg) _dg.setAttribute('transform', inside?'translate(0,0)':'translate(166,0)'); _setPolicy(true); _pulse(); }
+    _setPolicy(false); _svg6.style.cursor='pointer';
+    _svg6.addEventListener('click', function(){ _setPolicy(!_on); _pulse(); });
     const _bi=document.getElementById('btn-in6'), _bo=document.getElementById('btn-out6');
     if(_bi) _bi.onclick=function(){ _hit(true); };
     if(_bo) _bo.onclick=function(){ _hit(false); };
