@@ -52,7 +52,7 @@ h2.stitle{font-size:33px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
   .tl .stage.cur{border-color:#7048b6; background:#f6f2fc; box-shadow:0 6px 18px rgba(112,72,182,.15);}
   .tl .stage .badge{font-size:19px; font-weight:800; color:#4a3b6b;}
   .tl .stage.cur .badge{color:#7048b6;}
-  .tl .stage .chg{font-size:13.5px; color:#5f6b76; margin-top:8px; line-height:1.35; min-height:74px;}
+  .tl .stage .chg{font-size:15px; color:#5f6b76; margin-top:8px; line-height:1.35; min-height:40px;}
   .tl .stage .dep{font-size:12px; color:#8b96a0; margin-top:8px; font-weight:700;}
   .tl .arrow{align-self:center; color:#b7bcc6; font-size:24px; padding:0 8px;}
 /* progress */
@@ -447,25 +447,25 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="tl">
     <div class="stage">
       <div class="badge">2Q</div>
-      <div class="chg">Small FIFO + <b>Main LRU</b> + Ghost. Scan-resistant, but LRU is costly and hot blocks pay an extra miss.</div>
+      <div class="chg">Small FIFO + <b>Main LRU</b> + Ghost</div>
       <div class="dep">the classic (1994)</div>
     </div>
     <div class="arrow">&rarr;</div>
     <div class="stage">
       <div class="badge">Clock2Q</div>
-      <div class="chg">Main LRU &rarr; <b>Main Clock</b> &mdash; LRU-like behavior at lower CPU cost, more scalable.</div>
+      <div class="chg">Main LRU &rarr; <b>Main Clock</b> <span style="color:#8b96a0">(lower CPU)</span></div>
       <div class="dep">vSAN OSA &middot; VDFS &middot; early ESA</div>
     </div>
     <div class="arrow">&rarr;</div>
     <div class="stage">
       <div class="badge">S3-FIFO</div>
-      <div class="chg">Adds a <b>Ref bit</b> so hot blocks promote directly &mdash; no extra miss. But over-promotes correlated bursts.</div>
+      <div class="chg">adds a <b>Ref bit</b> &rarr; direct promotion</div>
       <div class="dep">2023 &middot; state of the art</div>
     </div>
     <div class="arrow">&rarr;</div>
     <div class="stage cur">
       <div class="badge">Clock2Q+</div>
-      <div class="chg">Clock2Q + the Ref bit + a <b>correlation window</b> to filter those bursts.</div>
+      <div class="chg">+ a <b>correlation window</b> <span style="color:#8b96a0">(filters bursts)</span></div>
       <div class="dep">vSAN ESA &middot; vSAN File Services &mdash; today</div>
     </div>
   </div>
