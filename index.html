@@ -154,8 +154,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <figure class="frag" data-f="1">
       <svg width="440" height="250" viewBox="0 0 440 250">
         <defs>
-          <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa5ad"/></marker>
-          <marker id="loc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f7fbf"/></marker>
+          <marker id="ah" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
+          <marker id="loc" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f7fbf"/></marker>
         </defs>
         <rect x="40" y="10" width="360" height="100" rx="11" fill="#f4f9fd" stroke="#3e9fd6" stroke-width="2"/>
         <text x="220" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#1f6fa8">DRAM &#8212; Block Cache</text>
@@ -202,7 +202,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     Because a page packs many keys, <b>unrelated accesses keep landing on the same page</b> — so it's hit again and again in a burst, then goes cold.</div>
   <figure style="text-align:center; margin-top:6px;">
       <svg width="540" height="300" viewBox="0 0 540 300">
-        <defs><marker id="cr" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker></defs>
+        <defs><marker id="cr" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker></defs>
         <text x="270" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#5f6b76">unrelated accesses to different keys</text>
         <g font-size="15" font-weight="800" fill="#fff" text-anchor="middle">
           <rect x="118" y="34" width="64" height="34" rx="17" fill="#4c8bf5"/><text x="150" y="57">L1</text>
@@ -239,8 +239,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <figure style="text-align:center; margin:2px 0 14px;">
     <svg viewBox="0 0 900 172" width="90%" style="max-height:160px;">
       <defs>
-        <marker id="p5" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5f6b76"/></marker>
-        <marker id="p5g" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f9e44"/></marker>
+        <marker id="p5" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#5f6b76"/></marker>
+        <marker id="p5g" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f9e44"/></marker>
       </defs>
       <g class="frag">
         <rect x="548" y="18" width="340" height="66" rx="12" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2"/>
@@ -269,7 +269,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <h3 style="color:var(--problem); margin:0 0 8px;">S3-FIFO &mdash; admits cold blocks</h3>
       <p style="margin:-2px 0 6px; font-size:12.5px; color:var(--muted);">uses a <b>reference bit</b> (0/1 = "hit again?") &mdash; set on <b>any</b> re-hit</p>
       <svg viewBox="0 0 520 176" width="100%">
-        <defs><marker id="a5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa5ad"/></marker></defs>
+        <defs><marker id="a5" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker></defs>
         <rect x="6" y="44" width="150" height="76" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
         <text x="81" y="34" text-anchor="middle" font-size="11.5" fill="#8b6a12">admission queue</text>
         <circle cx="58" cy="84" r="22" fill="#c0c8cf"/><text x="58" y="90" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">C</text>
@@ -289,8 +289,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <h3 style="color:var(--muted); margin:0 0 8px;">Clock2Q / 2Q &mdash; delays hot blocks</h3>
       <p style="margin:-2px 0 6px; font-size:12.5px; color:var(--muted);"><b>no</b> admission bit &mdash; must be dropped, then re-requested</p>
       <svg viewBox="0 0 520 176" width="100%">
-        <defs><marker id="a5b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9aa5ad"/></marker>
-          <marker id="a5r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e04b3a"/></marker></defs>
+        <defs><marker id="a5b" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
+          <marker id="a5r" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#e04b3a"/></marker></defs>
         <rect x="6" y="48" width="104" height="72" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
         <text x="58" y="38" text-anchor="middle" font-size="11.5" fill="#8b6a12">queue tail</text>
         <circle cx="58" cy="84" r="22" fill="#4c8bf5"/><text x="58" y="90" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">H</text>
@@ -334,8 +334,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <text x="200" y="335" text-anchor="middle" font-size="14" font-weight="800" fill="#6b7681">Ghost FIFO (keys only)</text>
       <text x="480" y="300" text-anchor="middle" font-size="30">&#128465;&#65039;</text>
       <text x="480" y="322" text-anchor="middle" font-size="12" fill="#8b96a0">evict</text>
-      <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker>
-        <marker id="a2g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f9e44"/></marker></defs>
+      <defs><marker id="a2" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
+        <marker id="a2g" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f9e44"/></marker></defs>
       <path d="M384,66 C430,66 440,96 462,120" class="ln" stroke="#2f9e44" marker-end="url(#a2g)"/>
       <text x="410" y="52" font-size="12.5" font-weight="700" fill="#2f9e44">Ref=1</text>
       <path d="M200,120 L200,244" class="ln" marker-end="url(#a2)"/>
