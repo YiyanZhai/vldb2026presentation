@@ -421,15 +421,15 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="accentbar" style="background:var(--results)"></div>
   <div class="kicker" style="color:var(--results)">Result — miss ratio</div>
   <h2 class="stitle">Lowest miss ratio across 10 SOTA policies</h2>
-  <div class="sub" style="text-align:center; margin:-2px 0 12px; font-size:16px;">Each box = a policy's miss ratio <b>relative to Clock2Q+</b> (the red 0-line). <b>Below 0 = worse than Clock2Q+.</b></div>
+  <div class="sub" style="text-align:center; margin:-2px 0 12px; font-size:16px;">Each box is a policy's miss ratio <b>relative to Clock2Q+</b>. <b>Below 0 = worse than Clock2Q+.</b></div>
   <div class="cols" style="gap:24px;">
     <figure class="frag" data-f="1">
       <img src="assets/meta_box.png" alt="metadata results" style="max-height:340px;">
-      <figcaption><b>Metadata traces.</b> Every competitor's box sits <b>below&nbsp;0</b> — i.e. worse than Clock2Q+.</figcaption>
+      <figcaption><b>Metadata traces.</b> Higher is better.</figcaption>
     </figure>
     <figure class="frag" data-f="2">
       <img src="assets/data_box.png" alt="data results" style="max-height:340px;">
-      <figcaption><b>Data traces.</b> Same result — every competitor is below the Clock2Q+ line.</figcaption>
+      <figcaption><b>Data traces.</b></figcaption>
     </figure>
   </div>
   <div class="callout r frag" data-f="3" style="margin-top:18px; border-color:var(--results); text-align:center; font-size:20px;">
@@ -497,7 +497,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
   <h2 class="stitle">Clock2Q+</h2>
   <ul class="clean" style="font-size:21px;">
-    <li class="frag" data-f="1"><b>Correlated references</b> are a real, costly metadata pattern: a short burst makes a <b>cold</b> page look hot, so filters meant to screen out one-hit wonders promote it anyway.</li>
+    <li class="frag" data-f="1"><b>Correlated references</b> are a real, costly metadata pattern: a short burst makes a <b>cold</b> page look hot.</li>
     <li class="frag" data-f="2">The <b>correlation window</b> is a one-line change: filter bursts, still promote genuinely hot blocks directly.</li>
     <li class="frag" data-f="3"><b>Best miss ratio</b> among SOTA on metadata <i>and</i> data — and it is <b>deployed in VMware vSAN</b>.</li>
     <li class="frag" data-f="4">Low overhead, scalable, dirty-aware, resizable — <b>simplicity pays off</b> in production.</li>
@@ -505,11 +505,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="callout frag" data-f="5" style="margin-top:22px; text-align:center; border-color:var(--wrap);">
     Reproducible: Clock2Q+ &amp; the metadata-trace method are upstreamed in <b>libCacheSim</b>.
   </div>
-  <div class="frag" style="margin-top:18px; text-align:center; font-size:14.5px; color:var(--muted); line-height:1.7;">
-    <b style="color:var(--ink)">Contact</b> &nbsp;
-    Yiyan Zhai (CMU) · yiyanz@andrew.cmu.edu &nbsp;&bull;&nbsp;
-    Wenguang Wang (Broadcom) · <span style="color:#b3bcc4">email TBD</span> &nbsp;&bull;&nbsp;
-    Juncheng Yang (Harvard) · <span style="color:#b3bcc4">email TBD</span>
+  <div class="frag" style="position:absolute; left:70px; right:70px; bottom:54px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;">
+    <div style="font-size:15px; color:var(--muted); line-height:1.65; text-align:left;">
+      <b style="color:var(--ink); font-size:16px;">Have questions? Get in touch</b><br>
+      Yiyan Zhai &middot; <span style="color:var(--ink)">yiyanz@andrew.cmu.edu</span><br>
+      Wenguang Wang &middot; <span style="color:#b3bcc4">email TBD</span> &nbsp;&middot;&nbsp; Juncheng Yang &middot; <span style="color:#b3bcc4">email TBD</span>
+    </div>
+    <div style="text-align:center;">
+      <a href="https://github.com/1a1a11a/libCacheSim" target="_blank" rel="noopener"><img src="assets/qr-libcachesim.svg" alt="libCacheSim repository QR code" style="width:100px; height:100px; display:block;"></a>
+      <div style="font-size:12px; color:var(--muted); margin-top:3px;">libCacheSim on GitHub</div>
+    </div>
   </div>
   <div class="foot"><span class="sec">Thank you</span><span class="tm"></span></div>
 </section>
