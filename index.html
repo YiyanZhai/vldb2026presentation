@@ -47,6 +47,14 @@ h2.stitle{font-size:33px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
   .setup-stats .stat .v{font-size:28px; font-weight:800; color:#2f7fbf; line-height:1;}
   .setup-stats .stat .v.sm{font-size:19px;}
   .setup-stats .stat .l{font-size:13px; color:var(--muted); margin-top:6px;}
+  .tl{display:flex; align-items:stretch; justify-content:center; margin-top:20px;}
+  .tl .stage{flex:1; max-width:250px; background:#f7f7fb; border:1px solid #e4e4ee; border-radius:14px; padding:14px 16px; text-align:center;}
+  .tl .stage.cur{border-color:#7048b6; background:#f6f2fc; box-shadow:0 6px 18px rgba(112,72,182,.15);}
+  .tl .stage .badge{font-size:19px; font-weight:800; color:#4a3b6b;}
+  .tl .stage.cur .badge{color:#7048b6;}
+  .tl .stage .chg{font-size:13.5px; color:#5f6b76; margin-top:8px; line-height:1.35; min-height:74px;}
+  .tl .stage .dep{font-size:12px; color:#8b96a0; margin-top:8px; font-weight:700;}
+  .tl .arrow{align-self:center; color:#b7bcc6; font-size:24px; padding:0 8px;}
 /* progress */
 #prog{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0; z-index:50; transition:width .3s;}
 #pager{position:fixed; right:14px; bottom:12px; font-size:12px; color:#8b96a0; z-index:50;
@@ -431,23 +439,59 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 
-<!-- ============ 10 · PRODUCTION ============ -->
-<section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:40">
+<!-- ============ 10 · EVOLUTION ============ -->
+<section class="slide" data-sec="deploy" data-secname="Evolution" data-time="0:45">
+  <div class="accentbar" style="background:var(--deploy)"></div>
+  <div class="kicker" style="color:var(--deploy)">Deployment &middot; a decade of evolution</div>
+  <h2 class="stitle">How vSAN's cache evolved</h2>
+  <div class="tl">
+    <div class="stage">
+      <div class="badge">2Q</div>
+      <div class="chg">Small FIFO + <b>Main LRU</b> + Ghost. Scan-resistant, but LRU is costly and hot blocks pay an extra miss.</div>
+      <div class="dep">the classic (1994)</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="stage">
+      <div class="badge">Clock2Q</div>
+      <div class="chg">Main LRU &rarr; <b>Main Clock</b> &mdash; LRU-like behavior at lower CPU cost, more scalable.</div>
+      <div class="dep">vSAN OSA &middot; VDFS &middot; early ESA</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="stage">
+      <div class="badge">S3-FIFO</div>
+      <div class="chg">Adds a <b>Ref bit</b> so hot blocks promote directly &mdash; no extra miss. But over-promotes correlated bursts.</div>
+      <div class="dep">2023 &middot; state of the art</div>
+    </div>
+    <div class="arrow">&rarr;</div>
+    <div class="stage cur">
+      <div class="badge">Clock2Q+</div>
+      <div class="chg">Clock2Q + the Ref bit + a <b>correlation window</b> to filter those bursts.</div>
+      <div class="dep">vSAN ESA &middot; vSAN File Services &mdash; today</div>
+    </div>
+  </div>
+  <div class="callout frag" style="margin-top:22px; text-align:center; border-color:var(--deploy);">
+    Every step kept <b>simplicity</b> a hard requirement &mdash; easy to implement, debug, and operate.
+  </div>
+  <div class="foot"><span class="sec">Evolution</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 11 · PRODUCTION ============ -->
+<section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:45">
   <div class="accentbar" style="background:var(--deploy)"></div>
   <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
-  <h2 class="stitle">Simplicity as a first-class requirement</h2>
+  <h2 class="stitle">Built to run safely at scale</h2>
   <div class="cols3">
-    <div class="card frag" data-f="1"><h3>Low overhead</h3><p>Allocation-free, array-based queues. Hit path = one hash lookup + at most a Ref-bit set.</p></div>
-    <div class="card frag" data-f="2"><h3>Scalable</h3><p>Atomic head/tail indices &amp; clock hand; fine-grained per-entry / per-bucket locks — no global lock.</p></div>
-    <div class="card frag" data-f="3"><h3>Dirty-aware</h3><p>Eviction &amp; promotion skip dirty pages until flushed. Simulated miss-ratio impact: negligible.</p></div>
-    <div class="card frag" data-f="4"><h3>Bounded work</h3><p>Per-eviction scan is capped (skip &lt; 2 on average) → no CPU spikes, no infinite loops.</p></div>
-    <div class="card frag" data-f="5"><h3>Online resizing</h3><p>Grow/shrink queues live, without rebuilding — required in a running system.</p></div>
-    <div class="card frag" data-f="6" style="border-color:#d4c7ee; background:#f7f4fc;"><h3 style="color:var(--deploy)">~A decade in vSAN</h3><p>2Q → Clock2Q → S3-FIFO → Clock2Q+, shaped by real deployment.</p></div>
+    <div class="card frag"><h3>Low overhead</h3><p>Allocation-free, array-based queues; the hit path is one hash lookup + at most a Ref-bit flip.</p></div>
+    <div class="card frag"><h3>Scalable</h3><p>Atomic FIFO / clock-hand indices + a mutex per hash bucket &mdash; no global lock. No lock contention in ESA / VDFS testing.</p></div>
+    <div class="card frag"><h3>Dirty-aware</h3><p>Eviction skips dirty pages (deferred); a dirty Small-FIFO tail stays until it's clean. Miss-ratio impact: negligible.</p></div>
+    <div class="card frag"><h3>Bounded work</h3><p>Cap the clock-hand / Small-FIFO scan (~10 skips) &rarr; no CPU spikes, and no infinite loop when every page is dirty.</p></div>
+    <div class="card frag"><h3>Online resizing</h3><p>Grow / shrink the queues live; a background thread migrates entries and flushes dirty pages before shrinking.</p></div>
+    <div class="card frag" style="border-color:#d4c7ee; background:#f7f4fc;"><h3 style="color:var(--deploy)">Simplicity</h3><p>A few arrays + linked lists for hash collisions &mdash; no adaptive resizing logic. A first-class goal.</p></div>
   </div>
   <div class="foot"><span class="sec">Deployment</span><span class="tm"></span></div>
 </section>
 
-<!-- ============ 11 · TAKEAWAYS ============ -->
+<!-- ============ 12 · TAKEAWAYS ============ -->
 <section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:40">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
@@ -572,6 +616,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
+    {t:'Nearly a decade of evolution — walk the timeline.', r:'2Q → Clock2Q (Main LRU→Clock) → S3-FIFO (Ref bit) → Clock2Q+ (+ correlation window). Deployed across vSAN OSA/ESA & VDFS; simplicity throughout.'},
     {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
     {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
   ];

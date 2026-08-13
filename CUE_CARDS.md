@@ -13,7 +13,8 @@ One line to get in, one line to land. Full text in `SPEAKER_SCRIPT.md`; live ver
 | **7** Animation | 1:15 | "Let's step through it." *(Next ▶ / click)* | Window filters bursts; fast promotion path untouched. Scenario buttons jump to a specific case. |
 | **8** Trace method | 0:50 | "How do you even evaluate a metadata policy?" | Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible. |
 | **9** Results | 1:10 | "Does the window actually pay off?" | Best median & mean at every cache size — metadata **and** data. *(28.5% second, per-trace.)* |
-| **10** Production | 0:40 | "It ships in vSAN — miss ratio isn't everything." | Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity. |
-| **11** Takeaways | 0:40 | "To wrap up." | One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim. |
+| **10** Evolution | 0:45 | "Clock2Q+ didn't appear from nowhere." | 2Q → Clock2Q (Main Clock) → S3-FIFO (Ref bit) → Clock2Q+ (+ window). vSAN OSA/ESA · VDFS. Simplicity throughout. |
+| **11** Production | 0:45 | "It ships in vSAN — miss ratio isn't everything." | Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity. |
+| **12** Takeaways | 0:40 | "To wrap up." | One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim. |
 
-**Total = 10:35.** ("Why it works" moved to backup.) Running long → let the animation (7) and design (6) visuals carry them.
+**Total = 11:25.** ("Why it works" is a backup.) Running long → let the animation (7) and design (6) visuals carry them.
