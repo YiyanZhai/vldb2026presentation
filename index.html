@@ -191,7 +191,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <figure><img src="assets/btree.png" alt="B-tree mapping LBN to PBN" style="max-height:290px;">
       <figcaption>vSAN maps LBN→PBN through B-trees; each <b>leaf</b> holds hundreds of mapping tuples.</figcaption></figure>
     <ul class="clean" style="font-size:19px;">
-      <li class="frag" data-f="1">A metadata page isn't one key — a B-tree <b>leaf packs ~200 tuples</b>.</li>
+      <li class="frag" data-f="1">A metadata page isn't one key — a B-tree <b>leaf packs hundreds of mapping tuples</b>.</li>
       <li class="frag" data-f="2"><b>L1</b> and <b>L5</b> both live in leaf <b>m4</b> → two lookups hit <b>m4</b> twice.</li>
       <li class="frag" data-f="3">Different accesses repeatedly hit the <b>same page</b> — by structure, not popularity.</li>
       <li class="frag" data-f="4">Internal nodes m1–m3 are hit by <i>every</i> lookup → effectively pinned; we focus on leaves.</li>
@@ -226,7 +226,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
           <rect x="438" y="42" width="36" height="42" rx="5" fill="#e8930c" stroke="#c87a08"/>
           <rect x="480" y="42" width="36" height="42" rx="5" fill="#fffdf5" stroke="#e8c98f"/>
         </g>
-        <text x="355" y="118" text-anchor="middle" font-size="12" fill="#8b6a12">one B-tree leaf page · holds ~200 keys · <tspan font-weight="800" fill="#c87a08">5 touched</tspan></text>
+        <text x="355" y="118" text-anchor="middle" font-size="12" fill="#8b6a12">one B-tree leaf page · holds hundreds of keys · <tspan font-weight="800" fill="#c87a08">5 touched</tspan></text>
         <!-- timeline (revealed) -->
         <g class="frag" data-f="1">
           <text x="8" y="182" font-size="14" font-weight="800" fill="#c23a2b">The page is hit 5× in a split second…</text>
@@ -541,7 +541,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   const NOTES=[
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
-    {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs ~200 keys. Distinct keys co-reside (L1 & L5 → leaf m4), so accesses hit the same page by structure, not popularity.'},
+    {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of mapping tuples. Distinct keys co-reside (L1 & L5 → leaf m4), so accesses hit the same page by structure, not popularity.'},
     {t:'That structure produces a distinctive access pattern.', r:'Burst = many keys on one page hit at once, then cold. Not a hot block; each hit looks like a hotness vote — the trap.'},
     {t:'How do the best policies handle a burst?', r:'S3-FIFO over-promotes; Clock2Q under-promotes. We want both.'},
     {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},

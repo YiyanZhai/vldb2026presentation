@@ -14,20 +14,20 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ---
 
 ## Slide 2 — What is a metadata cache? · ~0:55
-**Transition:** "First — what are we caching, and why is one cache special?"
+**Transition:** "Let me start with what we're actually caching."
 **Say:**
-> "A block cache keeps hot pages in DRAM so you don't pay for SSD or disk. Storage systems keep two of them. The **data cache** holds the payload — the actual file or disk blocks. The **metadata cache** holds the *map* you need to **find** that payload — in vSAN, B-trees that translate a logical block number to a physical one. And that second cache is special, because you touch it to locate almost *every* piece of data — so it runs constantly, under heavy concurrency, usually when the hit ratio is already near 100%. Which means a good policy here is judged on more than miss ratio: CPU cost, scalability, and plain **simplicity** matter just as much."
+> "A block cache keeps hot pages in DRAM so you avoid going to SSD or disk. Systems keep two kinds. A **data cache** holds the actual payload — file or disk blocks. A **metadata cache** holds the *index* the system uses to **locate** that data — in vSAN, that's B-trees mapping a logical block number to a physical one. That distinction matters, because the metadata cache is on the **hottest path**: you consult it to find almost every piece of data. So it runs at extreme frequency, under high concurrency, often with hit ratios already near 100%. Which means we judge its policy not only by miss ratio, but by **CPU overhead, scalability, and simplicity**."
 
-**Remember:** Metadata cache = the *map that finds data*; it's the hot path → overhead & simplicity are first-class.
+**Remember:** Metadata cache = the index (B-trees) that locates data; hottest path → overhead & simplicity are first-class.
 
 ---
 
 ## Slide 3 — Structural locality: a page packs many keys · ~0:55
 **Transition:** "So why does a metadata cache behave differently from a data cache? It starts with structure."
 **Say:**
-> "A metadata page isn't a single key — a B-tree **leaf packs hundreds of mapping tuples**; in vSAN, around 200. So many different keys physically co-reside on the same page. In this example, **L1 and L5 both live in leaf m4**, so two completely unrelated lookups both hit m4. Different accesses land on the same page not because it's popular, but because of how keys are packed — that's **structural locality**. One note: the internal nodes near the root are touched by *every* lookup, so they're effectively pinned; the interesting action is at the leaves, which are 99% of the tree."
+> "A metadata page isn't a single key — a B-tree **leaf packs hundreds of mapping tuples**. So many different keys physically co-reside on the same page. In this example, **L1 and L5 both live in leaf m4**, so two completely unrelated lookups both hit m4. Different accesses land on the same page not because it's popular, but because of how keys are packed — that's **structural locality**. One note: the internal nodes near the root are touched by *every* lookup, so they're effectively pinned; the interesting action is at the leaves, which are 99% of the tree."
 
-**Remember:** A leaf packs ~200 keys; distinct keys co-reside → accesses hit the same page by structure, not popularity.
+**Remember:** A leaf packs hundreds of mapping tuples; distinct keys co-reside → accesses hit the same page by structure, not popularity.
 
 ---
 
