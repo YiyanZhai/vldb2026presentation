@@ -160,10 +160,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <rect x="40" y="10" width="360" height="100" rx="11" fill="#f4f9fd" stroke="#3e9fd6" stroke-width="2"/>
         <text x="220" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#1f6fa8">DRAM &#8212; Block Cache</text>
         <rect x="48" y="40" width="140" height="54" rx="9" fill="#dcefff" stroke="#3e9fd6" stroke-width="2"/>
-        <text x="118" y="64" text-anchor="middle" font-size="13" font-weight="800" fill="#1f6fa8">Metadata cache</text>
+        <text x="118" y="64" text-anchor="middle" font-size="13" font-weight="800" fill="#1f6fa8">Metadata</text>
         <text x="118" y="82" text-anchor="middle" font-size="10" fill="#5f6b76">logical &#8594; physical</text>
         <rect x="252" y="40" width="140" height="54" rx="9" fill="#eef1f4" stroke="#aab4bd" stroke-width="2"/>
-        <text x="322" y="64" text-anchor="middle" font-size="13" font-weight="800" fill="#5f6b76">Data cache</text>
+        <text x="322" y="64" text-anchor="middle" font-size="13" font-weight="800" fill="#5f6b76">Data</text>
         <text x="322" y="82" text-anchor="middle" font-size="10" fill="#8b96a0">payload</text>
         <text x="220" y="57" text-anchor="middle" font-size="10.5" font-weight="800" fill="#2f7fbf">locates</text>
         <path d="M192,68 L246,68" fill="none" stroke="#2f7fbf" stroke-width="2.4" marker-end="url(#loc)"/>
@@ -236,26 +236,21 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="accentbar"></div>
   <div class="kicker">Why existing policies fall short</div>
   <h2 class="stitle">Filter too loosely, or too aggressively</h2>
+  <div class="card frag" style="background:#f7f9fb; margin-bottom:16px;">
+    <p style="font-size:16px; margin:0; line-height:1.45;">Both policies drop new blocks into a small <b>admission queue</b> (the Small FIFO), and give each a <b>reference bit</b> &mdash; a single 1/0 flag: <i>has this block been hit again since it arrived?</i> Earn the bit and it's <b>promoted</b> into the main cache; otherwise it's dropped.</p>
+  </div>
   <div class="cols">
-    <div class="card frag" data-f="1" style="border-color:#f3c9c3;">
-      <h3 style="color:var(--problem)">S3-FIFO — over-promotes</h3>
-      <p>A Ref bit is set on <i>any</i> re-hit in the Small FIFO. A correlated burst near the head sets Ref&nbsp;=&nbsp;1 → the cold page is <b>promoted to Main</b> and <b>pollutes</b> the cache.</p>
-      <div class="rowchips" style="margin-top:14px;">
-        <span class="chip" style="background:#f15bb5">C</span>
-        <span class="small">burst hit → <b style="color:var(--evict)">Ref=1</b> → wrongly promoted</span>
-      </div>
+    <div class="card frag" style="border-color:#f3c9c3;">
+      <h3 style="color:var(--problem)">S3-FIFO &mdash; too loose</h3>
+      <p><b>Any</b> re-hit flips the bit to 1. A correlated burst flips it on a <b>cold</b> page &rarr; it's promoted, and <b>pollutes</b> the main cache.</p>
     </div>
-    <div class="card frag" data-f="2" style="border-color:#cdd6de;">
-      <h3 style="color:var(--muted)">Clock2Q / 2Q — under-promotes</h3>
-      <p>A genuinely hot block reaches Main only <i>after</i> being evicted to Ghost and re-referenced — an <b>extra, avoidable miss</b> for every hot block.</p>
-      <div class="rowchips" style="margin-top:14px;">
-        <span class="chip" style="background:#4c8bf5">H</span>
-        <span class="small">must miss once before it can be promoted</span>
-      </div>
+    <div class="card frag" style="border-color:#cdd6de;">
+      <h3 style="color:var(--muted)">Clock2Q / 2Q &mdash; too strict</h3>
+      <p>A hot block is promoted only <i>after</i> it's been <b>dropped once and requested again</b> &rarr; an <b>extra miss</b> for every genuinely hot block.</p>
     </div>
   </div>
-  <div class="callout r frag" data-f="3" style="margin-top:26px; text-align:center;">
-    We want the <b>direct-promotion</b> speed of S3-FIFO <span class="hl-r">without</span> admitting correlated bursts.
+  <div class="callout r frag" style="margin-top:22px; text-align:center;">
+    We want S3-FIFO's <b>fast promotion</b> &mdash; <span class="hl-r">without</span> being fooled by the bursts.
   </div>
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
 </section>
@@ -526,7 +521,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
     {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of mapping tuples. Distinct keys co-reside (L1 & L5 → leaf m4), so accesses hit the same page by structure, not popularity.'},
     {t:'That packing shows up directly in the access stream.', r:'Burst = unrelated accesses landing on the SAME page (keys co-reside) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
-    {t:'How do the best policies handle a burst?', r:'S3-FIFO over-promotes; Clock2Q under-promotes. We want both.'},
+    {t:'Both share one mechanism — define it, THEN show the failure.', r:'Ref bit = 1/0 “hit again since arrival?”. S3-FIFO: ANY re-hit sets it → a burst promotes a cold page (too loose). Clock2Q: promote only after drop + re-ask → extra miss (too strict).'},
     {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},
     {t:'Put the window into the full picture.', r:'4 paths: cold/burst → Ghost · hot → Main direct · Ghost-hit → Main · Main = second-chance.'},
     {t:'Rather than a static trace — let’s watch it. (Step with Next ▶ / click.)', r:'Window silently filters bursts; the fast path is untouched.'},
