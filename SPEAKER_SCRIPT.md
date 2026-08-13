@@ -32,11 +32,11 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ---
 
 ## Slide 4 — What is a correlated reference? · ~1:05
-**Transition:** "That packing produces a very distinctive access pattern."
+**Transition:** "That packing shows up directly in the access stream."
 **Say:**
-> "Because a page holds many keys, a single operation — traversing or updating an index — touches many of them on the *same* page. So that one page gets hit many times within a split second, and then it goes cold, maybe untouched for a long time. Here's the intuition: it's like grabbing five books off *one* shelf during a single errand — for a minute the shelf looks incredibly popular, but you won't be back for weeks. That's a **correlated reference**: many accesses collapsing onto one page, clustered in time. And it matters because a burst like that is *weak* evidence of long-term popularity. The trap every standard policy falls into is counting each hit in the burst as a separate vote for 'this page is hot.'"
+> "Remember, all those keys share a page. So when a run of accesses touches keys that happen to co-reside — say L1, then L5, then L8, all sitting in leaf m4 — that one leaf gets hit again and again in a split second, then goes quiet for a long time. Here's the intuition: picture a single shelf in a library. Different people pull *different* books, but they all come from that *one* shelf — so for a minute the shelf looks incredibly busy. Not because it's special — just because so much lives on it. That's a **correlated reference**: unrelated accesses piling onto the same page because of how it's packed. It's *weak* evidence of long-term value. And the trap every standard policy falls into is reading each of those hits as a separate vote for 'this page is hot.'"
 
-**Remember:** A burst = one operation over many keys on one page — not a hot block. Counting each hit as a hotness vote is the trap.
+**Remember:** A burst = unrelated accesses piling onto the same page (keys co-reside) — busy by structure, not popularity. Counting each hit as a vote is the trap.
 
 ---
 

@@ -7,7 +7,7 @@ One line to get in, one line to land. Full text in `SPEAKER_SCRIPT.md`; live ver
 | **1** Title | 0:30 | Name + one-line; simple & deployed. | Simple, production idea — promise intuition. |
 | **2** Metadata cache | 0:55 | "What we're actually caching." | Data cache = payload; **metadata cache = the index (B-trees) that locates data**. Hottest path → overhead & simplicity matter too. |
 | **3** Structural locality | 0:55 | "Why is metadata different? Start with structure." | A leaf packs **hundreds of mapping tuples**; L1 & L5 → leaf m4. Same page by **structure, not popularity**. |
-| **4** Correlated ref | 1:05 | "That packing produces a pattern." | Burst = 1 op over many keys on **one** page (5 books, one shelf). Not hot; each hit looks like a vote — the trap. |
+| **4** Correlated ref | 1:05 | "That packing shows up in the access stream." | Burst = **unrelated accesses on the same page** (keys co-reside; L1,L5,L8 → m4). Busy by structure, not popularity — each hit looks like a vote (the trap). |
 | **5** Why others fail | 1:05 | "How do the best policies handle a burst?" | S3-FIFO over-promotes; Clock2Q under-promotes. Want both. |
 | **6** Insight | 0:55 | "The insight — almost embarrassingly simple." | **Where** the re-hit happens is the signal. One-line change. |
 | **7** Design | 1:05 | "Put the window into the full picture." | 4 paths: cold/burst→Ghost · hot→Main direct · Ghost-hit→Main · Main=second-chance. |
