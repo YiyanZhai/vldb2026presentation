@@ -458,6 +458,24 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <section class="slide" data-sec="backup" data-secname="Backup" data-time="">
   <div class="accentbar" style="background:var(--faint)"></div>
   <div class="backup-mark">Backup</div>
+  <div class="kicker" style="color:var(--faint)">Backup — why the same page?</div>
+  <h2 class="stitle">Structural locality: a leaf packs many keys</h2>
+  <div class="cols" style="grid-template-columns:1.08fr 0.92fr; gap:30px; align-items:center;">
+    <figure><img src="assets/btree.png" alt="B-tree mapping LBN to PBN" style="max-height:280px;">
+      <figcaption>vSAN maps LBN→PBN through B-trees; each <b>leaf</b> holds hundreds of mapping tuples.</figcaption></figure>
+    <ul class="clean" style="font-size:18px;">
+      <li>A leaf isn't one key — it packs <b>~200 tuples</b>.</li>
+      <li><b>L1</b> and <b>L5</b> both live in leaf <b>m4</b> → looking up LBN 1 then 5 hits <b>m4 twice</b>.</li>
+      <li>Even distinct one-time LBAs collapse onto the same leaf — that's the burst.</li>
+      <li>Internal nodes m1–m3 are hit by <i>every</i> lookup → effectively pinned; we focus on leaves.</li>
+    </ul>
+  </div>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--faint)"></div>
+  <div class="backup-mark">Backup</div>
   <div class="kicker" style="color:var(--faint)">Backup — miss ratio vs. cache size</div>
   <h2 class="stitle">Lowest curve across the whole range</h2>
   <figure><img src="assets/mr_curve.png" alt="miss ratio curve" style="max-height:440px;">
