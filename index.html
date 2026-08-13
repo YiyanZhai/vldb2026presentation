@@ -146,13 +146,12 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <h2 class="stitle">What is a <span class="hl">metadata cache</span>?</h2>
   <div class="cols">
     <div>
-      <ul class="clean">
-        <li class="frag" data-f="1">A block cache keeps hot pages in <b>DRAM</b> to avoid <b>SSD/HDD</b> I/O.</li>
-        <li class="frag" data-f="2"><b>Data cache</b> holds the payload; the <b>metadata cache</b> holds the <b>index that locates data</b> — e.g. B-trees that map logical → physical block addresses.</li>
-        <li class="frag" data-f="3">It sits on the <b>hottest path</b> — consulted for almost every data access → extreme frequency, high concurrency, hit ratios near <b>100%</b>.</li>
+      <ul class="clean" style="font-size:20px;">
+        <li class="frag"><b>Data cache</b> = the payload. <b>Metadata cache</b> = the index that <b>locates</b> it (B-trees).</li>
+        <li class="frag">The metadata cache is the <b>hot path</b> &mdash; touched on almost every access; hit ratios near <b>100%</b>.</li>
       </ul>
-      <div class="callout frag" data-f="4" style="margin-top:20px; font-size:19px;">
-        Judged not only on miss ratio, but on <span class="hl">CPU overhead, scalability, and simplicity</span>.
+      <div class="callout frag" style="margin-top:18px; font-size:19px;">
+        Judged on miss ratio <b>and</b> CPU overhead, scalability, simplicity.
       </div>
     </div>
     <figure class="frag" data-f="1">
