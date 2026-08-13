@@ -395,7 +395,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div style="max-width:880px; margin:0 auto;">
     <ul class="clean" style="font-size:19px;">
       <li class="frag">No public metadata-cache traces.</li>
-      <li class="frag"><b>Idea:</b> map each block to its leaf page &mdash; <span style="font-family:'STIX Two Math','Cambria Math',serif; font-size:22px; vertical-align:-2px;">leaf&nbsp;=&nbsp;&lfloor;&thinsp;block&nbsp;number&thinsp;/&thinsp;fan-out&thinsp;&rfloor;</span>&nbsp; <span style="font-size:14px; color:var(--muted);">(fan-out = 200)</span></li>
+      <li class="frag"><b>Idea:</b> map each block to its leaf page: <span style="font-family:'STIX Two Math','Cambria Math',serif; font-size:22px; vertical-align:-2px;">leaf&nbsp;=&nbsp;&lfloor;&thinsp;block&nbsp;number&thinsp;/&thinsp;fan-out&thinsp;&rfloor;</span>&nbsp; <span style="font-size:14px; color:var(--muted);">(fan-out = 200)</span></li>
       <li class="frag">Reproducible from <b>any</b> public block trace.</li>
     </ul>
   </div>
@@ -413,14 +413,15 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="accentbar" style="background:var(--results)"></div>
   <div class="kicker" style="color:var(--results)">Result — miss ratio</div>
   <h2 class="stitle">Lowest miss ratio across 10 SOTA policies</h2>
+  <div class="sub" style="text-align:center; margin:-2px 0 12px; font-size:16px;">Each box = a policy's miss ratio <b>relative to Clock2Q+</b> (the red 0-line). <b>Below 0 = worse than Clock2Q+.</b></div>
   <div class="cols" style="gap:24px;">
     <figure class="frag" data-f="1">
       <img src="assets/meta_box.png" alt="metadata results" style="max-height:340px;">
-      <figcaption><b>Metadata traces.</b> Clock2Q+ is the 0-line; every policy's box sits below it.</figcaption>
+      <figcaption><b>Metadata traces.</b> Every competitor's box sits <b>below&nbsp;0</b> — i.e. worse than Clock2Q+.</figcaption>
     </figure>
     <figure class="frag" data-f="2">
       <img src="assets/data_box.png" alt="data results" style="max-height:340px;">
-      <figcaption><b>Data traces.</b> Same story — medians below the Clock2Q+ line.</figcaption>
+      <figcaption><b>Data traces.</b> Same result — every competitor is below the Clock2Q+ line.</figcaption>
     </figure>
   </div>
   <div class="callout r frag" data-f="3" style="margin-top:18px; border-color:var(--results); text-align:center; font-size:20px;">
