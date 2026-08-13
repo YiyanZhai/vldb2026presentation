@@ -315,8 +315,8 @@
       const pos=small.indexOf(id), p=xy('small',pos);
       if(pos<W){
         tokens[id].windowHit=true; situation('corr');
-        say(`${key} is hit while still INSIDE the Correlation Window → correlated, so Ref stays 0. (In S3-FIFO this hit would set Ref=1 and promote a cold page.)`);
-        pulse(id); flash('in window → Ref stays 0 (S3-FIFO would set 1)', p[0], SM_Y-40, 'warn'); await gate(1650);
+        say(`${key} is hit while still INSIDE the Correlation Window → treated as a correlated reference, so Ref stays 0.`);
+        pulse(id); flash('hit in window → Ref stays 0', p[0], SM_Y-40, 'warn'); await gate(1650);
       } else {
         situation('hot');
         say(`${key} is hit BEYOND the window → genuine reuse, so Clock2Q+ sets Ref = 1.`);

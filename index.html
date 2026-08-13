@@ -237,28 +237,28 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker">Why existing policies fall short</div>
   <h2 class="stitle">Filter too loosely, or too aggressively</h2>
   <figure style="text-align:center; margin:2px 0 14px;">
-    <svg viewBox="0 0 900 160" width="90%" style="max-height:150px;">
+    <svg viewBox="0 0 900 172" width="90%" style="max-height:160px;">
       <defs>
         <marker id="p5" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5f6b76"/></marker>
         <marker id="p5g" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f9e44"/></marker>
       </defs>
       <g class="frag">
-        <rect x="558" y="16" width="328" height="52" rx="11" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2"/>
-        <text x="722" y="12" text-anchor="middle" font-size="12" font-weight="700" fill="#5f6b76">Main cache</text>
-        <circle cx="598" cy="44" r="14" fill="#4c8bf5"/><circle cx="646" cy="44" r="14" fill="#00c39a"/><circle cx="694" cy="44" r="14" fill="#9b5de5"/><circle cx="742" cy="44" r="14" fill="#e07a5f"/><circle cx="790" cy="44" r="14" fill="#6a994e"/>
+        <rect x="548" y="18" width="340" height="66" rx="12" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2"/>
+        <text x="718" y="13" text-anchor="middle" font-size="12" font-weight="700" fill="#5f6b76">Main cache</text>
+        <circle cx="582" cy="52" r="15" fill="#4c8bf5"/><circle cx="634" cy="52" r="15" fill="#00c39a"/><circle cx="686" cy="52" r="15" fill="#9b5de5"/><circle cx="738" cy="52" r="15" fill="#e07a5f"/><circle cx="790" cy="52" r="15" fill="#6a994e"/><circle cx="842" cy="52" r="15" fill="#f7931e"/>
       </g>
       <g class="frag">
-        <rect x="24" y="58" width="196" height="54" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
-        <text x="122" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#8b6a12">Small admission queue</text>
-        <circle cx="64" cy="85" r="15" fill="#c0c8cf"/><circle cx="122" cy="85" r="15" fill="#c0c8cf"/><circle cx="180" cy="85" r="15" fill="#c0c8cf"/>
-        <path d="M222,85 L318,85" stroke="#5f6b76" stroke-width="2.4" fill="none" marker-end="url(#p5)"/>
-        <text x="362" y="90" text-anchor="middle" font-size="14" font-weight="800" fill="#3a4750">promote?</text>
-        <path d="M404,79 L552,47" stroke="#2f9e44" stroke-width="2.4" fill="none" marker-end="url(#p5g)"/>
-        <text x="540" y="40" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2f9e44">yes</text>
-        <path d="M404,91 L552,123" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#p5)"/>
-        <text x="540" y="118" text-anchor="middle" font-size="12.5" font-weight="800" fill="#6b7681">no</text>
-        <rect x="558" y="104" width="328" height="46" rx="11" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2" stroke-dasharray="6 5"/>
-        <text x="722" y="131" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6b7681">Ghost &#183; keys only</text>
+        <rect x="24" y="64" width="196" height="54" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="122" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#8b6a12">Small admission queue</text>
+        <circle cx="64" cy="91" r="15" fill="#c0c8cf"/><circle cx="122" cy="91" r="15" fill="#c0c8cf"/><circle cx="180" cy="91" r="15" fill="#c0c8cf"/>
+        <path d="M222,91 L318,91" stroke="#5f6b76" stroke-width="2.4" fill="none" marker-end="url(#p5)"/>
+        <text x="362" y="96" text-anchor="middle" font-size="14" font-weight="800" fill="#3a4750">promote?</text>
+        <path d="M404,84 L544,52" stroke="#2f9e44" stroke-width="2.4" fill="none" marker-end="url(#p5g)"/>
+        <text x="474" y="60" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2f9e44">yes</text>
+        <path d="M404,98 L544,136" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#p5)"/>
+        <text x="474" y="110" text-anchor="middle" font-size="12.5" font-weight="800" fill="#6b7681">no</text>
+        <rect x="548" y="112" width="340" height="48" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="718" y="141" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6b7681">Ghost &#183; keys only</text>
       </g>
     </svg>
   </figure>
@@ -345,11 +345,11 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <div>
       <div class="callout i" style="font-size:19px; margin-bottom:16px;"><b>Where</b> a re-hit happens tells you what it means.</div>
       <ul class="clean" style="font-size:17px;">
-        <li class="frag"><b>Inside</b> the window &rarr; the hit does <b>not</b> set Ref &rarr; the correlated burst ages out to <b>Ghost</b>.</li>
+        <li class="frag"><b>Inside</b> the window &rarr; the hit does <b>not</b> set Ref <i>(S3-FIFO would)</i> &rarr; the correlated burst ages out to <b>Ghost</b>.</li>
         <li class="frag"><b>Beyond</b> the window &rarr; the hit sets <b>Ref = 1</b> &rarr; promoted <b>directly to Main</b>.</li>
       </ul>
       <div class="sub frag" style="margin-top:12px;">Everything else is unchanged: a <b>Ghost hit</b> admits to Main; the <b>Main Clock</b> gives Ref a second chance before eviction.</div>
-      <div class="sub frag" style="margin-top:10px; color:var(--design); font-weight:800;">A one-line change to S3-FIFO &mdash; no new knobs.</div>
+      <div class="sub frag" style="margin-top:10px; color:var(--design); font-weight:800;">The only change vs. S3-FIFO &mdash; no new knobs.</div>
     </div>
   </div>
   <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
@@ -358,7 +358,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <!-- ============ 7 · LIVE ANIMATION ============ -->
 <section class="slide" data-sec="design" data-secname="Design" data-time="1:15" style="padding:34px 40px 54px;">
   <div class="accentbar" style="background:var(--design)"></div>
-  <div class="kicker" style="color:var(--design); padding-left:24px;">Adding the correlation window &mdash; the only change vs. S3-FIFO</div>
+  <div class="kicker" style="color:var(--design); padding-left:24px;">Clock2Q+ in action</div>
   <iframe class="anim" src="animation.html?step=1&amp;clean=1" title="Clock2Q+ animation" loading="lazy" style="margin-top:6px;"></iframe>
   <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
 </section>
@@ -604,12 +604,12 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       document.body.style.overflow='hidden';
       deck.style.display=''; deck.style.gridTemplateColumns=''; deck.style.gap=''; deck.style.padding='';
       deck.style.width='1280px'; deck.style.height='720px';
-      slides.forEach(s=>{ s.style.position=''; s.style.height=''; s.style.cursor=''; s.onclick=null; });
+      slides.forEach(s=>{ s.style.position=''; s.style.height=''; s.style.cursor=''; s.style.opacity=''; s.style.visibility=''; s.style.transform=''; s.onclick=null; });
       resize(); apply();
     }
   }
 
-  document.addEventListener('keydown',e=>{
+  function onKey(e){
     if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); next(); }
     else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
     else if(e.key==='ArrowDown'){ e.preventDefault(); goto(ci+1); }
@@ -619,6 +619,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
     else if(e.key==='o'||e.key==='O'){ toggleOverview(); }
     else if(e.key==='s'||e.key==='S'){ document.body.classList.toggle('show-notes'); }
+  }
+  document.addEventListener('keydown', onKey);
+  // let slide-nav keys work even when the animation iframe has focus (arrows/space stay with the animation)
+  const FWD=['ArrowDown','ArrowUp','PageDown','PageUp','Home','End','o','O','f','F'];
+  document.querySelectorAll('iframe.anim').forEach(function(ifr){
+    ifr.addEventListener('load', function(){
+      try{ ifr.contentWindow.addEventListener('keydown', function(e){ if(FWD.indexOf(e.key)>=0) onKey(e); }); }catch(_){}
+    });
   });
 
   resize(); apply();

@@ -58,12 +58,12 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 7 — Adding the correlation window: the difference from S3-FIFO · ~1:15
-**Transition:** "Let's watch that one change in action — same structure as S3-FIFO, one new rule." *(Step mode: Next ▶ / click / →.)*
+## Slide 7 — Clock2Q+ in action · ~1:15
+**Transition:** "Let's watch it — I'll step through one move at a time." *(Step mode: Next ▶ / click / →.)*
 **Say (narrate as you step each move):**
-> "Watch the correlated burst. The block is hit while still *inside* the window, so its bit stays zero — and it ages out to Ghost. **That is the whole difference: S3-FIFO would set the bit here and promote a cold page into Main — pollution. The window quietly filters it out.** The other paths are unchanged: a **hot** block hit *beyond* the window earns Ref = 1 and goes straight to Main; a **ghost hit** is admitted directly; and in the Main Clock, a block with its bit set gets a second chance before a cold one is evicted."
+> "A **cold** block ages to the tail with its bit still zero, and drops into Ghost. A **correlated burst** is hit *inside* the window, so its bit stays zero and it too ages out to Ghost. A **hot** block hit *beyond* the window earns Ref = 1 and, at the tail, is promoted straight to Main. A **ghost hit** — a remembered key — is admitted directly to Main. And in the Main Clock, a block with its bit set gets a second chance before a cold one is evicted. I can also jump straight to the correlated-burst or hot-block case with the buttons."
 
-**Remember:** The window keeps the burst out of Main — S3-FIFO wouldn't. Same fast path for genuinely hot blocks.
+**Remember:** The window silently filters bursts; the direct-promotion fast path is untouched.
 
 ---
 
