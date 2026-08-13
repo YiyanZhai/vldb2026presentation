@@ -312,56 +312,26 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
 </section>
 
-<!-- ============ 5 · KEY INSIGHT ============ -->
-<section class="slide" data-sec="insight" data-secname="Key insight" data-time="0:55">
-  <div class="accentbar" style="background:var(--insight)"></div>
-  <div class="kicker" style="color:var(--insight)">Key insight</div>
-  <h2 class="stitle"><span class="hl-i">Where</span> a re-hit happens tells you what it means</h2>
-  <div style="display:grid; grid-template-columns:1fr; gap:22px;">
-    <div class="callout i" style="font-size:24px; text-align:center;">
-      Add a <span class="hl-i">Correlation Window</span> at the head of the Small FIFO:<br>
-      hits <b>inside</b> the window do <b>not</b> set the Ref bit.
-    </div>
-    <div class="cols frag" data-f="1">
-      <div class="card" style="border-color:#f6dca6; background:#fffaf0;">
-        <h3 style="color:var(--insight)">Inside the window (just inserted)</h3>
-        <p>A re-hit is almost certainly the <b>same correlated burst</b> → ignore it. Ref stays 0 → the page ages out to Ghost.</p>
-      </div>
-      <div class="card" style="border-color:#bfe3c8; background:#f4fbf5;">
-        <h3 style="color:var(--results)">Beyond the window</h3>
-        <p>A re-hit is <b>genuine reuse</b> → set Ref = 1 → promote directly to Main Clock, no extra miss.</p>
-      </div>
-    </div>
-    <div class="sub frag" data-f="2" style="text-align:center;">A one-line change to S3-FIFO — no new tuning knobs, no ordered LRU.</div>
-  </div>
-  <div class="foot"><span class="sec">Insight</span><span class="tm"></span></div>
-</section>
-
-<!-- ============ 6 · DESIGN / ARCHITECTURE ============ -->
-<section class="slide" data-sec="design" data-secname="Design" data-time="1:05">
+<!-- ============ 5 · CLOCK2Q+ : ADD THE WINDOW (insight + design) ============ -->
+<section class="slide" data-sec="design" data-secname="Design" data-time="1:30">
   <div class="accentbar" style="background:var(--design)"></div>
-  <div class="kicker" style="color:var(--design)">Clock2Q+ design</div>
-  <h2 class="stitle">Three queues + a correlation window</h2>
-  <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:30px; align-items:center;">
-    <svg width="580" height="410" viewBox="0 0 580 410">
-      <!-- Small FIFO -->
+  <div class="kicker" style="color:var(--design)">Clock2Q+</div>
+  <h2 class="stitle">Add a <span class="hl-i">correlation window</span> to the Small FIFO</h2>
+  <div style="display:grid; grid-template-columns:1.24fr 1fr; gap:28px; align-items:center;">
+    <svg width="580" height="400" viewBox="0 0 580 410">
       <rect x="20" y="30" width="360" height="86" rx="12" fill="#fff8e6" stroke="#f0b429" stroke-width="2.4" stroke-dasharray="7 5"/>
       <rect x="28" y="38" width="150" height="70" rx="9" fill="#ffe6ad" stroke="#e8930c" stroke-width="2"/>
       <text x="103" y="24" text-anchor="middle" font-size="12.5" font-weight="800" fill="#e8930c">Correlation Window</text>
       <text x="200" y="130" text-anchor="middle" font-size="14" font-weight="800" fill="#b9860f">Small FIFO</text>
-      <!-- Main clock -->
       <circle cx="480" cy="150" r="64" fill="#eaf4fb" stroke="#3e9fd6" stroke-width="2.4"/>
       <text x="480" y="150" text-anchor="middle" font-size="14" font-weight="800" fill="#1f6fa8">Main</text>
       <text x="480" y="168" text-anchor="middle" font-size="14" font-weight="800" fill="#1f6fa8">Clock</text>
       <line x1="480" y1="150" x2="480" y2="100" stroke="#d6480f" stroke-width="3"/>
       <circle cx="480" cy="150" r="5" fill="#d6480f"/>
-      <!-- Ghost -->
       <rect x="20" y="250" width="360" height="70" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.4" stroke-dasharray="7 5"/>
       <text x="200" y="335" text-anchor="middle" font-size="14" font-weight="800" fill="#6b7681">Ghost FIFO (keys only)</text>
-      <!-- Trash -->
-      <text x="480" y="300" text-anchor="middle" font-size="30">🗑️</text>
+      <text x="480" y="300" text-anchor="middle" font-size="30">&#128465;&#65039;</text>
       <text x="480" y="322" text-anchor="middle" font-size="12" fill="#8b96a0">evict</text>
-      <!-- arrows -->
       <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9aa5ad"/></marker>
         <marker id="a2g" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2f9e44"/></marker></defs>
       <path d="M384,66 C430,66 440,96 462,120" class="ln" stroke="#2f9e44" marker-end="url(#a2g)"/>
@@ -370,18 +340,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <text x="210" y="190" font-size="12.5" font-weight="700" fill="#6b7681">Ref=0</text>
       <path d="M384,285 C440,285 452,250 470,206" class="ln" stroke="#2f9e44" marker-end="url(#a2g)"/>
       <text x="392" y="250" font-size="12.5" font-weight="700" fill="#2f9e44">ghost hit</text>
-      <text x="150" y="392" text-anchor="middle" font-size="12.5" fill="#8b96a0">new blocks enter here →  age toward the tail</text>
+      <text x="150" y="392" text-anchor="middle" font-size="12.5" fill="#8b96a0">new blocks enter here &#8594;  age toward the tail</text>
     </svg>
     <div>
-      <ul class="clean" style="font-size:17.5px;">
-        <li class="frag" data-f="1"><b>Cold / correlated</b> → age out to <b>Ghost</b> (Ref = 0).</li>
-        <li class="frag" data-f="2"><b>Hot</b> (Ref = 1 at tail) → promoted <b>directly to Main</b>.</li>
-        <li class="frag" data-f="3"><b>Ghost hit</b> → proven reuse → admit to Main.</li>
-        <li class="frag" data-f="4"><b>Main Clock</b> → Ref gives a second chance before eviction.</li>
+      <div class="callout i" style="font-size:19px; margin-bottom:16px;"><b>Where</b> a re-hit happens tells you what it means.</div>
+      <ul class="clean" style="font-size:17px;">
+        <li class="frag"><b>Inside</b> the window &rarr; the hit does <b>not</b> set Ref &rarr; the correlated burst ages out to <b>Ghost</b>.</li>
+        <li class="frag"><b>Beyond</b> the window &rarr; the hit sets <b>Ref = 1</b> &rarr; promoted <b>directly to Main</b>.</li>
       </ul>
-      <div class="card frag" data-f="5" style="margin-top:14px; border-color:#bcd8ec; background:#f3f9fd;">
-        <p style="font-size:15px;">Sizes: Small FIFO 10% (window = half), Main Clock 90%, Ghost 50%.</p>
-      </div>
+      <div class="sub frag" style="margin-top:12px;">Everything else is unchanged: a <b>Ghost hit</b> admits to Main; the <b>Main Clock</b> gives Ref a second chance before eviction.</div>
+      <div class="sub frag" style="margin-top:10px; color:var(--design); font-weight:800;">A one-line change to S3-FIFO &mdash; no new knobs.</div>
     </div>
   </div>
   <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
@@ -390,7 +358,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <!-- ============ 7 · LIVE ANIMATION ============ -->
 <section class="slide" data-sec="design" data-secname="Design" data-time="1:15" style="padding:34px 40px 54px;">
   <div class="accentbar" style="background:var(--design)"></div>
-  <div class="kicker" style="color:var(--design); padding-left:24px;">Clock2Q+ in action</div>
+  <div class="kicker" style="color:var(--design); padding-left:24px;">Adding the correlation window &mdash; the only change vs. S3-FIFO</div>
   <iframe class="anim" src="animation.html?step=1" title="Clock2Q+ animation" loading="lazy" style="margin-top:6px;"></iframe>
   <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
 </section>
@@ -576,12 +544,11 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   const NOTES=[
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
-    {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of mapping tuples. Distinct keys co-reside (L1 & L5 → leaf m4), so accesses hit the same page by structure, not popularity.'},
-    {t:'That packing shows up directly in the access stream.', r:'Burst = unrelated accesses landing on the SAME page (keys co-reside) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
-    {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit = 1/0 “hit again?” — any re-hit sets it → a burst admits a cold page. Clock2Q/2Q have NO admission bit → promote only after drop + re-ask → delays every hot block (extra miss).'},
-    {t:'The insight — almost embarrassingly simple.', r:'WHERE the re-hit happens is the signal. One-line change to S3-FIFO.'},
-    {t:'Put the window into the full picture.', r:'4 paths: cold/burst → Ghost · hot → Main direct · Ghost-hit → Main · Main = second-chance.'},
-    {t:'Rather than a static trace — let’s watch it. (Step with Next ▶ / click.)', r:'Window silently filters bursts; the fast path is untouched.'},
+    {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of tuples. Distinct keys co-reside (L1 & L5 → leaf m4) → accesses hit the same page by structure, not popularity.'},
+    {t:'That packing shows up directly in the access stream.', r:'Burst = unrelated accesses landing on the SAME page — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
+    {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit, set on any re-hit → a burst admits a cold page. Clock2Q/2Q: no admission bit → promote only after drop + re-ask → delays hot blocks.'},
+    {t:'The insight IS the design: add a correlation window.', r:'WHERE a re-hit happens is the signal. Inside the window → Ref stays 0 (burst → Ghost); beyond → Ref = 1 → promote to Main. One change to S3-FIFO.'},
+    {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
     {t:'The mechanism behind that number.', r:'Promotes <¼ as many blocks — and the genuinely hot ones (short reuse distance).'},

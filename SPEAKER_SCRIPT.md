@@ -1,6 +1,6 @@
 # Clock2Q+ — 12-Minute Speaker Script (VLDB 2026)
 
-Aligned slide-by-slide with `index.html` (13 main slides). Target ≈ **11:30 spoken**, buffer for pacing.
+Aligned slide-by-slide with `index.html` (12 main slides). Target ≈ **11:30 spoken**, buffer for pacing.
 Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragments (→) as you reach the matching sentence.
 
 ---
@@ -49,34 +49,25 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 6 — Key insight: the correlation window · ~0:55
-**Transition:** "Here's the insight — and it's almost embarrassingly simple."
+## Slide 6 — Clock2Q+: add a correlation window · ~1:30
+**Transition:** "Here's the fix — and it's almost embarrassingly simple. It comes down to *where* a re-hit happens."
 **Say:**
-> "The realization is that *where* a re-hit happens tells you what it means. If a block is re-hit right after it's inserted — near the head of the small queue — that's almost certainly part of the *same* burst, so ignore it. If it's re-hit later, after it's aged a bit, that's real reuse worth acting on. So we add a **correlation window** at the head of the small queue: hits *inside* the window do **not** set the reference bit; hits *beyond* it do. Inside, bursts are filtered out. Beyond, genuinely hot blocks still get promoted directly. That's it — a one-line change to S3-FIFO, no new tuning knobs."
+> "Clock2Q+ keeps exactly S3-FIFO's three queues — a Small FIFO, a Main Clock, and a Ghost — and adds one thing: a **correlation window** at the head of the Small FIFO. The rule: a hit *inside* that window does **not** set the reference bit. Why? A re-hit right after a block arrives is almost certainly the same correlated burst — so we ignore it, and the block ages out to Ghost. But a re-hit *beyond* the window is genuine reuse — it sets Ref = 1 and the block is promoted straight to the Main Clock, no extra miss. Everything else is untouched: a ghost hit still admits to Main, and the Main Clock still gives a block a second chance before eviction. That's the whole contribution — one rule on top of S3-FIFO, no new knobs."
 
-**Remember:** *Where* the re-hit happens is the signal — one small change to S3-FIFO.
+**Remember:** The insight *is* the design — a correlation window where in-window hits don't set Ref. Inside → Ghost; beyond → Main. One change to S3-FIFO.
 
 ---
 
-## Slide 7 — Clock2Q+ design · ~1:05
-**Transition:** "Let me put that window into the full picture."
-**Say:**
-> "Three queues. New blocks enter the **Small FIFO**, whose head portion is the correlation window. Follow the paths. If a block reaches the tail *without* earning a reference bit — cold, or just a burst inside the window — it ages out to the **Ghost** queue, which keeps only the key. If it earned Ref = 1 *beyond* the window, it's promoted straight into the **Main Clock** — no extra miss. If a key sitting in Ghost is requested again, that's proven reuse, so we admit it directly to Main. And the Main Clock uses the classic second-chance rule: the reference bit buys one more pass of the clock hand before eviction."
-
-**Remember:** Four clean paths — cold/burst → Ghost, hot → Main directly, Ghost-hit → Main, Main uses second-chance.
-
----
-
-## Slide 8 — Clock2Q+ in action · ~1:15
-**Transition:** "Rather than trace that on a static diagram, let's step through it." *(Animation is in step mode — advance with Next ▶ / click / →.)*
+## Slide 7 — Adding the correlation window: the difference from S3-FIFO · ~1:15
+**Transition:** "Let's watch that one change in action — same structure as S3-FIFO, one new rule." *(Step mode: Next ▶ / click / →.)*
 **Say (narrate as you step each move):**
-> "A **cold** block ages to the tail with its bit still zero, and drops into Ghost. Now a **correlated burst** — it's hit, but *inside the window*, so the bit stays zero; it also ages out to Ghost — the burst never touches Main. Here's a **hot** block — hit *beyond* the window, so it earns Ref = 1, and when it reaches the tail it's promoted straight to Main. Now a **Ghost hit** — a key we remembered comes back, admitted directly to Main. And in the **Main Clock**, a block with the bit set gets a second chance — the hand clears it and moves on, then evicts a cold one. The window does quiet work while the fast path stays fast."
+> "Watch the correlated burst. The block is hit while still *inside* the window, so its bit stays zero — and it ages out to Ghost. **That is the whole difference: S3-FIFO would set the bit here and promote a cold page into Main — pollution. The window quietly filters it out.** The other paths are unchanged: a **hot** block hit *beyond* the window earns Ref = 1 and goes straight to Main; a **ghost hit** is admitted directly; and in the Main Clock, a block with its bit set gets a second chance before a cold one is evicted."
 
-**Remember:** The window silently filters bursts; the direct-promotion fast path is untouched.
+**Remember:** The window keeps the burst out of Main — S3-FIFO wouldn't. Same fast path for genuinely hot blocks.
 
 ---
 
-## Slide 9 — Evaluating a metadata policy · ~0:50
+## Slide 8 — Evaluating a metadata policy · ~0:50
 **Transition:** "How do you even evaluate a metadata policy? That's surprisingly hard."
 **Say:**
 > "There are no public metadata-cache traces, and production traces can't be shared. So here's the trick: take *any* public block trace and divide each block number by the B-tree fan-out — around 200. That reconstructs the sequence of leaf-page accesses a real metadata cache would see. We validated it against a real B-tree trace, and the miss-ratio curves match to within one-hundredth of a percent. So anyone can regenerate metadata results from public data. We ran 106 CloudPhysics traces — over two billion requests — against ten state-of-the-art policies."
@@ -85,7 +76,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 10 — Miss ratio vs. 10 SOTA policies · ~1:10
+## Slide 9 — Miss ratio vs. 10 SOTA policies · ~1:10
 **Transition:** "So — does the window actually pay off?"
 **Say:**
 > "These box plots show relative miss-ratio improvement, with **Clock2Q+ as the zero line** — every other policy is measured against us. On metadata, on the left, every competitor's box sits *below* the line — worse than Clock2Q+. On data traces, on the right, same story. Across every cache size we tested, Clock2Q+ has the best **median and mean** — and on some metadata traces we beat S3-FIFO, the strongest competitor, by up to **28.5%**. The headline isn't one lucky trace — it's that we win *across the board*, on metadata and data."
@@ -94,7 +85,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 11 — Why it works · ~0:55
+## Slide 10 — Why it works · ~0:55
 **Transition:** "Let me show the mechanism behind that number."
 **Say:**
 > "This table counts how many blocks each policy promotes from the small queue into the Main Clock. S3-FIFO promotes about 88,000; Clock2Q+ promotes about 21,000 — under a quarter as many. We're far more selective, because the window filters correlated bursts before they can be promoted. And it's not just fewer — it's the *right* ones: the blocks we promote have short reuse distances, so they're genuinely hot, while the ones we ghost have long ones."
@@ -103,7 +94,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 12 — Engineered for production · ~0:40
+## Slide 11 — Engineered for production · ~0:40
 **Transition:** "And because this ships in vSAN, miss ratio was never the only requirement."
 **Say:**
 > "Everything is array-based, no allocation, so the hit path is just a hash lookup and at most flipping one bit. It scales with fine-grained locks. It handles dirty pages by skipping them until they're flushed. It bounds the work per eviction, so no CPU spikes. And it resizes online. All of it came out of nearly a decade of evolving vSAN's cache — with simplicity treated as a hard requirement."
@@ -112,7 +103,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 
 ---
 
-## Slide 13 — Takeaways · ~0:40
+## Slide 12 — Takeaways · ~0:40
 **Transition:** "So, to wrap up."
 **Say:**
 > "Correlated references are a real, costly pattern in metadata caches, and they defeat the usual one-hit-wonder filters. The correlation window is a tiny change that fixes it — filter the bursts, still promote truly hot blocks instantly. The payoff is the best miss ratio among state-of-the-art policies, and it's running in VMware vSAN today. And it's all reproducible in libCacheSim. Thank you — happy to take questions."
@@ -122,8 +113,8 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ---
 
 ### Timing summary
-| Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | **Total** |
+| Slide | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | **Total** |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| min | 0:30 | 0:55 | 0:55 | 1:05 | 1:05 | 0:55 | 1:05 | 1:15 | 0:50 | 1:10 | 0:55 | 0:40 | 0:40 | **12:00** |
+| min | 0:30 | 0:55 | 0:55 | 1:05 | 1:05 | 1:30 | 1:15 | 0:50 | 1:10 | 0:55 | 0:40 | 0:40 | **11:30** |
 
-**If you're running long,** the animation (slide 8) and the design slide (7) are the easiest to compress — let the visuals carry them.
+**If you're running long,** the animation (slide 7) and the design slide (6) are the easiest to compress — let the visuals carry them.
