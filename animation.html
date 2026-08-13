@@ -157,6 +157,32 @@
   const stage=document.getElementById('stage'), reqrow=document.getElementById('reqrow'), hand=document.getElementById('hand');
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
+  // ---- step control: auto-play by default; ?step=1 (or M / the Step button) enables manual stepping ----
+  const _params=new URLSearchParams(location.search);
+  let MANUAL=_params.has('step')||_params.has('manual');
+  let _resolve=null;
+  function gate(ms){ if(!MANUAL) return sleep(ms); return new Promise(res=>{ _resolve=res; updateCtl(); }); }
+  function advance(){ if(_resolve){ const r=_resolve; _resolve=null; r(); updateCtl(); } }
+  function setManual(on){ MANUAL=on; if(!on) advance(); updateCtl(); }
+  const _st=document.createElement('style'); _st.textContent=
+    '#ctl{position:fixed;right:14px;bottom:12px;display:flex;gap:8px;align-items:center;z-index:100;}'+
+    '#ctl button{font:700 12.5px ui-sans-serif,system-ui,sans-serif;padding:6px 13px;border-radius:20px;border:1px solid #cfd6dc;background:#fff;color:#33404a;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08);}'+
+    '#ctl button:hover{background:#f2f5f8;}'+
+    '#ctl.manual #ctl-mode{background:#1f2933;color:#fff;border-color:#1f2933;}'+
+    '#ctl-next{display:none;} #ctl.manual #ctl-next{display:inline-block;}'+
+    '#ctl-next.ready{background:#2f9e44;color:#fff;border-color:#2f9e44;animation:ctlp 1.2s infinite;}'+
+    '@keyframes ctlp{0%,100%{box-shadow:0 0 0 0 rgba(47,158,68,.5);}50%{box-shadow:0 0 0 7px rgba(47,158,68,0);}}';
+  document.head.appendChild(_st);
+  const ctl=document.createElement('div'); ctl.id='ctl';
+  ctl.innerHTML='<button id="ctl-mode"></button><button id="ctl-next">Next ▶</button>';
+  document.body.appendChild(ctl);
+  const _cmode=ctl.querySelector('#ctl-mode'), _cnext=ctl.querySelector('#ctl-next');
+  _cmode.onclick=()=>setManual(!MANUAL); _cnext.onclick=()=>advance();
+  function updateCtl(){ _cmode.textContent=MANUAL?'▶ Auto':'⏸ Step'; ctl.classList.toggle('manual',MANUAL); _cnext.classList.toggle('ready',!!_resolve); }
+  document.addEventListener('keydown',e=>{ if(MANUAL&&(e.key==='ArrowRight'||e.key===' ')){ e.preventDefault(); advance(); } else if(e.key==='m'||e.key==='M'){ setManual(!MANUAL); } });
+  stage.addEventListener('click',()=>{ if(MANUAL) advance(); });
+  updateCtl();
+
   // capacities
   const S=4, W=2, M=3, G=4;
 
@@ -217,12 +243,12 @@
   async function sweepEvict(){
     let i=handIdx;
     for(let g=0; g<2*M+2; g++){
-      setHand(i); await sleep(720);
+      setHand(i); await gate(720);
       const id=clock[i]; if(!id) return i;
       if(tokens[id].ref===1){
-        pulse(id); setRef(id,0); flash('Ref 1→0 · second chance', RING[i][0], RING[i][1]-38, 'warn'); await sleep(1050); i=(i+1)%M;
+        pulse(id); setRef(id,0); flash('Ref 1→0 · second chance', RING[i][0], RING[i][1]-38, 'warn'); await sleep(650); i=(i+1)%M;
       } else {
-        pulse(id); flash('evict · clean Ref=0', RING[i][0], RING[i][1]-38, 'bad'); await sleep(900);
+        pulse(id); flash('evict · clean Ref=0', RING[i][0], RING[i][1]-38, 'bad'); await sleep(700);
         delete byKey[tokens[id].key]; clock[i]=null; await trash(id); return i;
       }
     }
@@ -270,27 +296,27 @@
     if(loc==='main'){
       const i=clock.indexOf(id); situation('hot');
       say(`${key} is already in the Main Clock — a hit sets its Ref bit to 1.`);
-      pulse(id); setRef(id,1); flash('Main hit → Ref=1', RING[i][0], RING[i][1]-38, 'good'); await sleep(1400);
+      pulse(id); setRef(id,1); flash('Main hit → Ref=1', RING[i][0], RING[i][1]-38, 'good'); await gate(1400);
     }
     else if(loc==='small'){
       const pos=small.indexOf(id), p=xy('small',pos);
       if(pos<W){
         tokens[id].windowHit=true; situation('corr');
         say(`${key} is hit while still INSIDE the Correlation Window → treated as a correlated reference, so Ref stays 0.`);
-        pulse(id); flash('hit in window → Ref stays 0', p[0], SM_Y-40, 'warn'); await sleep(1650);
+        pulse(id); flash('hit in window → Ref stays 0', p[0], SM_Y-40, 'warn'); await gate(1650);
       } else {
         situation('hot');
         say(`${key} is hit BEYOND the window → genuine reuse, so Clock2Q+ sets Ref = 1.`);
-        pulse(id); setRef(id,1); flash('hit beyond window → Ref=1', p[0], SM_Y-40, 'good'); await sleep(1650);
+        pulse(id); setRef(id,1); flash('hit beyond window → Ref=1', p[0], SM_Y-40, 'good'); await gate(1650);
       }
     }
     else if(loc==='ghost'){
       const gp=xy('ghost',ghost.indexOf(id)); situation('ghost');
       say(`${key}'s key is in the Ghost FIFO — a Ghost hit means it was evicted too early and is actually hot.`);
-      pulse(id); flash('Ghost hit!', gp[0], GH_Y-40, 'good'); await sleep(1450);
+      pulse(id); flash('Ghost hit!', gp[0], GH_Y-40, 'good'); await gate(1450);
       ghost.splice(ghost.indexOf(id),1); layout();
       say(`${key} is refilled and admitted DIRECTLY into the Main Clock, bypassing the Small FIFO.`);
-      await admitToMain(id); await sleep(1100);
+      await admitToMain(id); await gate(1100);
     }
     else {
       // cold miss
@@ -307,7 +333,7 @@
           flash('Ref = 0 → Ghost', tx, SM_Y-40, 'warn'); }
         else { situation('cold'); say(`${et.key} reached the tail with Ref = 0 → it is demoted to the Ghost FIFO (key only).`);
           flash('Ref = 0 → Ghost', tx, SM_Y-40, ''); }
-        await sleep(1050);
+        await gate(1050);
 
         // STEP 2 — everything moves at once (no vacant slot)
         small.pop(); let dropId=null;
@@ -316,10 +342,10 @@
           clock[slot]=ev; handIdx=(slot+1)%M; setHand(handIdx); }
         else { dropId=ghostInsertHead(ev); }
         small.unshift(nid); layout();
-        await sleep(840);
+        await gate(840);
         if(dropId!==null){ delete byKey[tokens[dropId].key]; await trash(dropId); }
       } else {
-        small.unshift(nid); layout(); await sleep(760);   // no eviction: single motion
+        small.unshift(nid); layout(); await gate(760);   // no eviction: single motion
       }
     }
     await sleep(420);
@@ -338,10 +364,10 @@
     while(true){
       resetAll(); setReqStream(SEQ);
       titleEl.textContent='Clock2Q+'; say('One request stream flows through the cache, demonstrating each situation in turn.');
-      await sleep(1500);
+      await gate(1500);
       for(const r of SEQ){ await access(r.k, r.c); }
       titleEl.textContent='Done'; say('All five situations shown. Restarting…');
-      await sleep(2400);
+      await gate(2400);
     }
   }
   run();
