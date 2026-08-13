@@ -144,7 +144,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <div>
       <ul class="clean">
         <li class="frag" data-f="1">A block cache keeps hot pages in <b>DRAM</b> to avoid <b>SSD/HDD</b> I/O.</li>
-        <li class="frag" data-f="2"><b>Data cache</b> holds the payload; the <b>metadata cache</b> holds the <b>index that locates data</b> — e.g. B-trees mapping LBN→PBN.</li>
+        <li class="frag" data-f="2"><b>Data cache</b> holds the payload; the <b>metadata cache</b> holds the <b>index that locates data</b> — e.g. B-trees that map logical → physical block addresses.</li>
         <li class="frag" data-f="3">It sits on the <b>hottest path</b> — consulted for almost every data access → extreme frequency, high concurrency, hit ratios near <b>100%</b>.</li>
       </ul>
       <div class="callout frag" data-f="4" style="margin-top:20px; font-size:19px;">
@@ -161,7 +161,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <text x="220" y="33" text-anchor="middle" font-size="15" font-weight="800" fill="#1f6fa8">DRAM &#8212; Block Cache</text>
         <rect x="64" y="44" width="146" height="58" rx="9" fill="#dcefff" stroke="#3e9fd6" stroke-width="2"/>
         <text x="137" y="67" text-anchor="middle" font-size="13" font-weight="800" fill="#1f6fa8">Metadata cache</text>
-        <text x="137" y="86" text-anchor="middle" font-size="10.5" fill="#5f6b76">LBN &#8594; PBN map</text>
+        <text x="137" y="86" text-anchor="middle" font-size="10.5" fill="#5f6b76">logical &#8594; physical</text>
         <rect x="250" y="44" width="124" height="58" rx="9" fill="#eef1f4" stroke="#aab4bd" stroke-width="2"/>
         <text x="312" y="67" text-anchor="middle" font-size="13" font-weight="800" fill="#5f6b76">Data cache</text>
         <text x="312" y="86" text-anchor="middle" font-size="10.5" fill="#8b96a0">payload</text>
@@ -188,8 +188,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker">Why metadata is different</div>
   <h2 class="stitle"><span class="hl-r">Structural locality</span>: a page packs many keys</h2>
   <div class="cols" style="grid-template-columns:1.05fr 0.95fr; gap:30px; align-items:center;">
-    <figure><img src="assets/btree.png" alt="B-tree mapping LBN to PBN" style="max-height:290px;">
-      <figcaption>vSAN maps LBN→PBN through B-trees; each <b>leaf</b> holds hundreds of mapping tuples.</figcaption></figure>
+    <figure><img src="assets/btree.png" alt="B-tree mapping logical to physical addresses" style="max-height:290px;">
+      <figcaption>vSAN maps logical → physical addresses through B-trees; each <b>leaf</b> holds hundreds of mapping tuples.</figcaption></figure>
     <ul class="clean" style="font-size:19px;">
       <li class="frag" data-f="1">A metadata page isn't one key — a B-tree <b>leaf packs hundreds of mapping tuples</b>.</li>
       <li class="frag" data-f="2"><b>L1</b> and <b>L5</b> both live in leaf <b>m4</b> → two lookups hit <b>m4</b> twice.</li>
