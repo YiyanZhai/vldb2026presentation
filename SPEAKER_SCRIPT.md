@@ -61,9 +61,9 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ## Slide 7 — Clock2Q+ in action · ~1:15
 **Transition:** "Let's watch it — I'll step through one move at a time." *(Step mode: Next ▶ / click / →.)*
 **Say (narrate as you step each move):**
-> "A **cold** block ages to the tail with its bit still zero, and drops into Ghost. A **correlated burst** is hit *inside* the window, so its bit stays zero and it too ages out to Ghost. A **hot** block hit *beyond* the window earns Ref = 1 and, at the tail, is promoted straight to Main. A **ghost hit** — a remembered key — is admitted directly to Main. And in the Main Clock, a block with its bit set gets a second chance before a cold one is evicted. I can also jump straight to the correlated-burst or hot-block case with the buttons."
+> "A **cold** block ages to the tail with its bit still zero, and drops into Ghost. A **correlated burst** is hit *inside* the window, so its bit stays zero and it too ages out to Ghost. A **hot** block hit *beyond* the window earns Ref = 1 and, at the tail, is promoted straight to Main. A **ghost hit** — a remembered key — is admitted directly to Main. And in the Main Clock, a block with its bit set gets a second chance before a cold one is evicted. I can also jump straight to the correlated-burst or hot-block case with the buttons. **So that's the whole policy in motion: the window quietly filters the correlated bursts, while genuinely hot blocks still promote directly — no extra miss.** From here, everything answers one question: does it actually help?"
 
-**Remember:** The window silently filters bursts; the direct-promotion fast path is untouched.
+**Remember:** Close by naming it — that's the whole policy: window filters bursts, hot blocks promote directly. Then pivot to "does it help?"
 
 ---
 
