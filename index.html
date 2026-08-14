@@ -270,6 +270,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <rect x="24" y="64" width="196" height="54" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
         <text x="122" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#8b6a12">Small admission queue</text>
         <circle cx="64" cy="91" r="15" fill="#c0c8cf"/><circle cx="122" cy="91" r="15" fill="#c0c8cf"/><circle cx="180" cy="91" r="15" fill="#c0c8cf"/>
+      </g>
+      <g id="refbits5" style="opacity:0; transition:opacity .4s ease">
         <g font-size="11" font-weight="800" text-anchor="middle">
           <circle cx="76" cy="79" r="9" fill="#fff" stroke="#3a4750" stroke-width="1.6"/><text x="76" y="83" fill="#3a4750">0</text>
           <circle cx="134" cy="79" r="9" fill="#fff" stroke="#3a4750" stroke-width="1.6"/><text x="134" y="83" fill="#3a4750">0</text>
@@ -290,7 +292,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     </svg>
   </figure>
   <div class="cols">
-    <div class="card frag" style="border-color:#f3c9c3;">
+    <div id="s3card5" class="card frag" style="border-color:#f3c9c3;">
       <h3 style="color:var(--problem); margin:0 0 8px;">S3-FIFO &mdash; admits cold blocks</h3>
       <p style="margin:-2px 0 6px; font-size:14px; color:var(--muted);">uses a <b>reference bit</b>, 0 / 1 = "hit again?"</p>
       <svg viewBox="0 0 520 176" width="100%">
@@ -645,6 +647,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     slides.forEach((s,i)=>s.classList.toggle('current', i===ci));
     const s=slides[ci], fr=frags(s);
     fr.forEach((f,k)=>f.classList.toggle('on', k<fi));
+    var _s3=document.getElementById('s3card5'), _rb=document.getElementById('refbits5'); if(_s3&&_rb) _rb.style.opacity=_s3.classList.contains('on')?'1':'0';
     // section accent
     const col=getComputedStyle(document.documentElement).getPropertyValue(secVar(s));
     document.documentElement.style.setProperty('--accent', col.trim()||'#2f7fbf');
