@@ -268,7 +268,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       </g>
       <g class="frag">
         <rect x="24" y="64" width="196" height="54" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
-        <text x="122" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#8b6a12">Small queue</text>
+        <text x="122" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#8b6a12">Small admission queue</text>
         <circle cx="64" cy="91" r="15" fill="#c0c8cf"/><circle cx="122" cy="91" r="15" fill="#c0c8cf"/><circle cx="180" cy="91" r="15" fill="#c0c8cf"/>
       </g>
       <g class="frag">
@@ -285,8 +285,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   </figure>
   <div class="cols">
     <div class="card frag" style="border-color:#f3c9c3;">
-      <h3 style="color:var(--problem); margin:0 0 8px;">S3-FIFO &mdash; admits cold blocks</h3>
-      <p style="margin:-2px 0 6px; font-size:12.5px; color:var(--muted);">uses a <b>reference bit</b> (0/1 = "hit again?") &mdash; set on <b>any</b> re-hit</p>
+      <h3 style="color:var(--problem); margin:0 0 8px; font-size:20px;">S3-FIFO &mdash; admits cold blocks</h3>
+      <p style="margin:-2px 0 8px; font-size:15px; color:var(--muted);">uses a <b>reference bit</b>, 0/ 1 = "hit again?"</p>
       <svg viewBox="0 0 520 176" width="100%">
         <defs><marker id="a5" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker></defs>
         <rect x="6" y="44" width="150" height="76" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
@@ -295,7 +295,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <circle cx="76" cy="66" r="12" fill="#2f9e44"/><text x="76" y="70" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1</text>
         <text x="122" y="80" text-anchor="middle" font-size="12" font-weight="800" fill="#e04b3a">3 hits</text>
         <text x="122" y="95" text-anchor="middle" font-size="11" fill="#c23a2b">burst</text>
-        <text x="81" y="140" text-anchor="middle" font-size="12" fill="#c23a2b">burst &#8594; Ref = 1</text>
+        <text x="81" y="140" text-anchor="middle" font-size="12" fill="#c23a2b"><b>any</b> re-hit &#8594; Ref = 1</text>
         <path d="M158,84 L300,84" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#a5)"/>
         <text x="229" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#5f6b76">promote</text>
         <rect x="306" y="48" width="206" height="72" rx="10" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2"/>
@@ -305,8 +305,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       </svg>
     </div>
     <div class="card frag" style="border-color:#cdd6de;">
-      <h3 style="color:var(--muted); margin:0 0 8px;">Clock2Q / 2Q &mdash; delays hot blocks</h3>
-      <p style="margin:-2px 0 6px; font-size:12.5px; color:var(--muted);"><b>no</b> admission bit &mdash; must be dropped, then re-requested</p>
+      <h3 style="color:var(--muted); margin:0 0 8px; font-size:20px;">Clock2Q / 2Q &mdash; delays hot blocks</h3>
+      <p style="margin:-2px 0 8px; font-size:15px; color:var(--muted);"><b>no</b> admission bit &mdash; must be dropped, then re-requested</p>
       <svg viewBox="0 0 520 176" width="100%">
         <defs><marker id="a5b" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
           <marker id="a5r" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#e04b3a"/></marker></defs>
