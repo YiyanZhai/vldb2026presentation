@@ -50,7 +50,7 @@ Delivery: ~130 words/min, pause on each figure/fragment reveal. Advance fragment
 ---
 
 ## Slide 6 — Clock2Q+: add a correlation window · ~1:30
-**Transition:** "Here's the fix — and it's almost embarrassingly simple. It comes down to *where* a re-hit happens."
+**Transition:** "So now you've seen the problem — promote on any hit and you keep cold blocks; wait too long and hot blocks miss. To fix it, Clock2Q+ changes exactly one thing, and it comes down to *where* a re-hit happens."
 **Say:**
 > "Clock2Q+ keeps exactly S3-FIFO's three queues — a Small FIFO, a Main Clock, and a Ghost — and adds one thing: a **correlation window** at the head of the Small FIFO, where a re-hit does **not** set the reference bit. *(Click the diagram to toggle the window on and off.)* Here's the whole comparison in a single bit. In **S3-FIFO** — window off — *any* re-hit sets Ref = 1, even a burst right at the head, so a cold page gets promoted and pollutes the cache. Turn the window on — that's **Clock2Q+** — and the same in-window hit stays at **0**, so the burst just ages out to Ghost. A re-hit *beyond* the window is genuine reuse, so it does set Ref = 1 and goes straight to Main, no extra miss. *(The two buttons demo exactly that — hit inside vs. beyond.)* That's the entire contribution: one rule on top of S3-FIFO, no new knobs."
 
