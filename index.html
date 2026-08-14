@@ -489,12 +489,12 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
   <h2 class="stitle">Built to run safely at scale</h2>
   <div class="cols3">
-    <div class="card frag"><h3>Low overhead</h3><p>Allocation-free, array-based queues; the hit path is one hash lookup + at most a Ref-bit flip.</p></div>
-    <div class="card frag"><h3>Scalable</h3><p>Atomic FIFO / clock-hand indices + a mutex per hash bucket &mdash; no global lock. No lock contention in ESA / VDFS testing.</p></div>
-    <div class="card frag"><h3>Dirty-aware</h3><p>Eviction skips dirty pages (deferred); a dirty Small-FIFO tail stays until it's clean. Miss-ratio impact: negligible.</p></div>
-    <div class="card frag"><h3>Bounded work</h3><p>Cap the clock-hand / Small-FIFO scan (~10 skips) &rarr; no CPU spikes, and no infinite loop when every page is dirty.</p></div>
-    <div class="card frag"><h3>Online resizing</h3><p>Grow / shrink the queues live; a background thread migrates entries and flushes dirty pages before shrinking.</p></div>
-    <div class="card frag" style="border-color:#d4c7ee; background:#f7f4fc;"><h3 style="color:var(--deploy)">Simplicity</h3><p>A few arrays + linked lists for hash collisions &mdash; no adaptive resizing logic. A first-class goal.</p></div>
+    <div class="card frag"><h3>Low overhead</h3><p>Array-based, allocation-free; hit path = one hash lookup + a Ref-bit flip.</p></div>
+    <div class="card frag"><h3>Scalable</h3><p>Per-bucket mutex + atomic queue indices &mdash; no global lock.</p></div>
+    <div class="card frag"><h3>Dirty-aware</h3><p>Eviction skips dirty pages until flushed &mdash; negligible miss-ratio cost.</p></div>
+    <div class="card frag"><h3>Bounded work</h3><p>Capped scan per eviction &rarr; no CPU spikes, no infinite loop.</p></div>
+    <div class="card frag"><h3>Online resizing</h3><p>Grow / shrink the queues live via a background thread.</p></div>
+    <div class="card frag" style="border-color:#d4c7ee; background:#f7f4fc;"><h3 style="color:var(--deploy)">Simplicity</h3><p>A few arrays + lists, no adaptive tuning &mdash; a first-class goal.</p></div>
   </div>
   <div class="foot"><span class="sec">Deployment</span><span class="tm"></span></div>
 </section>
