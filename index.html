@@ -64,14 +64,15 @@ h2.stitle{font-size:36px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
 #pager{position:fixed; left:16px; bottom:10px; font-size:15px; font-weight:800; color:#5f6b76; z-index:50;
   font-variant-numeric:tabular-nums; background:rgba(255,255,255,.85); padding:3px 12px; border-radius:20px; box-shadow:0 1px 4px rgba(0,0,0,.08);}
 .logos{display:flex; align-items:center; gap:26px;}
-.logos img{width:auto; display:block; opacity:.95;}
-.logos .l-cmu{height:16px;}
-.logos .l-harvard{height:38px;}
-.logos .l-broadcom{height:21px;}
-.logos.sm{gap:20px;}
-.logos.sm .l-cmu{height:12px;}
-.logos.sm .l-harvard{height:28px;}
-.logos.sm .l-broadcom{height:16px;}
+.logos.col{flex-direction:column; align-items:flex-end; gap:11px;}
+.logos img{width:auto; display:block; opacity:.96;}
+.logos .l-cmu{height:34px;}
+.logos .l-harvard{height:42px;}
+.logos .l-broadcom{height:16px;}
+.logos.sm{gap:16px;}
+.logos.sm .l-cmu{height:24px;}
+.logos.sm .l-harvard{height:30px;}
+.logos.sm .l-broadcom{height:12px;}
 
 /* speaker notes (toggle with S) */
 #notes-panel{position:fixed; left:0; right:0; bottom:0; z-index:60; display:none;
@@ -160,17 +161,19 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="big" style="color:var(--muted); font-weight:700; margin-top:8px; white-space:nowrap; font-size:25px;">
     Correlation-Aware Cache Replacement for Metadata Caches</div>
   <div style="margin-top:12px; font-size:15.5px; font-weight:800; color:#1f6fa8;">Deployed in VMware vSAN</div>
-  <div class="logos" style="justify-content:center; margin-top:30px;">
-    <img class="l-cmu" src="assets/logos/cmu.svg" alt="Carnegie Mellon University">
-    <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
-    <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
-  </div>
-  <div style="position:absolute; left:70px; right:70px; bottom:56px;">
-  <div class="authors" style="font-size:15px; line-height:1.75;">
-    <b>Yiyan Zhai</b><sup>1</sup>&nbsp;&nbsp; Bintang Dwi Marthen<sup>2</sup>&nbsp;&nbsp; Sarath Balivada<sup>3</sup>&nbsp;&nbsp; Vamsi Sudhakar Bojji<sup>3</sup>&nbsp;&nbsp; Eric Knauft<sup>3</sup>&nbsp;&nbsp; Jitender Rohilla<sup>3</sup><br>
-    Jiaqi Zuo<sup>3</sup>&nbsp;&nbsp; Quanxing Liu<sup>3</sup>&nbsp;&nbsp; Maxime Austruy<sup>3</sup>&nbsp;&nbsp; Junlong Gao<sup>3</sup>&nbsp;&nbsp; Wenguang Wang<sup>3</sup>&nbsp;&nbsp; Juncheng Yang<sup>2</sup>
-  </div>
-  <div class="affil" style="margin-top:8px;"><sup>1</sup>Carnegie Mellon University&nbsp;&nbsp; <sup>2</sup>Harvard University&nbsp;&nbsp; <sup>3</sup>Broadcom</div>
+  <div style="position:absolute; left:70px; right:70px; bottom:56px; display:flex; align-items:flex-end; justify-content:space-between; gap:44px;">
+    <div>
+      <div class="authors" style="font-size:15px; line-height:1.75;">
+        <b>Yiyan Zhai</b><sup>1</sup>&nbsp;&nbsp; Bintang Dwi Marthen<sup>2</sup>&nbsp;&nbsp; Sarath Balivada<sup>3</sup>&nbsp;&nbsp; Vamsi Sudhakar Bojji<sup>3</sup>&nbsp;&nbsp; Eric Knauft<sup>3</sup>&nbsp;&nbsp; Jitender Rohilla<sup>3</sup><br>
+        Jiaqi Zuo<sup>3</sup>&nbsp;&nbsp; Quanxing Liu<sup>3</sup>&nbsp;&nbsp; Maxime Austruy<sup>3</sup>&nbsp;&nbsp; Junlong Gao<sup>3</sup>&nbsp;&nbsp; Wenguang Wang<sup>3</sup>&nbsp;&nbsp; Juncheng Yang<sup>2</sup>
+      </div>
+      <div class="affil" style="margin-top:8px;"><sup>1</sup>Carnegie Mellon University&nbsp;&nbsp; <sup>2</sup>Harvard University&nbsp;&nbsp; <sup>3</sup>Broadcom</div>
+    </div>
+    <div class="logos col" style="flex:none;">
+      <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
+      <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University">
+      <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
+    </div>
   </div>
 </section>
 
@@ -540,9 +543,9 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:40">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
-  <div class="logos sm" style="position:absolute; top:32px; right:70px;">
-    <img class="l-cmu" src="assets/logos/cmu.svg" alt="Carnegie Mellon University">
+  <div class="logos sm" style="position:absolute; top:30px; right:70px;">
     <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
+    <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University">
     <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
   </div>
   <h2 class="stitle">Clock2Q+</h2>
