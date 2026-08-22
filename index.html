@@ -37,7 +37,7 @@ h2.stitle{font-size:36px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
 #nav-prev,#nav-next{position:fixed; bottom:9px; width:34px; height:34px; border-radius:50%;
   border:1px solid #d7dde2; background:rgba(255,255,255,.9); color:#33404a; font:700 20px/1 ui-sans-serif,system-ui,sans-serif;
   cursor:pointer; z-index:60; box-shadow:0 2px 6px rgba(0,0,0,.12);}
-#nav-prev{right:60px;} #nav-next{right:18px;} #nav-prev:hover,#nav-next:hover{background:#fff;}
+#nav-prev{left:18px;} #nav-next{left:60px;} #nav-prev:hover,#nav-next:hover{background:#fff;}
   .demobtn{font:700 13px ui-sans-serif,system-ui,sans-serif; padding:8px 14px; border-radius:20px; border:1px solid #cfd6dc; background:#fff; color:#33404a; cursor:pointer; margin:0 5px;}
   .demobtn:hover{background:#eaf4fb; border-color:#bcd8ec;}
   @keyframes blkpulse6{0%{transform:scale(1);}40%{transform:scale(1.32);}100%{transform:scale(1);}}
@@ -61,8 +61,10 @@ h2.stitle{font-size:36px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
   .tl .stage.cur .mini .q.new{background:#e9dcfb;}
 /* progress */
 #prog{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0; z-index:50; transition:width .3s;}
-#pager{position:fixed; left:16px; bottom:10px; font-size:15px; font-weight:800; color:#5f6b76; z-index:50;
-  font-variant-numeric:tabular-nums; background:rgba(255,255,255,.85); padding:3px 12px; border-radius:20px; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+#pager{position:fixed; right:16px; bottom:9px; font-size:19px; font-weight:800; color:#3a4750; z-index:50;
+  font-variant-numeric:tabular-nums; background:rgba(255,255,255,.9); padding:4px 14px; border-radius:20px; box-shadow:0 1px 5px rgba(0,0,0,.1);}
+#footlogos{position:fixed; right:120px; bottom:9px; z-index:50; gap:14px; opacity:.9;}
+#footlogos .l-harvard{height:20px;} #footlogos .l-cmu{height:17px;} #footlogos .l-broadcom{height:9px;}
 .logos{display:flex; align-items:center; gap:26px;}
 .logos.col{flex-direction:column; align-items:flex-end; gap:11px;}
 .logos img{width:auto; display:block; opacity:.96;}
@@ -557,14 +559,9 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   </ul>
   <div class="callout frag" data-f="5" style="margin-top:18px; text-align:center; border-color:var(--wrap); font-size:20px;">
     Reproducible in <b>libCacheSim</b> — Clock2Q+ &amp; the metadata-trace method are upstreamed.
-    <div style="font-size:15px; font-weight:700; margin-top:8px;">
-      <a href="https://libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">libcachesim.com</a> &middot;
-      <a href="https://www.cachemon.org" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">cachemon.org</a> &middot;
-      <a href="https://dataset.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">dataset.libcachesim.com</a> &middot;
-      <a href="https://python.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">python.libcachesim.com</a>
-    </div>
   </div>
-  <div class="frag" style="position:absolute; left:80px; right:104px; bottom:66px; display:flex; align-items:center; justify-content:space-between; gap:36px;">
+  <div class="frag" style="position:absolute; left:80px; right:104px; bottom:50px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:36px;">
     <div style="line-height:1.7;">
       <div style="font-size:21px; font-weight:800; color:var(--ink); margin-bottom:8px;">Have questions? Get in touch</div>
       <div style="font-size:17px; color:var(--ink);">Yiyan Zhai <span style="color:var(--muted)">(CMU)</span> &middot; <a href="mailto:yiyanz@andrew.cmu.edu" style="color:#2f7fbf; font-weight:700; text-decoration:none;">yiyanz@andrew.cmu.edu</a></div>
@@ -577,6 +574,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       </div>
       <div style="font-size:14px; font-weight:800; color:#2f7fbf; margin-top:8px;">github.com/1a1a11a/libCacheSim &#8599;</div>
     </a>
+    </div>
+    <div style="text-align:center; margin-top:14px; font-size:13.5px; color:var(--muted);">
+      <b style="color:var(--ink);">Related sites:</b>
+      <a href="https://libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">libcachesim.com</a> (simulator) &middot;
+      <a href="https://www.cachemon.org" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">cachemon.org</a> (project home) &middot;
+      <a href="https://dataset.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">dataset.libcachesim.com</a> (traces) &middot;
+      <a href="https://python.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">python.libcachesim.com</a> (Python API)
+    </div>
   </div>
   <div class="foot"><span class="sec">Thank you</span><span class="tm"></span></div>
 </section>
@@ -666,6 +671,11 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 
 <div id="prog"></div>
 <div id="pager"></div>
+<div id="footlogos" class="logos">
+  <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
+  <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University">
+  <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
+</div>
 <button id="nav-prev" title="Previous slide">‹</button><button id="nav-next" title="Next slide">›</button>
 <div id="notes-panel"></div>
 
@@ -708,6 +718,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     const isBackup=s.dataset.sec==='backup';
     const num=isBackup? 'B'+(ci-mainCount+1) : (ci+1)+' / '+mainCount;
     document.getElementById('pager').textContent=num;
+    const fl=document.getElementById('footlogos'); if(fl) fl.style.display=(ci===0||s.dataset.sec==='wrap')?'none':'flex';
     const tm=s.querySelector('.tm'); if(tm) tm.textContent='';
     // speaker notes
     const n=NOTES[ci], np=document.getElementById('notes-panel');
