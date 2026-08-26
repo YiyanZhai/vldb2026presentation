@@ -523,11 +523,6 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:40">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
-  <div class="logos sm" style="position:absolute; top:30px; right:70px;">
-    <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University">
-    <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
-    <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
-  </div>
   <h2 class="stitle">Clock2Q+</h2>
   <ul class="clean" style="font-size:21px;">
     <li class="frag" data-f="1"><b>Correlated references</b> are a real, costly metadata pattern: a short burst makes a <b>cold</b> page look hot.</li>
@@ -538,28 +533,40 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="callout frag" data-f="5" style="margin-top:18px; text-align:center; border-color:var(--wrap); font-size:20px;">
     Reproducible in <b>libCacheSim</b> — Clock2Q+ &amp; the metadata-trace method are upstreamed.
   </div>
-  <div class="frag" style="position:absolute; left:80px; right:104px; bottom:50px;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:36px;">
+  <div class="foot"><span class="sec">Takeaways</span><span class="tm"></span></div>
+</section>
+
+<!-- ============ 13 · THANK YOU / CONTACT ============ -->
+<section class="slide" id="s-thanks" data-sec="wrap" data-secname="Thank you" data-time="">
+  <div class="accentbar" style="background:var(--wrap)"></div>
+  <div class="kicker" style="color:var(--wrap)">Thank you</div>
+  <h2 class="stitle" style="margin-bottom:4px;">Clock2Q+</h2>
+  <div class="sub" style="font-size:18px; margin-bottom:26px;">Correlation-Aware Cache Replacement for Metadata Caches &middot; <b style="color:#1f6fa8;">deployed in VMware vSAN</b></div>
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:44px;">
     <div style="line-height:1.7;">
-      <div style="font-size:21px; font-weight:800; color:var(--ink); margin-bottom:8px;">Have questions? Get in touch</div>
-      <div style="font-size:17px; color:var(--ink);">Yiyan Zhai <span style="color:var(--muted)">(CMU)</span> &middot; <a href="mailto:yiyanz@andrew.cmu.edu" style="color:#2f7fbf; font-weight:700; text-decoration:none;">yiyanz@andrew.cmu.edu</a></div>
-      <div style="font-size:17px; color:var(--ink);">Wenguang Wang <span style="color:var(--muted)">(Broadcom)</span> &middot; <a href="mailto:wenguang.wang@broadcom.com" style="color:#2f7fbf; font-weight:700; text-decoration:none;">wenguang.wang@broadcom.com</a></div>
-      <div style="font-size:17px; color:var(--ink);">Juncheng Yang <span style="color:var(--muted)">(Harvard)</span> &middot; <a href="mailto:juncheng@seas.harvard.edu" style="color:#2f7fbf; font-weight:700; text-decoration:none;">juncheng@seas.harvard.edu</a></div>
+      <div style="font-size:21px; font-weight:800; color:var(--ink); margin-bottom:10px;">Get in touch</div>
+      <div style="font-size:17px; color:var(--ink); margin:4px 0;">Yiyan Zhai <span style="color:var(--muted)">(CMU)</span> &middot; <a href="mailto:yiyanz@andrew.cmu.edu" style="color:#2f7fbf; font-weight:700; text-decoration:none;">yiyanz@andrew.cmu.edu</a></div>
+      <div style="font-size:17px; color:var(--ink); margin:4px 0;">Wenguang Wang <span style="color:var(--muted)">(Broadcom)</span> &middot; <a href="mailto:wenguang.wang@broadcom.com" style="color:#2f7fbf; font-weight:700; text-decoration:none;">wenguang.wang@broadcom.com</a></div>
+      <div style="font-size:17px; color:var(--ink); margin:4px 0;">Juncheng Yang <span style="color:var(--muted)">(Harvard)</span> &middot; <a href="mailto:juncheng@seas.harvard.edu" style="color:#2f7fbf; font-weight:700; text-decoration:none;">juncheng@seas.harvard.edu</a></div>
+      <div style="font-size:21px; font-weight:800; color:var(--ink); margin:22px 0 10px;">Related sites</div>
+      <div style="font-size:16px; line-height:1.85;">
+        <a href="https://libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; font-weight:700; text-decoration:none;">libcachesim.com</a> <span style="color:var(--muted);">&mdash; simulator</span><br>
+        <a href="https://www.cachemon.org" target="_blank" rel="noopener" style="color:#2f7fbf; font-weight:700; text-decoration:none;">cachemon.org</a> <span style="color:var(--muted);">&mdash; project home</span><br>
+        <a href="https://dataset.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; font-weight:700; text-decoration:none;">dataset.libcachesim.com</a> <span style="color:var(--muted);">&mdash; traces</span><br>
+        <a href="https://python.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; font-weight:700; text-decoration:none;">python.libcachesim.com</a> <span style="color:var(--muted);">&mdash; Python API</span>
+      </div>
     </div>
     <a href="https://github.com/1a1a11a/libCacheSim" target="_blank" rel="noopener" style="text-decoration:none; text-align:center; flex:none;">
-      <div style="display:inline-block; border:2px solid #cfe0ee; border-radius:16px; padding:10px; background:#fff; box-shadow:0 6px 18px rgba(31,41,51,.14); line-height:0;">
-        <img src="assets/qr-libcachesim.svg" alt="libCacheSim repository QR code" style="width:126px; height:126px; display:block;">
+      <div style="display:inline-block; border:2px solid #cfe0ee; border-radius:16px; padding:12px; background:#fff; box-shadow:0 6px 18px rgba(31,41,51,.14); line-height:0;">
+        <img src="assets/qr-libcachesim.svg" alt="libCacheSim repository QR code" style="width:150px; height:150px; display:block;">
       </div>
-      <div style="font-size:14px; font-weight:800; color:#2f7fbf; margin-top:8px;">github.com/1a1a11a/libCacheSim &#8599;</div>
+      <div style="font-size:15px; font-weight:800; color:#2f7fbf; margin-top:9px;">github.com/1a1a11a/libCacheSim &#8599;</div>
     </a>
-    </div>
-    <div style="text-align:center; margin-top:14px; font-size:13.5px; color:var(--muted);">
-      <b style="color:var(--ink);">Related sites:</b>
-      <a href="https://libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">libcachesim.com</a> (simulator) &middot;
-      <a href="https://www.cachemon.org" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">cachemon.org</a> (project home) &middot;
-      <a href="https://dataset.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">dataset.libcachesim.com</a> (traces) &middot;
-      <a href="https://python.libcachesim.com" target="_blank" rel="noopener" style="color:#2f7fbf; text-decoration:none;">python.libcachesim.com</a> (Python API)
-    </div>
+  </div>
+  <div class="logos" style="position:absolute; left:70px; right:70px; bottom:58px; justify-content:center; gap:48px;">
+    <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University">
+    <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
+    <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
   </div>
   <div class="foot"><span class="sec">Thank you</span><span class="tm"></span></div>
 </section>
@@ -726,8 +733,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     const isBackup=s.dataset.sec==='backup';
     const num=isBackup? 'B'+(ci-mainCount+1) : (ci+1)+' / '+mainCount;
     document.getElementById('pager').textContent=num;
-    const fl=document.getElementById('footlogos'); if(fl) fl.style.display=(ci===0||s.dataset.sec==='wrap')?'none':'flex';
-    const rh=document.getElementById('runhead'); if(rh) rh.style.display=(ci===0)?'none':'block';
+    const fl=document.getElementById('footlogos'); if(fl) fl.style.display=(ci===0||s.id==='s-thanks')?'none':'flex';
+    const rh=document.getElementById('runhead'); if(rh) rh.style.display=(ci===0||s.id==='s-thanks')?'none':'block';
     const tm=s.querySelector('.tm'); if(tm) tm.textContent='';
     // speaker notes
     const n=NOTES[ci], np=document.getElementById('notes-panel');
