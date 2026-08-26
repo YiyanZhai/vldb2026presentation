@@ -63,8 +63,11 @@ h2.stitle{font-size:36px; font-weight:800; line-height:1.12; margin:6px 0 22px; 
 #prog{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0; z-index:50; transition:width .3s;}
 #pager{position:fixed; right:16px; bottom:9px; font-size:19px; font-weight:800; color:#3a4750; z-index:50;
   font-variant-numeric:tabular-nums; background:rgba(255,255,255,.9); padding:4px 14px; border-radius:20px; box-shadow:0 1px 5px rgba(0,0,0,.1);}
-#footlogos{position:fixed; right:120px; bottom:9px; z-index:50; gap:14px; opacity:.9;}
-#footlogos .l-harvard{height:20px;} #footlogos .l-cmu{height:17px;} #footlogos .l-broadcom{height:9px;}
+#footlogos{position:fixed; right:150px; bottom:8px; z-index:50; gap:16px; opacity:.92;}
+#footlogos .l-harvard{height:24px;} #footlogos .l-cmu{height:21px;} #footlogos .l-broadcom{height:11px;}
+#runhead{position:absolute; top:16px; left:0; right:0; text-align:center; z-index:40; font-size:13px; font-weight:700; color:#9aa5ad; letter-spacing:.01em; pointer-events:none;}
+.dtext{font-size:16px; line-height:1.35; margin-top:9px; padding:7px 11px; border-radius:8px; color:#8a95a0; border-left:3px solid transparent; transition:background .25s, color .25s, border-color .25s;}
+.dtext.hl{color:#33404a; background:#f3f7fb; border-left-color:#2f7fbf; font-weight:600;}
 .logos{display:flex; align-items:center; gap:26px;}
 .logos.col{flex-direction:column; align-items:flex-end; gap:11px;}
 .logos img{width:auto; display:block; opacity:.96;}
@@ -412,7 +415,9 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <button id="btn-in6" class="demobtn">Hit inside the window</button>
         <button id="btn-out6" class="demobtn">Hit beyond the window</button>
       </div>
-      <div id="demoMsg6" style="min-height:58px; font-size:20px; line-height:1.38; margin-top:10px; color:#5f6b76;">Click a button — watch block <b>B</b>'s Ref bit in the diagram.</div>
+      <div id="txt-s36" class="dtext"><b>S3-FIFO</b> (window off): <b>any</b> re-hit &rarr; <b>Ref = 1</b> &rarr; even a burst pollutes the cache.</div>
+      <div id="txt-in6" class="dtext"><b>Clock2Q+ &middot; inside the window</b>: same burst &rarr; <b>Ref stays 0</b> &rarr; ages out to Ghost.</div>
+      <div id="txt-out6" class="dtext"><b>Clock2Q+ &middot; beyond the window</b>: real reuse &rarr; <b>Ref = 1</b> &rarr; promoted to Main.</div>
     </div>
   </div>
   <div class="foot"><span class="sec">Design</span><span class="tm"></span></div>
@@ -512,35 +517,6 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="foot"><span class="sec">Evolution</span><span class="tm"></span></div>
 </section>
 
-<!-- ============ 11 · PRODUCTION ============ -->
-<section class="slide" data-sec="deploy" data-secname="Deployment" data-time="0:45">
-  <div class="accentbar" style="background:var(--deploy)"></div>
-  <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
-  <h2 class="stitle">Built to run safely at scale</h2>
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
-    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
-      <span style="font-size:34px; line-height:1;">&#9889;</span>
-      <div><h3>Fast &amp; lean</h3><p>Array-based, allocation-free; the hit path is one hash lookup + a Ref-bit flip.</p></div>
-    </div>
-    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
-      <span style="font-size:34px; line-height:1;">&#129525;</span>
-      <div><h3>Scales on cores</h3><p>Per-bucket mutex + atomic queue indices &mdash; no global lock.</p></div>
-    </div>
-    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
-      <span style="font-size:34px; line-height:1;">&#128737;&#65039;</span>
-      <div><h3>Robust under load</h3><p>Skips dirty pages until flushed; capped scan per eviction &mdash; no CPU spikes, no infinite loops.</p></div>
-    </div>
-    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
-      <span style="font-size:34px; line-height:1;">&#8596;&#65039;</span>
-      <div><h3>Resizes online</h3><p>Grow / shrink the queues live via a background thread.</p></div>
-    </div>
-  </div>
-  <div class="callout frag" style="margin-top:20px; text-align:center; border-color:var(--deploy);">
-    <b style="color:var(--deploy)">Simplicity &mdash; a first-class goal:</b> simple data structures & no adaptive tuning.
-  </div>
-  <div class="foot"><span class="sec">Deployment</span><span class="tm"></span></div>
-</section>
-
 <!-- ============ 12 · TAKEAWAYS ============ -->
 <section class="slide" data-sec="wrap" data-secname="Takeaways" data-time="0:40">
   <div class="accentbar" style="background:var(--wrap)"></div>
@@ -587,6 +563,35 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 </section>
 
 <!-- ============ BACKUP ============ -->
+<!-- (moved from main) Engineered for production -->
+<section class="slide" data-sec="backup" data-secname="Backup" data-time="">
+  <div class="accentbar" style="background:var(--deploy)"></div>
+  <div class="kicker" style="color:var(--deploy)">Engineered for production</div>
+  <h2 class="stitle">Built to run safely at scale</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
+      <span style="font-size:34px; line-height:1;">&#9889;</span>
+      <div><h3>Fast &amp; lean</h3><p>Array-based, allocation-free; the hit path is one hash lookup + a Ref-bit flip.</p></div>
+    </div>
+    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
+      <span style="font-size:34px; line-height:1;">&#129525;</span>
+      <div><h3>Scales on cores</h3><p>Per-bucket mutex + atomic queue indices &mdash; no global lock.</p></div>
+    </div>
+    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
+      <span style="font-size:34px; line-height:1;">&#128737;&#65039;</span>
+      <div><h3>Robust under load</h3><p>Skips dirty pages until flushed; capped scan per eviction &mdash; no CPU spikes, no infinite loops.</p></div>
+    </div>
+    <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
+      <span style="font-size:34px; line-height:1;">&#8596;&#65039;</span>
+      <div><h3>Resizes online</h3><p>Grow / shrink the queues live via a background thread.</p></div>
+    </div>
+  </div>
+  <div class="callout frag" style="margin-top:20px; text-align:center; border-color:var(--deploy);">
+    <b style="color:var(--deploy)">Simplicity &mdash; a first-class goal:</b> simple data structures & no adaptive tuning.
+  </div>
+  <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
+</section>
+
 <section class="slide" data-sec="backup" data-secname="Backup" data-time="">
   <div class="accentbar" style="background:var(--faint)"></div>
   <div class="backup-mark">Backup</div>
@@ -667,6 +672,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
 </section>
 
+<div id="runhead">Clock2Q+: A Simple and Efficient Replacement Algorithm for Metadata Cache in VMware vSAN</div>
 </div></div>
 
 <div id="prog"></div>
@@ -719,6 +725,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     const num=isBackup? 'B'+(ci-mainCount+1) : (ci+1)+' / '+mainCount;
     document.getElementById('pager').textContent=num;
     const fl=document.getElementById('footlogos'); if(fl) fl.style.display=(ci===0||s.dataset.sec==='wrap')?'none':'flex';
+    const rh=document.getElementById('runhead'); if(rh) rh.style.display=(ci===0)?'none':'block';
     const tm=s.querySelector('.tm'); if(tm) tm.textContent='';
     // speaker notes
     const n=NOTES[ci], np=document.getElementById('notes-panel');
@@ -793,9 +800,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       else { if(_drb){_drb.setAttribute('fill','#fff'); _drb.setAttribute('stroke','#3a4750');} if(_dr){_dr.textContent='0'; _dr.setAttribute('fill','#3a4750');} } }
     function _refresh(){
       _badge(_on ? (_pos==='in'?0:1) : 1);   // S3-FIFO: ANY re-hit sets Ref=1
-      if(_dm){ if(!_on) _dm.innerHTML='<b style="color:#e04b3a">S3-FIFO</b>: <b>any</b> re-hit sets <b>Ref = 1</b> \u2014 even a burst near the head \u2192 pollution.';
-        else if(_pos==='in') _dm.innerHTML='<b style="color:#e8930c">Clock2Q+, inside the window</b>: same burst, so <b>Ref stays 0</b> \u2192 ages out to Ghost.';
-        else _dm.innerHTML='<b style="color:#2f9e44">Clock2Q+, beyond the window</b>: real reuse, so <b>Ref = 1</b> \u2192 promoted to Main.'; }
+      var a=document.getElementById('txt-s36'), b=document.getElementById('txt-in6'), c=document.getElementById('txt-out6');
+      if(a) a.classList.toggle('hl', !_on);
+      if(b) b.classList.toggle('hl', _on && _pos==='in');
+      if(c) c.classList.toggle('hl', _on && _pos==='out');
     }
     function _setPolicy(on){ _on=on; _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a'); _refresh(); }
     function _pulse(){ if(_db){ _db.classList.remove('blkpulse6'); _db.getBoundingClientRect(); _db.classList.add('blkpulse6'); } }
