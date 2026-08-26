@@ -458,15 +458,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker" style="color:var(--results)">Result — miss ratio</div>
   <h2 class="stitle">Lowest miss ratio across 10 SOTA policies</h2>
   <div class="sub" style="text-align:center; margin:-2px 0 12px; font-size:16px;">Each box is a policy's miss ratio <b>relative to Clock2Q+</b>. <b>Below 0 = worse than Clock2Q+.</b></div>
-  <div class="cols" style="gap:24px;">
-    <figure class="frag" data-f="1">
-      <img src="assets/meta_box.png" alt="metadata results" style="max-height:340px;">
+  <div style="display:flex; gap:18px; align-items:center; justify-content:center;">
+    <figure class="frag" data-f="1" style="margin:0;">
+      <img src="assets/meta_plot.png" alt="metadata results" style="max-height:300px;">
       <figcaption><b>Metadata traces.</b> Higher is better.</figcaption>
     </figure>
-    <figure class="frag" data-f="2">
-      <img src="assets/data_box.png" alt="data results" style="max-height:340px;">
+    <figure class="frag" data-f="2" style="margin:0;">
+      <img src="assets/data_plot.png" alt="data results" style="max-height:300px;">
       <figcaption><b>Data traces.</b></figcaption>
     </figure>
+    <img src="assets/legend_box.png" alt="policy legend" style="max-height:262px; align-self:center;">
   </div>
   <div class="callout r frag" data-f="3" style="margin-top:18px; border-color:var(--results); text-align:center; font-size:20px;">
     Best <b>median &amp; mean</b> improvement at every cache size — up to <span class="hl-g">28.5%</span> per-trace over S3-FIFO on metadata.
