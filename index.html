@@ -162,23 +162,21 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <section class="slide" id="s-title" data-sec="" data-secname="" data-time="0:30">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <div class="kicker" style="color:var(--accent)">VLDB 2026 · Industrial Track</div>
+  <div class="logos" style="position:absolute; top:34px; right:70px; gap:30px;">
+    <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University" style="height:44px;">
+    <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University" style="height:50px;">
+    <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom" style="height:20px;">
+  </div>
   <h1 class="title" style="font-size:52px; margin-top:10px;">Clock2Q+</h1>
   <div class="big" style="color:var(--muted); font-weight:700; margin-top:8px; white-space:nowrap; font-size:25px;">
     Correlation-Aware Cache Replacement for Metadata Caches</div>
   <div style="margin-top:12px; font-size:15.5px; font-weight:800; color:#1f6fa8;">Deployed in VMware vSAN</div>
-  <div style="position:absolute; left:70px; right:70px; bottom:56px; display:flex; align-items:flex-end; justify-content:space-between; gap:44px;">
-    <div>
-      <div class="authors" style="font-size:15px; line-height:1.75;">
-        <b>Yiyan Zhai</b><sup>1</sup>&nbsp;&nbsp; Bintang Dwi Marthen<sup>2</sup>&nbsp;&nbsp; Sarath Balivada<sup>3</sup>&nbsp;&nbsp; Vamsi Sudhakar Bojji<sup>3</sup>&nbsp;&nbsp; Eric Knauft<sup>3</sup>&nbsp;&nbsp; Jitender Rohilla<sup>3</sup><br>
-        Jiaqi Zuo<sup>3</sup>&nbsp;&nbsp; Quanxing Liu<sup>3</sup>&nbsp;&nbsp; Maxime Austruy<sup>3</sup>&nbsp;&nbsp; Junlong Gao<sup>3</sup>&nbsp;&nbsp; Wenguang Wang<sup>3</sup>&nbsp;&nbsp; Juncheng Yang<sup>2</sup>
-      </div>
-      <div class="affil" style="margin-top:8px;"><sup>1</sup>Carnegie Mellon University&nbsp;&nbsp; <sup>2</sup>Harvard University&nbsp;&nbsp; <sup>3</sup>Broadcom</div>
+  <div style="position:absolute; left:70px; right:70px; bottom:56px;">
+    <div class="authors" style="font-size:15px; line-height:1.75;">
+      <b>Yiyan Zhai</b><sup>1</sup>&nbsp;&nbsp; Bintang Dwi Marthen<sup>2</sup>&nbsp;&nbsp; Sarath Balivada<sup>3</sup>&nbsp;&nbsp; Vamsi Sudhakar Bojji<sup>3</sup>&nbsp;&nbsp; Eric Knauft<sup>3</sup>&nbsp;&nbsp; Jitender Rohilla<sup>3</sup><br>
+      Jiaqi Zuo<sup>3</sup>&nbsp;&nbsp; Quanxing Liu<sup>3</sup>&nbsp;&nbsp; Maxime Austruy<sup>3</sup>&nbsp;&nbsp; Junlong Gao<sup>3</sup>&nbsp;&nbsp; Wenguang Wang<sup>3</sup>&nbsp;&nbsp; Juncheng Yang<sup>2</sup>
     </div>
-    <div class="logos col" style="flex:none;">
-      <img class="l-cmu" src="assets/logos/cmu.png" alt="Carnegie Mellon University">
-      <img class="l-harvard" src="assets/logos/harvard.svg" alt="Harvard University">
-      <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom">
-    </div>
+    <div class="affil" style="margin-top:8px;"><sup>1</sup>Carnegie Mellon University&nbsp;&nbsp; <sup>2</sup>Harvard University&nbsp;&nbsp; <sup>3</sup>Broadcom</div>
   </div>
 </section>
 
@@ -462,13 +460,13 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div style="display:flex; gap:18px; align-items:center; justify-content:center;">
     <figure class="frag" data-f="1" style="margin:0;">
       <img src="assets/meta_plot.png" alt="metadata results" style="max-height:300px;">
-      <figcaption><b>Metadata traces.</b> Higher is better.</figcaption>
+      <figcaption style="font-size:18px;"><b>Metadata traces.</b> Higher is better.</figcaption>
     </figure>
     <figure class="frag" data-f="2" style="margin:0;">
       <img src="assets/data_plot.png" alt="data results" style="max-height:300px;">
-      <figcaption><b>Data traces.</b></figcaption>
+      <figcaption style="font-size:18px;"><b>Data traces.</b></figcaption>
     </figure>
-    <img src="assets/legend_box.png" alt="policy legend" style="max-height:262px; align-self:center;">
+    <img src="assets/legend_box.png" alt="policy legend" style="max-height:228px; align-self:center;">
   </div>
   <div class="callout r frag" data-f="3" style="margin-top:18px; border-color:var(--results); text-align:center; font-size:20px;">
     Best <b>median &amp; mean</b> improvement at every cache size — up to <span class="hl-g">28.5%</span> per-trace over S3-FIFO on metadata.
