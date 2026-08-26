@@ -232,10 +232,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <h2 class="stitle"><span class="hl-r">Structural locality</span>: a page packs many keys</h2>
   <div class="cols" style="grid-template-columns:1.05fr 0.95fr; gap:30px; align-items:center;">
     <figure><img src="assets/btree.png" alt="B-tree mapping logical to physical addresses" style="max-height:290px;">
-      <figcaption style="font-size:16.5px; color:#4a5560;">vSAN maps logical → physical addresses through B-trees.</figcaption></figure>
+      <figcaption style="font-size:16.5px; color:#4a5560;">A <b>metadata page</b> is a <b>B-tree</b> node; the tree maps <b>logical&nbsp;→&nbsp;physical</b> addresses.</figcaption></figure>
     <ul class="clean" style="font-size:19px;">
-      <li class="frag" data-f="1">A metadata page isn't one key — a B-tree <b>leaf packs hundreds of mapping tuples</b>.</li>
-      <li class="frag" data-f="3">Different accesses repeatedly hit the <b>same page</b> — by structure, not popularity.</li>
+      <li class="frag" data-f="1">One page holds <b>hundreds of mappings</b> — a full B-tree <b>leaf</b>, not a single key.</li>
+      <li class="frag" data-f="3">So <b>unrelated lookups pile onto the same page</b> — it <i>looks</i> hot, but that's <b>structure, not popularity</b>.</li>
     </ul>
   </div>
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
