@@ -266,10 +266,12 @@
     return i;
   }
   async function admitToMain(id){
-    tokens[id].ghost=false; tokens[id].ref=1; render(id);
-    let slot=clock.indexOf(null);
-    if(slot<0){ situation('evict'); say('The Main Clock is full — the hand sweeps for a victim.'); slot=await sweepEvict(); }
+    tokens[id].ghost=false; tokens[id].ref=0; render(id);        // fresh in Main Clock: Ref reset to 0
+    let slot;
+    if(clock[handIdx]===null){ slot=handIdx; }                    // insert right before the clock hand
+    else { situation('evict'); say('The Main Clock is full — the hand sweeps for a victim.'); slot=await sweepEvict(); }
     clock[slot]=id; place(id,RING[slot][0],RING[slot][1]); pulse(id);
+    flash('enters Main · Ref=0', RING[slot][0], RING[slot][1]-38, 'warn');
     handIdx=(slot+1)%M; setHand(handIdx); await sleep(400);
   }
 
@@ -350,9 +352,9 @@
 
         // STEP 2 — everything moves at once (no vacant slot)
         small.pop(); let dropId=null;
-        if(et.ref===1){ et.ghost=false; et.ref=1; render(ev);
-          let slot=clock.indexOf(null); if(slot<0){ situation('evict'); slot=await sweepEvict(); }
-          clock[slot]=ev; handIdx=(slot+1)%M; setHand(handIdx); }
+        if(et.ref===1){ et.ghost=false; et.ref=0; render(ev);   // fresh in Main Clock: Ref reset to 0
+          let slot; if(clock[handIdx]===null){ slot=handIdx; } else { situation('evict'); slot=await sweepEvict(); }
+          clock[slot]=ev; place(ev,RING[slot][0],RING[slot][1]); handIdx=(slot+1)%M; setHand(handIdx); }
         else { dropId=ghostInsertHead(ev); }
         small.unshift(nid); layout();
         await gate(840);
