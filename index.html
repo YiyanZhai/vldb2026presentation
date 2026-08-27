@@ -275,6 +275,53 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
 </section>
 
+<!-- ============ 3.5 · BACKGROUND: THREE QUEUES ============ -->
+<section class="slide" data-sec="problem" data-secname="Problem" data-time="0:45">
+  <div class="accentbar"></div>
+  <div class="kicker">Background &middot; the shared design</div>
+  <h2 class="stitle">Modern caches share a <span class="hl">three-queue</span> skeleton</h2>
+  <div class="sub" style="text-align:center; margin:-2px 0 4px; font-size:16px;">2Q, S3-FIFO, and Clock2Q are all built from the same three queues.</div>
+  <figure style="text-align:center; margin-top:8px;">
+    <svg viewBox="0 0 640 250" width="82%" style="max-height:300px;">
+      <defs>
+        <marker id="bg-g" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
+        <marker id="bg-p" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f9e44"/></marker>
+      </defs>
+      <!-- new access -->
+      <text x="62" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#5f6b76">new access</text>
+      <path d="M14,80 L116,80" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#bg-g)"/>
+      <!-- Small (admission) FIFO -->
+      <text x="195" y="34" text-anchor="middle" font-size="13.5" font-weight="800" fill="#8b6a12">Small &middot; admission (FIFO)</text>
+      <rect x="120" y="44" width="150" height="72" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2.2" stroke-dasharray="6 5"/>
+      <text x="195" y="86" text-anchor="middle" font-size="12.5" fill="#8b6a12">new items land here first</text>
+      <!-- promote -->
+      <path d="M270,72 L426,72" stroke="#2f9e44" stroke-width="2.6" fill="none" marker-end="url(#bg-p)"/>
+      <text x="348" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#2f9e44">promote</text>
+      <!-- Main -->
+      <text x="510" y="34" text-anchor="middle" font-size="13.5" font-weight="800" fill="#5f6b76">Main</text>
+      <rect x="430" y="44" width="160" height="72" rx="11" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2.2"/>
+      <text x="510" y="86" text-anchor="middle" font-size="12.5" fill="#5f6b76">long-lived hot items</text>
+      <!-- evict from Small -->
+      <path d="M185,116 L298,170" stroke="#9aa5ad" stroke-width="2.2" fill="none" marker-end="url(#bg-g)"/>
+      <text x="208" y="152" text-anchor="middle" font-size="12" fill="#6b7681">evict</text>
+      <!-- evict from Main -->
+      <path d="M505,116 L402,170" stroke="#9aa5ad" stroke-width="2.2" fill="none" marker-end="url(#bg-g)"/>
+      <text x="492" y="152" text-anchor="middle" font-size="12" fill="#6b7681">evict</text>
+      <!-- Ghost -->
+      <rect x="255" y="172" width="180" height="54" rx="11" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.2" stroke-dasharray="6 5"/>
+      <text x="345" y="194" text-anchor="middle" font-size="13.5" font-weight="800" fill="#5f6b76">Ghost</text>
+      <text x="345" y="213" text-anchor="middle" font-size="11.5" fill="#6b7681">keys only &mdash; remembers recent evictions</text>
+      <!-- re-request -> promote -->
+      <path d="M435,190 C560,190 560,116 522,118" stroke="#2f9e44" stroke-width="2.2" fill="none" stroke-dasharray="5 4" marker-end="url(#bg-p)"/>
+      <text x="588" y="156" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2f9e44">re-request</text>
+    </svg>
+  </figure>
+  <div class="callout frag" style="margin-top:14px; text-align:center; border-color:var(--accent);">
+    The three queues are fixed. What differs between policies is <b>how an item earns promotion to Main</b>.
+  </div>
+  <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
+</section>
+
 <!-- ============ 4 · WHY EXISTING FAIL ============ -->
 <section class="slide" data-sec="problem" data-secname="Problem" data-time="1:05">
   <div class="accentbar"></div>
@@ -730,6 +777,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
     {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of tuples. Distinct keys co-reside (L1 & L5 → leaf m4) → accesses hit the same page by structure, not popularity.'},
     {t:'That packing shows up directly in the access stream.', r:'Burst = a sequential run of lookups landing on the SAME cold page in a short time (not unrelated random hits) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
+    {t:'Before the two designs — the shared 3-queue skeleton.', r:'Small (admission) FIFO catches new items; Main holds long-lived hot items; Ghost keeps keys-only of recent evictions so a re-request can be recognized. 2Q, S3-FIFO, and Clock2Q all use this — they differ only in how an item earns promotion to Main.'},
     {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit, set on any re-hit → a burst admits a cold page. Clock2Q/2Q: no admission bit → promote only after drop + re-ask → delays hot blocks.'},
     {t:'The insight IS the design: add a correlation window.', r:'WHERE a re-hit happens is the signal. Inside the window → Ref stays 0 (burst → Ghost); beyond → Ref = 1 → promote to Main. One change to S3-FIFO.'},
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
