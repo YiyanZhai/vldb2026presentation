@@ -538,21 +538,15 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div style="display:flex; flex-direction:column; justify-content:center; min-height:470px;">
   <div style="display:flex; align-items:center; justify-content:center; gap:2px;">
     <!-- 2Q: conceptual starting point -->
-    <div class="tl" style="margin-top:0;">
+    <div class="tl" style="margin-top:0; order:1;">
       <div class="stage frag" style="flex:none; width:150px; min-height:156px;">
         <div class="badge">2Q</div>
         <div class="mini"><span class="q">Small FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
         <div class="dep">conceptual starting point</div>
       </div>
     </div>
-    <!-- diverge: 2Q -> Clock2Q / S3-FIFO -->
-    <svg width="64" height="334" viewBox="0 0 64 334" style="flex:none;" aria-hidden="true">
-      <defs><marker id="lin-a" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#b7bcc6"/></marker></defs>
-      <path d="M0,167 H16 L56,78" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
-      <path d="M0,167 H16 L56,256" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
-    </svg>
     <!-- middle column: Clock2Q (top) / S3-FIFO (bottom) -->
-    <div style="display:flex; flex-direction:column; gap:22px;">
+    <div style="display:flex; flex-direction:column; gap:22px; order:3;">
       <div class="tl" style="margin-top:0;">
         <div class="stage frag" style="flex:none; width:158px; min-height:156px;">
           <div class="badge">Clock2Q</div>
@@ -573,18 +567,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         </div>
       </div>
     </div>
-    <!-- merge: Clock2Q + S3-FIFO -> Clock2Q+, with inheritance labels -->
-    <svg width="192" height="334" viewBox="0 0 192 334" style="flex:none;">
-      <defs><marker id="lin-b" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#7048b6"/></marker></defs>
-      <path d="M0,78 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
-      <path d="M0,256 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
-      <text x="56" y="61" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
-      <text x="56" y="74" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Window</text>
-      <text x="56" y="277" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Correlation</text>
-      <text x="56" y="290" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">Window</text>
+    <!-- diverge: 2Q -> Clock2Q / S3-FIFO (revealed after the two branch nodes) -->
+    <svg class="frag" width="64" height="334" viewBox="0 0 64 334" style="flex:none; order:2;" aria-hidden="true">
+      <defs><marker id="lin-a" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#b7bcc6"/></marker></defs>
+      <path d="M0,167 H16 L56,78" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+      <path d="M0,167 H16 L56,256" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
     </svg>
     <!-- Clock2Q+ -->
-    <div class="tl" style="margin-top:0;">
+    <div class="tl" style="margin-top:0; order:5;">
       <div class="stage cur frag" style="flex:none; width:178px; min-height:156px;">
         <div class="badge">Clock2Q+</div>
         <div class="mini"><span class="q">FIFO</span><span class="q new">+ Window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
@@ -594,6 +584,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <div class="dep">VDFS &middot; ESA etc, today</div>
       </div>
     </div>
+    <!-- merge: Clock2Q + S3-FIFO -> Clock2Q+ (revealed with Clock2Q+) -->
+    <svg class="frag" width="192" height="334" viewBox="0 0 192 334" style="flex:none; order:4;">
+      <defs><marker id="lin-b" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#7048b6"/></marker></defs>
+      <path d="M0,78 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <path d="M0,256 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <text x="56" y="61" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
+      <text x="56" y="74" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Window</text>
+      <text x="56" y="277" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Correlation</text>
+      <text x="56" y="290" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">Window</text>
+    </svg>
   </div>
   <div class="callout frag" style="margin-top:22px; text-align:center; border-color:var(--deploy);">
     <b style="color:var(--deploy)">Simplicity &mdash; a first-class goal:</b> every step stayed easy to implement, debug, and operate.
