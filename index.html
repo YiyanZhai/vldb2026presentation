@@ -533,51 +533,68 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 
 
 <!-- ============ 10 · EVOLUTION ============ -->
-<section class="slide" data-sec="deploy" data-secname="Evolution" data-time="0:45">
+<section class="slide" data-sec="deploy" data-secname="Lineage" data-time="0:45">
   <div class="accentbar" style="background:var(--deploy)"></div>
-  <div class="kicker" style="color:var(--deploy)">Deployment &middot; a decade of evolution</div>
-  <h2 class="stitle">How vSAN's cache evolved</h2>
+  <div class="kicker" style="color:var(--deploy)">Design lineage</div>
+  <h2 class="stitle">Where Clock2Q+ comes from</h2>
   <div style="display:flex; flex-direction:column; justify-content:center; min-height:470px;">
-  <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
-    <div style="display:flex; flex-direction:column; gap:26px;">
-      <!-- main deployed line -->
-      <div class="tl" style="margin-top:0; justify-content:flex-start;">
-        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
-          <div class="badge">2Q</div>
-          <div class="mini"><span class="q">FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
-          <div class="chg">three-queue baseline</div>
-          <div class="dep">the classic &middot; 1994<br><span style="color:#b06a5e;">never used by vSAN</span></div>
-        </div>
-        <div class="arrow frag">&rarr;</div>
-        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
+  <div style="display:flex; align-items:center; justify-content:center; gap:2px;">
+    <!-- 2Q: conceptual starting point -->
+    <div class="tl" style="margin-top:0;">
+      <div class="stage frag" style="flex:none; width:150px; min-height:156px;">
+        <div class="badge">2Q</div>
+        <div class="mini"><span class="q">Small FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
+        <div class="chg">filters short-term references</div>
+        <div style="font-size:11.5px; color:#b06a5e; margin-top:5px;">but Main LRU is expensive</div>
+        <div class="dep">conceptual starting point</div>
+      </div>
+    </div>
+    <!-- diverge: 2Q -> Clock2Q / S3-FIFO -->
+    <svg width="64" height="334" viewBox="0 0 64 334" style="flex:none;" aria-hidden="true">
+      <defs><marker id="lin-a" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#b7bcc6"/></marker></defs>
+      <path d="M0,167 H16 L56,78" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+      <path d="M0,167 H16 L56,256" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+    </svg>
+    <!-- middle column: Clock2Q (top) / S3-FIFO (bottom) -->
+    <div style="display:flex; flex-direction:column; gap:22px;">
+      <div class="tl" style="margin-top:0;">
+        <div class="stage frag" style="flex:none; width:158px; min-height:156px;">
           <div class="badge">Clock2Q</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">Main Clock</span><span class="q">Ghost</span></div>
-          <div class="chg">LRU &rarr; <b>Clock</b> <span style="color:#8b96a0">(lower CPU)</span></div>
-          <div class="dep">vSAN OSA &middot; VDFS &middot; ESA<br>&middot; other services</div>
+          <div class="chg">Main LRU &rarr; <b>Main Clock</b></div>
+          <div style="font-size:12px; color:#2f9e44; font-weight:700; margin-top:5px;">lower CPU overhead</div>
         </div>
       </div>
-      <!-- experimental branch -->
-      <div class="tl" style="margin-top:0; justify-content:flex-end;">
-        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
+      <div class="tl" style="margin-top:0;">
+        <div class="stage frag" style="flex:none; width:158px; min-height:156px;">
           <div class="badge">S3-FIFO</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">+ Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
-          <div class="chg">+ <b>Ref bit</b> <span style="color:#8b96a0">(direct promotion)</span></div>
-          <div class="dep">2023 &middot; on a branch, experimental</div>
+          <div class="chg">add <b>Ref bit</b> to Small</div>
+          <div style="font-size:11.5px; color:#2f9e44; font-weight:700; margin-top:4px;">directly promotes re-referenced blocks</div>
+          <div style="font-size:11px; color:#c23a2b; margin-top:3px;">but correlated refs can look hot</div>
+          <div class="dep">state-of-the-art comparison</div>
         </div>
       </div>
     </div>
-    <!-- merge connector: both lines converge on Clock2Q+ -->
-    <svg width="60" height="342" viewBox="0 0 60 342" style="flex:none;" aria-hidden="true">
-      <path d="M0 79 H22 L50 171" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <path d="M0 263 H22 L50 171" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <path d="M44 164 L60 171 L44 178 Z" fill="#7048b6"/>
+    <!-- merge: Clock2Q + S3-FIFO -> Clock2Q+, with inheritance labels -->
+    <svg width="192" height="334" viewBox="0 0 192 334" style="flex:none;">
+      <defs><marker id="lin-b" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#7048b6"/></marker></defs>
+      <path d="M0,78 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <path d="M0,256 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <text x="56" y="61" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">low-overhead</text>
+      <text x="56" y="74" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">Main Clock</text>
+      <text x="56" y="277" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">direct promotion</text>
+      <text x="56" y="290" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">with Ref bit</text>
     </svg>
+    <!-- Clock2Q+ -->
     <div class="tl" style="margin-top:0;">
-      <div class="stage cur frag" style="flex:none; width:162px; min-height:158px;">
+      <div class="stage cur frag" style="flex:none; width:178px; min-height:156px;">
         <div class="badge">Clock2Q+</div>
-        <div class="mini"><span class="q">FIFO</span><span class="q new">+ window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
-        <div class="chg"><b>Correlation-aware</b></div>
-        <div class="dep">vSAN &middot; VDFS &middot; ESA &middot; &hellip;, today</div>
+        <div class="mini"><span class="q">FIFO</span><span class="q new">+ Window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
+        <div class="chg">+ <b>Correlation Window</b></div>
+        <div style="font-size:11.5px; color:#5f6b76; margin-top:4px;">ignore Ref updates for early re-references</div>
+        <div style="font-size:11.5px; color:var(--deploy); font-weight:800; margin-top:6px;">prevents correlated accesses from polluting Main</div>
+        <div class="dep">VDFS &middot; ESA etc, today</div>
       </div>
     </div>
   </div>
@@ -585,7 +602,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <b style="color:var(--deploy)">Simplicity &mdash; a first-class goal:</b> every step stayed easy to implement, debug, and operate.
   </div>
   </div>
-  <div class="foot"><span class="sec">Evolution</span><span class="tm"></span></div>
+  <div class="foot"><span class="sec">Lineage</span><span class="tm"></span></div>
 </section>
 
 <!-- ============ 12 · TAKEAWAYS ============ -->
@@ -785,7 +802,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
-    {t:'Nearly a decade of evolution — walk the timeline.', r:'2Q is the classic baseline (never shipped in vSAN). Clock2Q (LRU→Clock) ships across vSAN OSA, VDFS, ESA & other services — concurrency is an implementation detail, not a separate policy, so it is one node. S3-FIFO lived on an experimental branch. Both Clock2Q and S3-FIFO converge on Clock2Q+, which is correlation-aware, deployed today. Simplicity throughout.'},
+    {t:'Where Clock2Q+ comes from — the design lineage.', r:'2Q is the conceptual starting point (Small FIFO, Main LRU, Ghost) — filters short-term refs but Main LRU is costly. Two branches fix different things: Clock2Q swaps Main LRU→Main Clock (lower CPU); S3-FIFO adds a Ref bit to Small (directly promotes re-referenced blocks, but correlated refs can look hot). Clock2Q+ inherits the low-overhead Main Clock from Clock2Q AND direct promotion from S3-FIFO, then adds the Correlation Window — ignore Ref updates for early re-references — so correlated metadata accesses no longer pollute Main. Deployed in VDFS, ESA, etc.'},
     {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
     {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
   ];
