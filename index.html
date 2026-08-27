@@ -539,16 +539,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div style="display:flex; align-items:center; justify-content:center; gap:2px;">
     <!-- 2Q: conceptual starting point -->
     <div class="tl" style="margin-top:0; order:1;">
-      <div class="stage frag" style="flex:none; width:150px; min-height:156px;">
+      <div class="stage frag" style="flex:none; width:162px; min-height:150px;">
         <div class="badge">2Q</div>
         <div class="mini"><span class="q">Small FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
         <div class="dep">conceptual starting point</div>
       </div>
     </div>
     <!-- middle column: Clock2Q (top) / S3-FIFO (bottom) -->
-    <div style="display:flex; flex-direction:column; gap:22px; order:3;">
+    <div style="display:flex; flex-direction:column; gap:20px; order:3;">
       <div class="tl" style="margin-top:0;">
-        <div class="stage frag" style="flex:none; width:158px; min-height:156px;">
+        <div class="stage frag" style="flex:none; width:172px; min-height:150px;">
           <div class="badge">Clock2Q</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">Main Clock</span><span class="q">Ghost</span></div>
           <div class="chg">LRU &rarr; <b>Clock</b></div>
@@ -557,25 +557,23 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         </div>
       </div>
       <div class="tl" style="margin-top:0;">
-        <div class="stage frag" style="flex:none; width:158px; min-height:156px;">
+        <div class="stage frag" style="flex:none; width:172px; min-height:150px;">
           <div class="badge">S3-FIFO</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">+ Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
           <div class="chg">add <b>Ref bit</b> to Small FIFO</div>
-          <div style="font-size:11.5px; color:#2f9e44; font-weight:700; margin-top:4px;">directly promotes re-referenced blocks</div>
-          <div style="font-size:11px; color:#c23a2b; margin-top:3px;">but correlated refs can look hot</div>
           <div class="dep">state-of-the-art comparison</div>
         </div>
       </div>
     </div>
     <!-- diverge: 2Q -> Clock2Q / S3-FIFO (revealed after the two branch nodes) -->
-    <svg class="frag" width="64" height="334" viewBox="0 0 64 334" style="flex:none; order:2;" aria-hidden="true">
+    <svg class="frag" width="64" height="320" viewBox="0 0 64 320" style="flex:none; order:2;" aria-hidden="true">
       <defs><marker id="lin-a" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#b7bcc6"/></marker></defs>
-      <path d="M0,167 H16 L56,78" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
-      <path d="M0,167 H16 L56,256" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+      <path d="M0,160 H16 L56,75" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+      <path d="M0,160 H16 L56,245" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
     </svg>
     <!-- Clock2Q+ -->
     <div class="tl" style="margin-top:0; order:5;">
-      <div class="stage cur frag" style="flex:none; width:178px; min-height:156px;">
+      <div class="stage cur frag" style="flex:none; width:194px; min-height:150px;">
         <div class="badge">Clock2Q+</div>
         <div class="mini"><span class="q">FIFO</span><span class="q new">+ Window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
         <div class="chg"><b>Correlation-aware</b></div>
@@ -585,14 +583,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       </div>
     </div>
     <!-- merge: Clock2Q + S3-FIFO -> Clock2Q+ (revealed with Clock2Q+) -->
-    <svg class="frag" width="192" height="334" viewBox="0 0 192 334" style="flex:none; order:4;">
+    <svg class="frag" width="192" height="320" viewBox="0 0 192 320" style="flex:none; order:4;">
       <defs><marker id="lin-b" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#7048b6"/></marker></defs>
-      <path d="M0,78 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
-      <path d="M0,256 H112 L186,167" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
-      <text x="56" y="61" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
-      <text x="56" y="74" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Window</text>
-      <text x="56" y="277" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Correlation</text>
-      <text x="56" y="290" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">Window</text>
+      <path d="M0,75 H112 L186,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <path d="M0,245 H112 L186,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <text x="56" y="58" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
+      <text x="56" y="71" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Window</text>
+      <text x="56" y="262" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">+ Correlation</text>
+      <text x="56" y="275" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7048b6">Window</text>
     </svg>
   </div>
   <div class="callout frag" style="margin-top:22px; text-align:center; border-color:var(--deploy);">
