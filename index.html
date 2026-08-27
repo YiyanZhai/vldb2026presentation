@@ -550,17 +550,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         </div>
         <div class="arrow frag">&rarr;</div>
         <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
-          <div class="badge">Clock2Q <span style="font-size:12px; font-weight:800; color:#8b96a0;">&middot; single-thread</span></div>
+          <div class="badge">Clock2Q</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">Main Clock</span><span class="q">Ghost</span></div>
           <div class="chg">LRU &rarr; <b>Clock</b> <span style="color:#8b96a0">(lower CPU)</span></div>
-          <div class="dep">vSAN OSA &middot; ~2010</div>
-        </div>
-        <div class="arrow frag">&rarr;</div>
-        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
-          <div class="badge">Clock2Q <span style="font-size:12px; font-weight:800; color:#8b96a0;">&middot; concurrent</span></div>
-          <div class="mini"><span class="q">FIFO</span><span class="q">Main Clock</span><span class="q new">+ multi-CPU</span><span class="q">Ghost</span></div>
-          <div class="chg"><b>concurrent</b> <span style="color:#8b96a0">(multi-CPU)</span></div>
-          <div class="dep">VDFS &middot; ESA &middot; other services</div>
+          <div class="dep">vSAN OSA &middot; VDFS &middot; ESA<br>&middot; other services</div>
         </div>
       </div>
       <!-- experimental branch -->
@@ -583,7 +576,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <div class="stage cur frag" style="flex:none; width:162px; min-height:158px;">
         <div class="badge">Clock2Q+</div>
         <div class="mini"><span class="q">FIFO</span><span class="q new">+ window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
-        <div class="chg">+ <b>correlation window</b></div>
+        <div class="chg"><b>Correlation-aware</b></div>
         <div class="dep">vSAN &middot; VDFS &middot; ESA &middot; &hellip;, today</div>
       </div>
     </div>
@@ -792,7 +785,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
-    {t:'Nearly a decade of evolution — walk the timeline.', r:'2Q is the classic baseline (never shipped in vSAN). Clock2Q single-thread (~2010) shipped in OSA; the concurrent version runs in VDFS, ESA & other services. S3-FIFO lived on an experimental branch. Both the Clock2Q line and S3-FIFO converge on Clock2Q+ (+ correlation window), deployed today. Simplicity throughout.'},
+    {t:'Nearly a decade of evolution — walk the timeline.', r:'2Q is the classic baseline (never shipped in vSAN). Clock2Q (LRU→Clock) ships across vSAN OSA, VDFS, ESA & other services — concurrency is an implementation detail, not a separate policy, so it is one node. S3-FIFO lived on an experimental branch. Both Clock2Q and S3-FIFO converge on Clock2Q+, which is correlation-aware, deployed today. Simplicity throughout.'},
     {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
     {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
   ];
