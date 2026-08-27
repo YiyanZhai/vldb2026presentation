@@ -159,9 +159,9 @@
   class Abort{}
   const _params=new URLSearchParams(location.search);
   let MANUAL=_params.has('step')||_params.has('manual');
-  let _resolve=null, runToken=0;
+  let _resolve=null, runToken=0, FAST=false;
   function sleep(ms){ const my=runToken; return new Promise((res,rej)=>setTimeout(()=> my===runToken?res():rej(new Abort()), ms)); }
-  function gate(ms){ if(!MANUAL) return sleep(ms); const my=runToken; return new Promise((res,rej)=>{ _resolve={res,rej,my}; updateCtl(); }); }
+  function gate(ms){ if(FAST) return sleep(0); if(!MANUAL) return sleep(ms); const my=runToken; return new Promise((res,rej)=>{ _resolve={res,rej,my}; updateCtl(); }); }
   function advance(){ if(_resolve){ const g=_resolve; _resolve=null; g.res(); updateCtl(); } }
   function setManual(on){ MANUAL=on; if(!on) advance(); updateCtl(); }
   function newRun(){ runToken++; if(_resolve){ const g=_resolve; _resolve=null; g.rej(new Abort()); } return runToken; }
@@ -176,7 +176,8 @@
     '#ctl-next.ready{background:#2f9e44;color:#fff;border-color:#2f9e44;animation:ctlp 1.2s infinite;}'+
     '#ctl .scn{background:#eaf4fb;border-color:#bcd8ec;color:#1f6fa8;}'+
     '@keyframes ctlp{0%,100%{box-shadow:0 0 0 0 rgba(47,158,68,.5);}50%{box-shadow:0 0 0 7px rgba(47,158,68,0);}}'+
-    'body.clean #titlebar, body.clean #situations{display:none;}';
+    'body.clean #titlebar, body.clean #situations{display:none;}'+
+    'body.nofx .token, body.nofx #hand, body.nofx .chip{transition:none!important;}';
   document.head.appendChild(_st);
   const ctl=document.createElement('div'); ctl.id='ctl';
   ctl.innerHTML='<button id="ctl-corr" class="scn">▶ Correlated burst</button>'+
@@ -186,8 +187,8 @@
   document.body.appendChild(ctl);
   const _cmode=ctl.querySelector('#ctl-mode'), _cnext=ctl.querySelector('#ctl-next');
   _cmode.onclick=()=>setManual(!MANUAL); _cnext.onclick=()=>advance();
-  ctl.querySelector('#ctl-corr').onclick=()=>{ setManual(true); play(SEQ_CORR,false,'Correlated burst — filtered by the window'); };
-  ctl.querySelector('#ctl-hot').onclick=()=>{ setManual(true); play(SEQ_HOT,false,'Hot block — promoted to the Main Clock'); };
+  ctl.querySelector('#ctl-corr').onclick=()=>{ playScenario(SCN_CORR); };
+  ctl.querySelector('#ctl-hot').onclick=()=>{ playScenario(SCN_HOT); };
   ctl.querySelector('#ctl-full').onclick=()=>{ play(SEQ,true); };
   function updateCtl(){ _cmode.textContent=MANUAL?'▶ Auto':'⏸ Step'; ctl.classList.toggle('manual',MANUAL); _cnext.classList.toggle('ready',!!_resolve); }
   document.addEventListener('keydown',e=>{ if(e.key==='m'||e.key==='M'){ setManual(!MANUAL); } });  // arrows/space are left for the deck to change slides; step via click / Next / scenario buttons
@@ -235,9 +236,9 @@
     ghost.forEach((id,i)=>{const p=xy('ghost',i); place(id,p[0],p[1]);});
     clock.forEach((id,i)=>{if(id){const p=RING[i]; place(id,p[0],p[1]);}});
   }
-  function pulse(id){const t=tokens[id]; if(!t)return; t.el.classList.add('pulse'); setTimeout(()=>t.el.classList.remove('pulse'),600);}
+  function pulse(id){if(FAST)return; const t=tokens[id]; if(!t)return; t.el.classList.add('pulse'); setTimeout(()=>t.el.classList.remove('pulse'),600);}
   function setRef(id,v){if(tokens[id]){tokens[id].ref=v; render(id);}}
-  function flash(text,x,y,cls){const f=document.createElement('div'); f.className='flash'+(cls?' '+cls:'');
+  function flash(text,x,y,cls){if(FAST)return; const f=document.createElement('div'); f.className='flash'+(cls?' '+cls:'');
     f.textContent=text; f.style.left=x+'px'; f.style.top=y+'px'; stage.appendChild(f); setTimeout(()=>f.remove(),1700);}
   function locate(id){ if(clock.indexOf(id)>=0)return'main'; if(small.indexOf(id)>=0)return'small'; if(ghost.indexOf(id)>=0)return'ghost'; return null; }
   function setHand(i){ let target=RINGDEG[i]; while(target<handAngle) target+=360; // clockwise only, never backwards
@@ -293,7 +294,7 @@
   const titleEl=document.getElementById('scene-title'), descEl=document.getElementById('scene-desc');
   function say(t){ descEl.textContent=t; }
   const NAMES={cold:'Cold block',corr:'Correlated burst',hot:'Hot block',ghost:'Ghost hit',evict:'Main Clock eviction'};
-  function situation(k){ titleEl.textContent=NAMES[k]||'';
+  function situation(k){ if(FAST)return; titleEl.textContent=NAMES[k]||'';
     document.querySelectorAll('#situations .st').forEach(s=>{const on=s.dataset.k===k; s.classList.toggle('on',on); if(on) s.classList.add('did');}); }
 
   // palette — every object has its own color (labels are alphabetical by first appearance)
@@ -302,8 +303,9 @@
 
   // compact crafted stream (13 requests) — A cold, C correlated, D hot; B/E/F/G/H drive aging
   const SEQ=['A','B','C','C','D','E','F','D','G','H','A','B','C'].map(k=>({k, c:COL[k]}));
-  const SEQ_CORR=['C','C','A','B','D','E'].map(k=>({k, c:COL[k]}));   // C hit inside the window, then ages out to Ghost
-  const SEQ_HOT =['H','A','B','H','C','D'].map(k=>({k, c:COL[k]}));   // H pushed beyond the window, hit -> Ref=1 -> promote
+  // scenario snapshots: SAME object queue as the full run — fast-build the state up to `start`, then animate [start, stop)
+  const SCN_CORR={start:2, stop:9, title:'Correlated burst — filtered by the window'};  // C enters, hit in window (Ref stays 0), ages out to Ghost
+  const SCN_HOT ={start:7, stop:10, title:'Hot block — promoted to the Main Clock'};    // D hit beyond window -> Ref=1 -> promoted at its tail
 
   async function access(key,color){
     advanceReq(); await sleep(120); // chip slides concurrently with the object's motion below
@@ -393,6 +395,24 @@
       }
     }catch(e){ if(!(e instanceof Abort)) throw e; }
   }
+  // scenario playback: silently fast-build the full-run state up to scn.start, then step through [start, stop)
+  async function playScenario(scn){
+    const my=newRun();
+    try{
+      MANUAL=false; updateCtl();
+      resetAll(); setReqStream(SEQ);
+      FAST=true; document.body.classList.add('nofx');
+      for(let i=0;i<scn.start;i++){ await access(SEQ[i].k, SEQ[i].c); }
+      FAST=false; document.body.classList.remove('nofx');
+      setManual(true);
+      titleEl.textContent=scn.title;
+      say('Snapshot from the full run — stepping on from here.');
+      await gate(1000);
+      for(let i=scn.start; i<scn.stop && i<SEQ.length; i++){ await access(SEQ[i].k, SEQ[i].c); }
+      titleEl.textContent='Done'; say('Scenario complete.');
+    }catch(e){ if(!(e instanceof Abort)) throw e; }
+  }
+
   play(SEQ, true);
 })();
 </script>
