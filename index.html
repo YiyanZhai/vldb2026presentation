@@ -576,17 +576,16 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <div id="lin-c2qp" class="stage cur frag" style="flex:none; width:240px; min-height:150px;">
         <div class="badge">Clock2Q+</div>
         <div class="mini"><span class="q">FIFO</span><span class="q new">+ Window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
-        <div class="chg"><b>Correlation-aware</b></div>
-        <div style="font-size:11.5px; color:#5f6b76; margin-top:4px;">ignore Ref updates for early re-references</div>
-        <div style="font-size:11.5px; color:var(--deploy); font-weight:800; margin-top:6px;">prevents correlated accesses from polluting Main</div>
+        <div class="chg">+ <b>Window &amp; Ref bit</b></div>
         <div class="dep">VDFS &middot; ESA etc, today</div>
       </div>
     </div>
     <!-- merge: Clock2Q + S3-FIFO -> Clock2Q+ (appears WITH the Clock2Q+ box, via JS toggle) -->
     <svg id="lin-mg" width="192" height="320" viewBox="0 0 192 320" style="flex:none; order:4; opacity:0; transition:opacity .4s ease;">
       <defs><marker id="lin-b" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#7048b6"/></marker></defs>
-      <path d="M0,75 H112 L186,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
-      <path d="M0,245 H112 L186,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <path d="M0,75 H100 L150,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M0,245 H100 L150,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M150,160 H184" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linecap="round" marker-end="url(#lin-b)"/>
       <text x="56" y="57" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
       <text x="56" y="72" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Window</text>
       <text x="56" y="264" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Window</text>
