@@ -212,7 +212,7 @@
   }
 
   const tokens={}, byKey={};
-  let small=[], ghost=[], clock=new Array(M).fill(null), handIdx=0, uid=0;
+  let small=[], ghost=[], clock=new Array(M).fill(null), handIdx=0, uid=0, handAngle=-90;
 
   function makeToken(key,color,ref,spawn){
     const id='k'+(uid++);
@@ -240,7 +240,8 @@
   function flash(text,x,y,cls){const f=document.createElement('div'); f.className='flash'+(cls?' '+cls:'');
     f.textContent=text; f.style.left=x+'px'; f.style.top=y+'px'; stage.appendChild(f); setTimeout(()=>f.remove(),1700);}
   function locate(id){ if(clock.indexOf(id)>=0)return'main'; if(small.indexOf(id)>=0)return'small'; if(ghost.indexOf(id)>=0)return'ghost'; return null; }
-  function setHand(i){ hand.style.transform=`rotate(${RINGDEG[i]}deg)`; }
+  function setHand(i){ let target=RINGDEG[i]; while(target<handAngle) target+=360; // clockwise only, never backwards
+    handAngle=target; hand.style.transform=`rotate(${handAngle}deg)`; }
 
   async function trash(id){const t=tokens[id]; if(!t)return; place(id,TRASH[0],TRASH[1]); await sleep(300);
     t.el.classList.add('trashing'); await sleep(600); t.el.remove(); delete tokens[id];}
@@ -370,7 +371,9 @@
     Object.values(tokens).forEach(t=>t.el.remove());
     for(const k in tokens) delete tokens[k];
     for(const k in byKey) delete byKey[k];
-    small=[]; ghost=[]; clock=new Array(M).fill(null); handIdx=0; setHand(0);
+    small=[]; ghost=[]; clock=new Array(M).fill(null); handIdx=0;
+    hand.style.transition='none'; handAngle=-90; hand.style.transform='rotate(-90deg)';   // snap back to start, no reverse spin
+    void hand.offsetWidth; hand.style.transition='transform .8s cubic-bezier(.4,0,.2,1)';
     document.querySelectorAll('#situations .st').forEach(s=>s.classList.remove('on','did'));
     titleEl.textContent=''; say('');
   }
