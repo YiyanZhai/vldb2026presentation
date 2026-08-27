@@ -233,7 +233,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <figcaption style="font-size:16.5px; color:#4a5560;">A <b>B-tree</b> maps <b>logical&nbsp;→&nbsp;physical</b> addresses; each node is one <b>metadata page</b>, packed with many mappings.</figcaption></figure>
     <ul class="clean" style="font-size:19px;">
       <li class="frag" data-f="1">A <b>metadata page</b> = a B-tree <b>leaf</b> holding <b>hundreds of key&nbsp;→&nbsp;location mappings</b> — not one key.</li>
-      <li class="frag" data-f="2">So <b>many unrelated lookups land on the same page</b>.</li>
+      <li class="frag" data-f="2">A <b>sequential run of lookups</b> lands on the <b>same page</b> in a <b>short time</b>.</li>
       <li class="frag" data-f="3">The page <i>looks</i> hot — but that's <b>structure, not real popularity</b>.</li>
     </ul>
   </div>
@@ -247,18 +247,18 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <figure style="text-align:center; margin-top:14px;">
       <svg width="680" height="378" viewBox="0 0 540 300">
         <defs><marker id="cr" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker></defs>
-        <text x="270" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#5f6b76">unrelated accesses to different keys</text>
+        <text x="270" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#5f6b76">sequential lookups to a cold page, in a short time</text>
         <g font-size="15" font-weight="800" fill="#fff" text-anchor="middle" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">
           <rect x="118" y="34" width="64" height="34" rx="17" fill="#4c8bf5"/><text x="150" y="57">L1</text>
-          <rect x="238" y="34" width="64" height="34" rx="17" fill="#00c39a"/><text x="270" y="57">L5</text>
-          <rect x="358" y="34" width="64" height="34" rx="17" fill="#9b5de5"/><text x="390" y="57">L8</text>
+          <rect x="238" y="34" width="64" height="34" rx="17" fill="#00c39a"/><text x="270" y="57">L2</text>
+          <rect x="358" y="34" width="64" height="34" rx="17" fill="#9b5de5"/><text x="390" y="57">L3</text>
         </g>
         <path d="M150,70 L246,112" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <path d="M270,70 L270,112" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <path d="M390,70 L294,112" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <rect x="185" y="116" width="170" height="64" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2.4"/>
         <text x="270" y="143" text-anchor="middle" font-size="16" font-weight="800" fill="#b9860f">leaf <tspan font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">m4</tspan></text>
-        <text x="270" y="164" text-anchor="middle" font-size="11" fill="#8b6a12"><tspan font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">L1, L5, L8</tspan> all live on it</text>
+        <text x="270" y="164" text-anchor="middle" font-size="11" fill="#8b6a12"><tspan font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">L1, L2, L3</tspan> all live on it</text>
         <path d="M270,182 L270,206" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <line x1="120" y1="256" x2="430" y2="256" stroke="#c2ccd4" stroke-width="2"/>
         <text x="430" y="276" text-anchor="end" font-size="11" fill="#9aa5ad">time &#8594;</text>
@@ -729,7 +729,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
     {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of tuples. Distinct keys co-reside (L1 & L5 → leaf m4) → accesses hit the same page by structure, not popularity.'},
-    {t:'That packing shows up directly in the access stream.', r:'Burst = unrelated accesses landing on the SAME page — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
+    {t:'That packing shows up directly in the access stream.', r:'Burst = a sequential run of lookups landing on the SAME cold page in a short time (not unrelated random hits) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
     {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit, set on any re-hit → a burst admits a cold page. Clock2Q/2Q: no admission bit → promote only after drop + re-ask → delays hot blocks.'},
     {t:'The insight IS the design: add a correlation window.', r:'WHERE a re-hit happens is the signal. Inside the window → Ref stays 0 (burst → Ghost); beyond → Ref = 1 → promote to Main. One change to S3-FIFO.'},
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
