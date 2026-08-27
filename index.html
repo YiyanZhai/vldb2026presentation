@@ -482,33 +482,54 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker" style="color:var(--deploy)">Deployment &middot; a decade of evolution</div>
   <h2 class="stitle">How vSAN's cache evolved</h2>
   <div style="display:flex; flex-direction:column; justify-content:center; min-height:470px;">
-  <div class="tl">
-    <div class="stage frag">
-      <div class="badge">2Q</div>
-      <div class="mini"><span class="q">FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
-      <div class="chg">three-queue baseline</div>
-      <div class="dep">the classic &middot; 1994</div>
+  <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+    <div style="display:flex; flex-direction:column; gap:26px;">
+      <!-- main deployed line -->
+      <div class="tl" style="margin-top:0; justify-content:flex-start;">
+        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
+          <div class="badge">2Q</div>
+          <div class="mini"><span class="q">FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
+          <div class="chg">three-queue baseline</div>
+          <div class="dep">the classic &middot; 1994<br><span style="color:#b06a5e;">never used by vSAN</span></div>
+        </div>
+        <div class="arrow frag">&rarr;</div>
+        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
+          <div class="badge">Clock2Q <span style="font-size:12px; font-weight:800; color:#8b96a0;">&middot; single-thread</span></div>
+          <div class="mini"><span class="q">FIFO</span><span class="q new">Main Clock</span><span class="q">Ghost</span></div>
+          <div class="chg">LRU &rarr; <b>Clock</b> <span style="color:#8b96a0">(lower CPU)</span></div>
+          <div class="dep">vSAN OSA &middot; ~2010</div>
+        </div>
+        <div class="arrow frag">&rarr;</div>
+        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
+          <div class="badge">Clock2Q <span style="font-size:12px; font-weight:800; color:#8b96a0;">&middot; concurrent</span></div>
+          <div class="mini"><span class="q">FIFO</span><span class="q">Main Clock</span><span class="q new">+ multi-CPU</span><span class="q">Ghost</span></div>
+          <div class="chg"><b>concurrent</b> <span style="color:#8b96a0">(multi-CPU)</span></div>
+          <div class="dep">VDFS &middot; ESA &middot; other services</div>
+        </div>
+      </div>
+      <!-- experimental branch -->
+      <div class="tl" style="margin-top:0; justify-content:flex-end;">
+        <div class="stage frag" style="flex:none; width:152px; min-height:158px;">
+          <div class="badge">S3-FIFO</div>
+          <div class="mini"><span class="q">FIFO</span><span class="q new">+ Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
+          <div class="chg">+ <b>Ref bit</b> <span style="color:#8b96a0">(direct promotion)</span></div>
+          <div class="dep">2023 &middot; on a branch, experimental</div>
+        </div>
+      </div>
     </div>
-    <div class="arrow frag">&rarr;</div>
-    <div class="stage frag">
-      <div class="badge">Clock2Q</div>
-      <div class="mini"><span class="q">FIFO</span><span class="q new">Main Clock</span><span class="q">Ghost</span></div>
-      <div class="chg">LRU &rarr; <b>Clock</b> <span style="color:#8b96a0">(lower CPU)</span></div>
-      <div class="dep">vSAN OSA &middot; VDFS &middot; early ESA</div>
-    </div>
-    <div class="arrow frag">&rarr;</div>
-    <div class="stage frag">
-      <div class="badge">S3-FIFO</div>
-      <div class="mini"><span class="q">FIFO</span><span class="q new">+ Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
-      <div class="chg">+ <b>Ref bit</b> <span style="color:#8b96a0">(direct promotion)</span></div>
-      <div class="dep">2023 &middot; state of the art</div>
-    </div>
-    <div class="arrow frag">&rarr;</div>
-    <div class="stage cur frag">
-      <div class="badge">Clock2Q+</div>
-      <div class="mini"><span class="q">FIFO</span><span class="q new">+ window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
-      <div class="chg">+ <b>correlation window</b> <span style="color:#8b96a0">(filters bursts)</span></div>
-      <div class="dep">vSAN &middot; vSAN File Services, today</div>
+    <!-- merge connector: both lines converge on Clock2Q+ -->
+    <svg width="60" height="342" viewBox="0 0 60 342" style="flex:none;" aria-hidden="true">
+      <path d="M0 79 H22 L50 171" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M0 263 H22 L50 171" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M44 164 L60 171 L44 178 Z" fill="#7048b6"/>
+    </svg>
+    <div class="tl" style="margin-top:0;">
+      <div class="stage cur frag" style="flex:none; width:162px; min-height:158px;">
+        <div class="badge">Clock2Q+</div>
+        <div class="mini"><span class="q">FIFO</span><span class="q new">+ window</span><span class="q">Clock</span><span class="q">Ghost</span></div>
+        <div class="chg">+ <b>correlation window</b></div>
+        <div class="dep">vSAN &middot; VDFS &middot; ESA &middot; &hellip;, today</div>
+      </div>
     </div>
   </div>
   <div class="callout frag" style="margin-top:22px; text-align:center; border-color:var(--deploy);">
@@ -582,7 +603,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     </div>
     <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
       <span style="font-size:34px; line-height:1;">&#129525;</span>
-      <div><h3>Scales on cores</h3><p>Per-bucket mutex + atomic queue indices &mdash; no global lock.</p></div>
+      <div><h3>Scales on cores &mdash; the VIP requirement</h3><p><b>LRU reorders on every hit</b> &rarr; a write-lock per access, contention at scale. Clock's <b>Ref bit</b> is read-mostly: per-bucket mutex + atomic indices, no global lock.</p></div>
     </div>
     <div class="card frag" style="display:flex; gap:16px; align-items:flex-start;">
       <span style="font-size:34px; line-height:1;">&#128737;&#65039;</span>
@@ -593,7 +614,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <div><h3>Resizes online</h3><p>Grow / shrink the queues live via a background thread.</p></div>
     </div>
   </div>
-  <div class="callout frag" style="margin-top:20px; text-align:center; border-color:var(--deploy);">
+  <div class="callout frag" style="margin-top:18px; text-align:center; border-color:var(--deploy);">
+    <b style="color:var(--deploy)">The bigger picture:</b> textbooks teach <b>LRU</b> &mdash; but at <b>multi-CPU scale</b> its per-hit reordering doesn't hold up. <b>Clock</b> is what actually runs safely.
+  </div>
+  <div class="callout frag" style="margin-top:12px; text-align:center; border-color:var(--deploy);">
     <b style="color:var(--deploy)">Simplicity &mdash; a first-class goal:</b> simple data structures & no adaptive tuning.
   </div>
   <div class="foot"><span class="sec">Backup</span><span class="tm"></span></div>
@@ -711,7 +735,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
-    {t:'Nearly a decade of evolution — walk the timeline.', r:'2Q → Clock2Q (Main LRU→Clock) → S3-FIFO (Ref bit) → Clock2Q+ (+ correlation window). Deployed across vSAN OSA/ESA & VDFS; simplicity throughout.'},
+    {t:'Nearly a decade of evolution — walk the timeline.', r:'2Q is the classic baseline (never shipped in vSAN). Clock2Q single-thread (~2010) shipped in OSA; the concurrent version runs in VDFS, ESA & other services. S3-FIFO lived on an experimental branch. Both the Clock2Q line and S3-FIFO converge on Clock2Q+ (+ correlation window), deployed today. Simplicity throughout.'},
     {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
     {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
   ];
