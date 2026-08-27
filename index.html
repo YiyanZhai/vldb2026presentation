@@ -539,7 +539,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div style="display:flex; align-items:center; justify-content:center; gap:2px;">
     <!-- 2Q: conceptual starting point -->
     <div class="tl" style="margin-top:0; order:1;">
-      <div class="stage frag" style="flex:none; width:176px; min-height:150px;">
+      <div class="stage frag" style="flex:none; width:176px; min-height:138px;">
         <div class="badge">2Q</div>
         <div class="mini"><span class="q">Small FIFO</span><span class="q">Main LRU</span><span class="q">Ghost</span></div>
         <div class="dep">conceptual starting point</div>
@@ -548,7 +548,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <!-- middle column: Clock2Q (top) / S3-FIFO (bottom) -->
     <div style="display:flex; flex-direction:column; gap:20px; order:3;">
       <div class="tl" style="margin-top:0;">
-        <div class="stage frag" style="flex:none; width:208px; min-height:150px;">
+        <div class="stage frag" style="flex:none; width:208px; min-height:138px;">
           <div class="badge">Clock2Q</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">Main Clock</span><span class="q">Ghost</span></div>
           <div class="chg">LRU &rarr; <b>Clock</b></div>
@@ -557,7 +557,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         </div>
       </div>
       <div class="tl" style="margin-top:0;">
-        <div id="lin-s3" class="stage frag" style="flex:none; width:208px; min-height:150px;">
+        <div id="lin-s3" class="stage frag" style="flex:none; width:208px; min-height:138px;">
           <div class="badge">S3-FIFO</div>
           <div class="mini"><span class="q">FIFO</span><span class="q new">+ Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
           <div class="chg">add <b>Ref bit</b> to Small FIFO</div>
@@ -567,14 +567,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       </div>
     </div>
     <!-- diverge: 2Q -> Clock2Q / S3-FIFO (appears WITH the S3-FIFO box, via JS toggle) -->
-    <svg id="lin-dv" width="64" height="320" viewBox="0 0 64 320" style="flex:none; order:2; opacity:0; transition:opacity .4s ease;" aria-hidden="true">
+    <svg id="lin-dv" width="64" height="296" viewBox="0 0 64 296" style="flex:none; order:2; opacity:0; transition:opacity .4s ease;" aria-hidden="true">
       <defs><marker id="lin-a" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#b7bcc6"/></marker></defs>
-      <path d="M0,160 H16 L56,75" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
-      <path d="M0,160 H16 L56,245" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+      <path d="M0,148 H16 L56,69" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
+      <path d="M0,148 H16 L56,227" stroke="#b7bcc6" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#lin-a)"/>
     </svg>
     <!-- Clock2Q+ -->
     <div class="tl" style="margin-top:0; order:5;">
-      <div id="lin-c2qp" class="stage cur frag" style="flex:none; width:240px; min-height:150px;">
+      <div id="lin-c2qp" class="stage cur frag" style="flex:none; width:240px; min-height:138px;">
         <div class="badge">Clock2Q+</div>
         <div class="mini"><span class="q">FIFO</span><span class="q new">+ Window &amp; Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
         <div style="font-size:12px; color:#2f9e44; font-weight:700; margin-top:4px;">filters bursts</div>
@@ -582,14 +582,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       </div>
     </div>
     <!-- merge: Clock2Q + S3-FIFO -> Clock2Q+ (appears WITH the Clock2Q+ box, via JS toggle) -->
-    <svg id="lin-mg" width="192" height="320" viewBox="0 0 192 320" style="flex:none; order:4; opacity:0; transition:opacity .4s ease;">
+    <svg id="lin-mg" width="192" height="296" viewBox="0 0 192 296" style="flex:none; order:4; opacity:0; transition:opacity .4s ease;">
       <defs><marker id="lin-b" markerWidth="11" markerHeight="9" refX="6" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,4.5 L0,9 Z" fill="#7048b6"/></marker></defs>
-      <path d="M0,75 H100 L150,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <path d="M0,245 H100 L150,160" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <path d="M150,160 H184" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linecap="round" marker-end="url(#lin-b)"/>
-      <text x="56" y="57" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
-      <text x="56" y="72" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Window</text>
-      <text x="56" y="264" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Window</text>
+      <path d="M0,69 H100 L150,148" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M0,227 H100 L150,148" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M150,148 H184" stroke="#7048b6" stroke-width="2.6" fill="none" stroke-linecap="round" marker-end="url(#lin-b)"/>
+      <text x="56" y="51" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Ref bit</text>
+      <text x="56" y="66" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Window</text>
+      <text x="56" y="246" text-anchor="middle" font-size="13.5" font-weight="800" fill="#7048b6">+ Window</text>
     </svg>
   </div>
   <div class="callout frag" style="margin-top:22px; text-align:center; border-color:var(--deploy);">
