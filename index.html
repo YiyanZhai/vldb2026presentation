@@ -279,7 +279,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <section class="slide" data-sec="problem" data-secname="Problem" data-time="0:45">
   <div class="accentbar"></div>
   <div class="kicker">Background &middot; the shared design</div>
-  <h2 class="stitle">Modern caches share a <span class="hl">three-queue</span> skeleton</h2>
+  <h2 class="stitle">These policies share a <span class="hl">three-queue</span> skeleton</h2>
   <div class="sub" style="text-align:center; margin:-2px 0 4px; font-size:16px;">A new block must prove reuse before it occupies the protected cache.</div>
   <figure style="text-align:center; margin-top:6px;">
     <svg viewBox="0 0 640 250" width="82%" style="max-height:300px;">
@@ -291,18 +291,18 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <text x="60" y="64" text-anchor="middle" font-size="13" font-weight="700" fill="#5f6b76">new access</text>
       <path d="M12,80 L116,80" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#bg-g)"/>
       <!-- Small (admission) FIFO -->
-      <text x="195" y="30" text-anchor="middle" font-size="13.5" font-weight="800" fill="#8b6a12">Small &middot; admission (FIFO)</text>
+      <text x="195" y="30" text-anchor="middle" font-size="13.5" font-weight="800" fill="#8b6a12">Small &middot; probation</text>
       <rect x="120" y="42" width="150" height="76" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2.2" stroke-dasharray="6 5"/>
       <g><circle cx="150" cy="72" r="12" fill="#c0c8cf"/><circle cx="180" cy="72" r="12" fill="#c0c8cf"/><circle cx="210" cy="72" r="12" fill="#c0c8cf"/><circle cx="240" cy="72" r="12" fill="#c0c8cf"/></g>
-      <text x="195" y="106" text-anchor="middle" font-size="11" fill="#8b6a12">new items enter here</text>
-      <!-- promote -->
-      <path d="M272,74 L426,74" stroke="#2f9e44" stroke-width="2.6" fill="none" marker-end="url(#bg-p)"/>
-      <text x="349" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#2f9e44">promote</text>
-      <!-- Main (protected cache) -->
-      <text x="517" y="26" text-anchor="middle" font-size="14" font-weight="800" fill="#2f7fbf">Main &middot; protected cache</text>
+      <text x="195" y="106" text-anchor="middle" font-size="11" fill="#8b6a12">new items prove reuse here</text>
+      <!-- promote (policy-dependent, direct path) -->
+      <path d="M272,74 L426,74" stroke="#2f9e44" stroke-width="2.6" fill="none" stroke-dasharray="6 4" marker-end="url(#bg-p)"/>
+      <text x="349" y="62" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2f9e44">qualifying reuse</text>
+      <!-- Main (protection) -->
+      <text x="517" y="26" text-anchor="middle" font-size="14" font-weight="800" fill="#2f7fbf">Main &middot; protection</text>
       <rect x="430" y="36" width="175" height="92" rx="12" fill="#e7f0fb" stroke="#2f7fbf" stroke-width="2.8"/>
       <g><circle cx="457" cy="74" r="13" fill="#4c8bf5"/><circle cx="487" cy="74" r="13" fill="#4c8bf5"/><circle cx="517" cy="74" r="13" fill="#4c8bf5"/><circle cx="547" cy="74" r="13" fill="#4c8bf5"/><circle cx="577" cy="74" r="13" fill="#4c8bf5"/></g>
-      <text x="517" y="114" text-anchor="middle" font-size="11.5" fill="#2f7fbf">long-lived hot items</text>
+      <text x="517" y="114" text-anchor="middle" font-size="11.5" fill="#2f7fbf">items judged worth protecting</text>
       <!-- Main evicts out of the cache (NOT to Ghost) -->
       <path d="M605,74 L636,74" stroke="#9aa5ad" stroke-width="2.2" fill="none" marker-end="url(#bg-g)"/>
       <text x="620" y="64" text-anchor="middle" font-size="11" fill="#6b7681">evict</text>
@@ -310,13 +310,14 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <path d="M180,118 L300,166" stroke="#9aa5ad" stroke-width="2.2" fill="none" marker-end="url(#bg-g)"/>
       <text x="205" y="150" text-anchor="middle" font-size="12" fill="#6b7681">evict</text>
       <!-- Ghost (keys only, dashed blocks) -->
-      <text x="345" y="162" text-anchor="middle" font-size="13.5" font-weight="800" fill="#5f6b76">Ghost &middot; keys only</text>
+      <text x="345" y="162" text-anchor="middle" font-size="13.5" font-weight="800" fill="#5f6b76">Ghost &middot; history (keys only)</text>
       <rect x="255" y="170" width="180" height="56" rx="11" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.2" stroke-dasharray="6 5"/>
       <g fill="none" stroke="#9aa5ad" stroke-width="1.8" stroke-dasharray="3 2"><circle cx="290" cy="190" r="10"/><circle cx="320" cy="190" r="10"/><circle cx="350" cy="190" r="10"/><circle cx="380" cy="190" r="10"/><circle cx="410" cy="190" r="10"/></g>
-      <text x="345" y="216" text-anchor="middle" font-size="10.5" fill="#6b7681">remembers recent evictions</text>
-      <!-- re-request -> promote back to Main -->
+      <text x="345" y="216" text-anchor="middle" font-size="10.5" fill="#6b7681">remembers recently evicted keys</text>
+      <!-- re-request after eviction -> back to Main -->
       <path d="M435,188 C560,188 560,130 525,128" stroke="#2f9e44" stroke-width="2.2" fill="none" stroke-dasharray="5 4" marker-end="url(#bg-p)"/>
-      <text x="590" y="158" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2f9e44">re-request</text>
+      <text x="588" y="150" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2f9e44">re-request</text>
+      <text x="588" y="163" text-anchor="middle" font-size="10" fill="#2f9e44">after eviction</text>
     </svg>
   </figure>
   <div class="callout frag" style="margin-top:14px; text-align:center; border-color:var(--accent);">
@@ -785,7 +786,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
     {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of tuples. Distinct keys co-reside (L1 & L5 → leaf m4) → accesses hit the same page by structure, not popularity.'},
     {t:'That packing shows up directly in the access stream.', r:'Burst = a sequential run of lookups landing on the SAME cold page in a short time (not unrelated random hits) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
-    {t:'Before the two designs — the shared 3-queue skeleton.', r:'Small (admission) FIFO catches new items; Main holds long-lived hot items; Ghost keeps keys-only of recent evictions so a re-request can be recognized. 2Q, S3-FIFO, and Clock2Q all use this — they differ only in how an item earns promotion to Main.'},
+    {t:'Before the two designs — the shared 3-queue skeleton.', r:'Small = probation (new items prove reuse); Main = protection (items worth keeping); Ghost = history, keys only (recently evicted keys). Two paths into Main: (a) qualifying reuse in Small → direct promote (S3-FIFO, Clock2Q+ only — dashed, policy-dependent); (b) re-request after eviction via Ghost (Clock2Q/2Q). The whole difference is what counts as "qualifying reuse".'},
     {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit, set on any re-hit → a burst admits a cold page. Clock2Q/2Q: no admission bit → promote only after drop + re-ask → delays hot blocks.'},
     {t:'The insight IS the design: add a correlation window.', r:'WHERE a re-hit happens is the signal. Inside the window → Ref stays 0 (burst → Ghost); beyond → Ref = 1 → promote to Main. One change to S3-FIFO.'},
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
