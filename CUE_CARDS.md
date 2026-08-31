@@ -2,20 +2,20 @@
 
 One line to get in, one line to land. Full text in `SPEAKER_SCRIPT.md`; live version toggles with **S** in the deck.
 
-| # | Time | ↪ Transition in | ★ Remember (land this) |
-|---|------|-----------------|------------------------|
-| **1** Title | 0:30 | Name + one-line; simple & deployed. | Simple, production idea — promise intuition. |
-| **2** Metadata cache | 0:55 | "What we're actually caching." | Data cache = payload; **metadata cache = the index (B-trees) that locates data**. Hottest path → overhead & simplicity matter too. |
-| **3** Structural locality | 0:55 | "Why is metadata different? Start with structure." | A leaf packs **hundreds of mapping tuples**; L1, L2, L3 → Leaf m4. Same page by **structure, not popularity**. |
-| **4** Correlated ref | 1:05 | "That packing shows up in the access stream." | **Sequential lookups to a cold page in a short time** (co-resident keys L1,L2,L3 → m4) — not unrelated random hits. Each hit looks like a vote (the trap). |
-| **5** Three-queue skeleton | 0:40 | "The skeleton all three policies share." | **Small = probation · Main = protection · Ghost = history (keys only).** Two paths to Main: **qualifying reuse** (direct) or **re-request** via Ghost. Policies differ only in what qualifies. |
-| **6** Why others fail | 1:05 | "Two opposite mistakes on 'what qualifies for Main?'" | **Ref bit is S3-FIFO's** (any re-hit → admits a cold page). Clock2Q/2Q: no bit → **evict to Ghost + re-ask** → hot blocks pay an extra miss. |
-| **7** Design (+ window) | 1:30 | "The fix — it's about *where* a re-hit happens." | Add a **correlation window**: in-window hits don't set Ref → Ghost; beyond → Ref=1 → Main. The only change vs. S3-FIFO. |
-| **8** Animation | 1:15 | "Let's step through it." *(Next ▶ / click)* | Window filters bursts; hot blocks promote directly (enter Main with **Ref=0**); hand sweeps clockwise. Scenario buttons = snapshot of the *same* run. |
-| **9** Trace method | 0:50 | "How do you even evaluate a metadata policy?" | Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible. |
-| **10** Results | 1:10 | "Does the window actually pay off?" | Best median & mean at every cache size — metadata **and** data. *(28.5% second, per-trace.)* **Harvard course: Clock2Q+ wins** (independent). |
-| **11** Design lineage | 0:45 | "Where Clock2Q+ comes from." | 2Q (concept) → **Clock2Q** (LRU→Clock; OSA ~2010, then concurrent VDFS/ESA) **& S3-FIFO** (Ref bit) → converge on **Clock2Q+** (+ Ref bit + correlation window). Simplicity throughout. |
-| **12** Run safely at scale | 0:45 | "How does it hold up as shipping code?" | **Concurrency is the real constraint** — LRU reorders per hit → lock contention; **Clock scales**. Dirty-aware · bounded · resizable. Textbooks say LRU; at scale, Clock. |
-| **13** Takeaways | 0:40 | "To wrap up." | One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim. |
+| # | ↪ Transition in | ★ Remember (land this) |
+|---|-----------------|------------------------|
+| **1** Title | Name + one-line; simple & deployed. | Simple, production idea — promise intuition. |
+| **2** Metadata cache | "What we're actually caching." | Data cache = payload; **metadata cache = the index (B-trees) that locates data**. Hottest path → overhead & simplicity matter too. |
+| **3** Structural locality | "Why is metadata different? Start with structure." | A leaf packs **hundreds of mapping tuples**; L1, L2, L3 → Leaf m4. Same page by **structure, not popularity**. |
+| **4** Correlated ref | "That packing shows up in the access stream." | **Sequential lookups to a cold page in a short time** (co-resident keys L1,L2,L3 → m4) — not unrelated random hits. Each hit looks like a vote (the trap). |
+| **5** Three-queue skeleton | "The skeleton all three policies share." | **Small = probation · Main = protection · Ghost = history (keys only).** Two paths to Main: **qualifying reuse** (direct) or **re-request** via Ghost. Policies differ only in what qualifies. |
+| **6** Why others fail | "Two opposite mistakes on 'what qualifies for Main?'" | **Ref bit is S3-FIFO's** (any re-hit → admits a cold page). Clock2Q/2Q: no bit → **evict to Ghost + re-ask** → hot blocks pay an extra miss. |
+| **7** Design (+ window) | "The fix — it's about *where* a re-hit happens." | Add a **correlation window**: in-window hits don't set Ref → Ghost; beyond → Ref=1 → Main. The only change vs. S3-FIFO. |
+| **8** Animation | "Let's step through it." *(Next ▶ / click)* | Window filters bursts; hot blocks promote directly (enter Main with **Ref=0**); hand sweeps clockwise. Scenario buttons = snapshot of the *same* run. |
+| **9** Trace method | "How do you even evaluate a metadata policy?" | Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible. |
+| **10** Results | "Does the window actually pay off?" | Best median & mean at every cache size — metadata **and** data. *(28.5% second, per-trace.)* **Harvard course: Clock2Q+ wins** (independent). |
+| **11** Design lineage | "Where Clock2Q+ comes from." | 2Q (concept) → **Clock2Q** (LRU→Clock; OSA ~2010, then concurrent VDFS/ESA) **& S3-FIFO** (Ref bit) → converge on **Clock2Q+** (+ Ref bit + correlation window). Simplicity throughout. |
+| **12** Run safely at scale | "How does it hold up as shipping code?" | **Concurrency is the real constraint** — LRU reorders per hit → lock contention; **Clock scales**. Dirty-aware · bounded · resizable. Textbooks say LRU; at scale, Clock. |
+| **13** Takeaways | "To wrap up." | One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim. |
 
-**Total ≈ 12:05.** ("Why it works" is a backup.) Running long → compress the three-queue slide (5) and let the animation (8)/design (7) visuals carry them.
+("Why it works" is a backup.) Running long → compress the three-queue slide (5) and let the animation (8)/design (7) visuals carry them.

@@ -168,8 +168,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     <img class="l-broadcom" src="assets/logos/broadcom.svg" alt="Broadcom" style="height:20px;">
   </div>
   <h1 class="title" style="font-size:52px; margin-top:10px;">Clock2Q+</h1>
-  <div class="big" style="color:var(--muted); font-weight:700; margin-top:8px; white-space:nowrap; font-size:25px;">
-    Correlation-Aware Cache Replacement for Metadata Caches</div>
+  <div class="big" style="color:var(--muted); font-weight:700; margin-top:8px; white-space:nowrap; font-size:22px;">
+    A Simple and Efficient Replacement Algorithm for Metadata Cache in VMware vSAN</div>
   <div style="margin-top:12px; font-size:18px; font-weight:800; color:#1f6fa8;">Deployed in VMware vSAN</div>
   <div style="position:absolute; left:70px; right:70px; bottom:56px;">
     <div class="authors" style="font-size:15px; line-height:1.75;">
@@ -620,7 +620,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
 <section class="slide" id="s-thanks" data-sec="wrap" data-secname="Thank you" data-time="">
   <div class="accentbar" style="background:var(--wrap)"></div>
   <h2 class="stitle" style="margin-bottom:4px;">Clock2Q+</h2>
-  <div class="sub" style="font-size:18px; margin-bottom:26px;">Correlation-Aware Cache Replacement for Metadata Caches &middot; <b style="color:#1f6fa8;">deployed in VMware vSAN</b></div>
+  <div class="sub" style="font-size:18px; margin-bottom:26px;">A Simple and Efficient Replacement Algorithm for Metadata Cache &middot; <b style="color:#1f6fa8;">deployed in VMware vSAN</b></div>
   <div style="line-height:1.7;">
     <div style="font-size:21px; font-weight:800; color:var(--ink); margin-bottom:10px;">Get in touch</div>
     <div style="font-size:17px; color:var(--ink); margin:4px 0;">Yiyan Zhai <span style="color:var(--muted)">(CMU)</span> &middot; <a href="mailto:yiyanz@andrew.cmu.edu" style="color:#2f7fbf; font-weight:700; text-decoration:none;">yiyanz@andrew.cmu.edu</a></div>
@@ -784,7 +784,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   const SECCOL_={problem:'--problem',insight:'--insight',design:'--design',results:'--results',
                 method:'--design',deploy:'--deploy',wrap:'--wrap',backup:'--faint'};
   function secVar(s){return SECCOL_[s.dataset.sec]||'--design';}
-  // speaker notes, index-aligned to slides[]  (t = transition cue, r = remember)
+  // speaker notes, index-aligned to slides[] — main slides 0..12, then backup slides from 13
+  // (t = transition cue, r = remember). Keep in sync with SPEAKER_SCRIPT.md.
   const NOTES=[
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
     {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
@@ -797,8 +798,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     {t:'How do you even evaluate a metadata policy?', r:'Divide block# by fan-out → metadata trace; validated <0.01%. Reproducible.'},
     {t:'Does the window actually pay off?', r:'Best median & mean at every cache size — metadata AND data. (28.5% is per-trace, say it second.)'},
     {t:'Where Clock2Q+ comes from — the design lineage.', r:'2Q is the conceptual starting point (Small FIFO, Main LRU, Ghost). Two branches: Clock2Q swaps LRU→Clock (lower CPU) — used single-thread ~2010 in vSAN OSA, then concurrent in VDFS & early ESA; S3-FIFO adds a Ref bit to the Small FIFO (directly promotes re-referenced blocks, but correlated refs can look hot). To reach Clock2Q+: from Clock2Q add the Ref bit + Correlation Window; from S3-FIFO add just the Correlation Window. Result: correlation-aware — ignore Ref updates for early re-references — so correlated metadata accesses no longer pollute Main. Deployed in VDFS, ESA, etc.'},
-    {t:'It ships in vSAN — so miss ratio isn’t everything.', r:'Low overhead · scalable · dirty-aware · bounded · resizable. Simplicity by design.'},
-    {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim.'}
+    {t:'To wrap up.', r:'One correlation-aware idea → best miss ratio + deployed. Reproducible in libCacheSim. Bullet 4: low overhead · scalable · dirty-aware · resizable — simplicity pays off in production.'},
+    {t:'Thank you — happy to take questions.', r:'Contacts, related sites, libCacheSim QR. (O = overview, to jump to a backup slide.)'},
+    // --- backup slides start here (index 13 = first .slide with data-sec="backup") ---
+    {t:'Backup — if asked about production hardening / concurrency.', r:'Concurrency is the real constraint — LRU reorders on every hit → a write-lock per access; Clock’s Ref bit is read-mostly → fine-grained locks, no global lock. Also: array-based hit path, dirty-aware, bounded scan per eviction, online resize. Textbooks say LRU; at multi-CPU scale, Clock.'}
   ];
   let ci=0, fi=0;
 
@@ -824,7 +827,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
     const tm=s.querySelector('.tm'); if(tm) tm.textContent='';
     // speaker notes
     const n=NOTES[ci], np=document.getElementById('notes-panel');
-    np.innerHTML = n ? (`<div class="nt-time">Slide ${ci+1}${s.dataset.time?' · '+s.dataset.time:''}</div>`+
+    np.innerHTML = n ? (`<div class="nt-time">${isBackup?'Backup '+(ci-mainCount+1):'Slide '+(ci+1)}${s.dataset.time?' · '+s.dataset.time:''}</div>`+
       (n.t?`<div class="nt-trans">↪ ${n.t}</div>`:'')+(n.r?`<div class="nt-rem">${n.r}</div>`:''))
       : `<div class="nt-time">${s.dataset.secname||''}</div>`;
   }
