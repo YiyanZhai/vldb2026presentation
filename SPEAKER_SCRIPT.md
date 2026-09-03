@@ -16,18 +16,20 @@ Delivery: pause on each figure/fragment reveal. Advance fragments (→) as you r
 ## Slide 2 — What is a metadata cache?
 **Transition:** "Let me start with what we're actually caching."
 **Say:**
-> "A block cache keeps hot pages in DRAM so you avoid going to SSD or disk. Systems keep two kinds. A **data cache** holds the actual payload — file or disk blocks. A **metadata cache** holds the *index* the system uses to **locate** that data — in vSAN, that's B-trees mapping a logical block number to a physical one. That distinction matters, because the metadata cache is on the **hottest path**: you consult it to find almost every piece of data. So it runs at extreme frequency, under high concurrency, often with hit ratios already near 100%. Which means we judge its policy not only by miss ratio, but by **CPU overhead, scalability, and simplicity**."
+> "A block cache keeps hot pages in DRAM so you avoid slower SSD or disk. Storage systems keep two types of information. The **data** holds the payload — the actual file blocks. The **metadata** holds the *map* you need to **find** that payload — in vSAN, metadata translate a logical block address to a physical one and they are stored in **B⁺ trees**. And there are caches for both of them. That distinction matters, because the metadata cache is on the **hottest path**: you consult it to find almost every piece of data. So it runs at extreme frequency, under high concurrency, often with hit ratios already near 100%. Which means we judge its policy not only by miss ratio, but by **CPU overhead, scalability, and simplicity**."
 
-**Remember:** Metadata cache = the index (B-trees) that locates data; hottest path → overhead & simplicity are first-class.
+**Remember:** Data = payload; metadata = the map (B⁺ trees in vSAN) that finds it — both are cached; hottest path → overhead & simplicity are first-class.
 
 ---
 
 ## Slide 3 — Structural locality: a page packs many keys
 **Transition:** "So why does a metadata cache behave differently from a data cache? It starts with structure."
 **Say:**
-> "A metadata page isn't a single key — a B-tree **leaf packs hundreds of mapping tuples**. So many different keys physically co-reside on the same page. In this example, **L1, L2, and L3 all live in Leaf m4** — so a run of lookups over those keys all lands on m4 in a short window. Different accesses hit the same page not because it's popular, but because of how keys are packed — that's **structural locality**. One note: the internal nodes near the root are touched by *every* lookup, so they're effectively pinned; the interesting action is at the leaves, which are 99% of the tree."
+> "One sentence on the structure, since everything follows from it. A **B⁺ tree** is the standard *ordered* index — the one every database uses for range lookups. The internal nodes are just signposts: they **route** a lookup down the tree. **All** the actual key-to-location tuples live in the **leaf** pages at the bottom, and leaves are **99% or more** of the pages. So the internal nodes near the root are touched by *every* lookup and are effectively pinned — the interesting action is at the leaves.
+>
+> Now the key fact: **one leaf page packs hundreds of those mapping tuples**. So many different keys physically co-reside on the same page. In this figure, **L1 and L5 both live in Leaf m4** — different keys, one page. Different accesses hit the same page not because it's popular, but because of how keys are packed — that's **structural locality**. And it isn't a B⁺-tree quirk: extent maps, bitmaps, inode tables all pack many entries into one page, so they behave the same way."
 
-**Remember:** A leaf packs hundreds of mapping tuples; co-resident keys → a run of lookups hits the same page by structure, not popularity.
+**Remember:** B⁺ tree = ordered index; internal nodes route, all tuples live in the leaves (99%+ of pages). One leaf packs hundreds of tuples → co-resident keys (L1 & L5 → m4) hit the same page by structure, not popularity. Not B⁺-tree-specific.
 
 ---
 
@@ -42,10 +44,17 @@ Delivery: pause on each figure/fragment reveal. Advance fragments (→) as you r
 
 ## Slide 5 — Three-queue skeleton (shared design)   ← NEW
 **Transition:** "Before we compare the policies, here's the skeleton they all share."
+**Build (→, six clicks):** Small · Main · Ghost (arriving with the *not promoted → evict data, remember key* drop that fills it) — then path **①** direct promotion and path **②** re-request (a block travels each arrow) — then the closing callout.
 **Say:**
-> "2Q, S3-FIFO, and Clock2Q are all built from the same **three queues**. A new block first enters a **Small FIFO** — think of it as **probation**: it has to prove reuse before it can occupy the protected cache. The **Main** queue is **protection** — the long-lived blocks judged worth keeping. And the **Ghost** is **history** — it stores *keys only*, no data, remembering what was recently evicted. A block reaches Main one of two ways: **qualifying reuse** while it's still on probation in the Small FIFO — a direct promotion — or a **re-request after eviction**, coming back through the Ghost. The architecture is fixed; what differs between the policies is exactly **how an item earns promotion to Main**."
+> "2Q, S3-FIFO, and Clock2Q are all built from the same **three queues**. A new block first enters a **Small FIFO** — think of it as **probation**: it has to prove reuse before it can occupy the protected cache. The **Main** queue is **protection** — the long-lived blocks judged worth keeping. And the **Ghost** is **history** — it stores *keys only*, no data, remembering what was recently evicted. A block reaches Main one of two ways.
+>
+> Path **one** — **qualifying reuse** while it's still on probation in the Small FIFO: it's hit again before it ages out, so it's promoted **directly** into Main.
+>
+> Path **two** — a **re-request after eviction**, coming back through the Ghost. Say the block reaches the tail of the Small FIFO without qualifying. Its **data is dropped** — that space goes back to the cache — but its **key is kept** in the Ghost. So the cache has forgotten the *contents* and remembered only that *it saw this block recently*. If that key is then requested again, we take the miss and fetch from storage — but the Ghost hit tells us this isn't a first-time block: it's been asked for twice, separated by a whole pass through the Small FIFO. That's exactly the evidence probation was there to collect, so the block is admitted **straight into Main** instead of starting over on probation. And because the Ghost stores keys only — no data — you can remember far more history than you could ever cache, for almost nothing.
+>
+> So: promoted from probation, or promoted on the way back through history. The architecture is fixed; what differs between the policies is exactly **how an item earns promotion to Main** — and, as we'll see, the two paths trade off against each other."
 
-**Remember:** Three queues — Small (probation), Main (protection), Ghost (history, keys only). Two paths to Main: qualifying reuse (direct) or re-request via Ghost. Policies differ only in what counts as "qualifying reuse."
+**Remember:** Three queues — Small (probation), Main (protection), Ghost (history, keys only). Two paths to Main: (1) qualifying reuse in Small → direct promotion; (2) re-request after eviction → Ghost keeps the key when the data is dropped, so a later hit on that key proves a *second, separated* access and admits the block straight to Main (one miss paid). Keys-only = cheap, long history. Policies differ only in what counts as "qualifying reuse."
 
 ---
 
@@ -83,7 +92,7 @@ Delivery: pause on each figure/fragment reveal. Advance fragments (→) as you r
 ## Slide 9 — Method: generating metadata traces
 **Transition:** "How do you even evaluate a metadata policy? That's surprisingly hard."
 **Say:**
-> "There are no public metadata-cache traces, and production traces can't be shared. So here's the trick: take *any* public block trace and divide each block number by the B-tree fan-out — around 200. That reconstructs the sequence of leaf-page accesses a real metadata cache would see. We validated it against a real B-tree trace, and the miss-ratio curves match to within one-hundredth of a percent. So anyone can regenerate metadata results from public data. We ran 106 CloudPhysics traces — over two billion requests — against ten state-of-the-art policies."
+> "There are no public metadata-cache traces, and production traces can't be shared. So here's the trick: take *any* public block trace and divide each block number by the B⁺-tree fan-out — around 200. That reconstructs the sequence of leaf-page accesses a real metadata cache would see. We validated it against a real B⁺-tree trace, and the miss-ratio curves match to within one-hundredth of a percent. So anyone can regenerate metadata results from public data. We ran 106 CloudPhysics traces — over two billion requests — against ten state-of-the-art policies."
 
 **Remember:** A simple, validated recipe (block# ÷ fan-out) makes metadata-cache evaluation reproducible for everyone.
 

@@ -114,6 +114,14 @@ figcaption{font-size:13px; color:var(--faint); text-align:center; margin-top:8px
 .frag{opacity:0; transform:translateY(6px); transition:opacity .4s ease, transform .4s ease;}
 .frag.on{opacity:1; transform:none;}
 
+/* slide 5 (three-queue skeleton): each reveal throbs once so the eye lands on it */
+#s-3q .pop{transform-box:fill-box; transform-origin:center;}
+#s-3q .frag.fragcur .pop{animation:q3pop 1.15s ease-in-out 2;}
+@keyframes q3pop{0%{transform:scale(1);}35%{transform:scale(1.055);}70%{transform:scale(1);}100%{transform:scale(1);}}
+#s-3q .frag.fragcur .q3path{animation:q3ln 1.15s ease-in-out 2;}
+@keyframes q3ln{0%{stroke-width:2.4;}40%{stroke-width:5;}100%{stroke-width:2.4;}}
+#s-3q .frag:not(.on) .q3dot{visibility:hidden;}
+
 /* callout */
 .callout{background:linear-gradient(0deg,#fbfdff,#fbfdff); border:2px solid var(--accent);
   border-radius:14px; padding:20px 24px; font-size:23px; font-weight:700; line-height:1.35;}
@@ -185,34 +193,51 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="accentbar"></div>
   <div class="kicker">The setting</div>
   <h2 class="stitle">What is a <span class="hl">metadata cache</span>?</h2>
-  <div style="position:relative; min-height:292px;">
-    <ul class="clean" style="font-size:20px; max-width:54%;">
-      <li class="frag"><b>Data cache</b> = the payload.</li>
-      <li class="frag"><b>Metadata cache</b> = the index that <b>locates</b> it. Maps logical addresses &rarr; physical addresses.</li>
-    </ul>
+  <div style="position:relative; min-height:320px;">
+    <!-- reveal order: tiers -> the two bullets -> pair on storage -> pair lifts into DRAM -->
     <figure class="frag" style="position:absolute; right:0; top:4px; width:44%; margin:0;">
-      <svg width="440" height="200" viewBox="0 0 440 200" style="width:100%; height:auto;">
+      <svg width="440" height="252" viewBox="0 0 440 252" style="width:100%; height:auto;">
         <defs>
-          <marker id="ah" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
           <marker id="loc" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f7fbf"/></marker>
+          <marker id="locg" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
         </defs>
-        <rect x="40" y="10" width="360" height="100" rx="11" fill="#f4f9fd" stroke="#3e9fd6" stroke-width="2"/>
+        <!-- step 1: the two tiers, both empty -->
+        <rect x="40" y="10" width="360" height="114" rx="11" fill="#f4f9fd" stroke="#3e9fd6" stroke-width="2"/>
         <text x="220" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#1f6fa8">DRAM &#8212; Block Cache</text>
-        <rect x="48" y="40" width="140" height="54" rx="9" fill="#dcefff" stroke="#3e9fd6" stroke-width="2"/>
-        <text x="118" y="64" text-anchor="middle" font-size="13" font-weight="800" fill="#1f6fa8">Metadata</text>
-        <text x="118" y="82" text-anchor="middle" font-size="10" fill="#5f6b76">logical &#8594; physical</text>
-        <rect x="252" y="40" width="140" height="54" rx="9" fill="#eef1f4" stroke="#aab4bd" stroke-width="2"/>
-        <text x="322" y="64" text-anchor="middle" font-size="13" font-weight="800" fill="#5f6b76">Data</text>
-        <text x="322" y="82" text-anchor="middle" font-size="10" fill="#8b96a0">payload</text>
-        <text x="220" y="57" text-anchor="middle" font-size="10.5" font-weight="800" fill="#2f7fbf">locates</text>
-        <path d="M192,68 L246,68" fill="none" stroke="#2f7fbf" stroke-width="2.4" marker-end="url(#loc)"/>
-        <path d="M220,118 L220,142" fill="none" stroke="#9aa5ad" stroke-width="2.4" marker-start="url(#ah)" marker-end="url(#ah)"/>
-        <rect x="40" y="150" width="172" height="40" rx="9" fill="#fafbfc" stroke="#d2dae1" stroke-width="1.6"/>
-        <text x="126" y="175" text-anchor="middle" font-size="14" font-weight="700" fill="#9aa5ad">SSD</text>
-        <rect x="228" y="150" width="172" height="40" rx="9" fill="#fafbfc" stroke="#d2dae1" stroke-width="1.6"/>
-        <text x="314" y="175" text-anchor="middle" font-size="14" font-weight="700" fill="#9aa5ad">HDD</text>
+        <text id="dramCap2" x="220" y="112" text-anchor="middle" font-size="10" fill="#7d8892" style="opacity:0; transition:opacity .5s ease">cached copies &#8212; only a hot subset fits</text>
+        <rect x="40" y="148" width="360" height="86" rx="10" fill="#fafbfc" stroke="#d2dae1" stroke-width="1.6"/>
+        <text x="220" y="167" text-anchor="middle" font-size="13" font-weight="700" fill="#9aa5ad">SSD / HDD</text>
+        <text x="220" y="248" text-anchor="middle" font-size="10" fill="#8b96a0">all metadata + data live here</text>
+        <!-- dimmed copy left behind on storage once the pair is cached -->
+        <g id="pairGhost2" style="opacity:0; transition:opacity .6s ease">
+          <rect x="48" y="174" width="140" height="54" rx="9" fill="#eef4f8" stroke="#c2ccd4" stroke-width="1.6"/>
+          <text x="118" y="198" text-anchor="middle" font-size="13" font-weight="800" fill="#8b96a0">Metadata</text>
+          <text x="118" y="216" text-anchor="middle" font-size="10" fill="#a6b0b9">logical &#8594; physical</text>
+          <rect x="252" y="174" width="140" height="54" rx="9" fill="#f2f4f6" stroke="#c2ccd4" stroke-width="1.6"/>
+          <text x="322" y="198" text-anchor="middle" font-size="13" font-weight="800" fill="#8b96a0">Data</text>
+          <text x="322" y="216" text-anchor="middle" font-size="10" fill="#a6b0b9">payload</text>
+          <text x="220" y="191" text-anchor="middle" font-size="10.5" font-weight="800" fill="#a6b0b9">locates</text>
+          <path d="M192,202 L246,202" fill="none" stroke="#c2ccd4" stroke-width="2.2" marker-end="url(#locg)"/>
+        </g>
+        <!-- the pair travels together, "locates" arrow included -->
+        <g id="pair2" style="opacity:0; transition:opacity .45s ease, transform .85s cubic-bezier(.36,.06,.2,1)">
+          <rect x="48" y="174" width="140" height="54" rx="9" fill="#dcefff" stroke="#3e9fd6" stroke-width="2"/>
+          <text x="118" y="198" text-anchor="middle" font-size="13" font-weight="800" fill="#1f6fa8">Metadata</text>
+          <text x="118" y="216" text-anchor="middle" font-size="10" fill="#5f6b76">logical &#8594; physical</text>
+          <rect x="252" y="174" width="140" height="54" rx="9" fill="#eef1f4" stroke="#aab4bd" stroke-width="2"/>
+          <text x="322" y="198" text-anchor="middle" font-size="13" font-weight="800" fill="#5f6b76">Data</text>
+          <text x="322" y="216" text-anchor="middle" font-size="10" fill="#8b96a0">payload</text>
+          <text x="220" y="191" text-anchor="middle" font-size="10.5" font-weight="800" fill="#2f7fbf">locates</text>
+          <path d="M192,202 L246,202" fill="none" stroke="#2f7fbf" stroke-width="2.4" marker-end="url(#loc)"/>
+        </g>
       </svg>
     </figure>
+    <!-- one step: both bullets and the pair on storage -->
+    <ul class="clean frag" id="p2show" style="font-size:20px; max-width:54%;">
+      <li><b>Data</b> = the payload.</li>
+      <li><b>Metadata</b> = the map that <b>locates</b> the payload. Maps logical addresses &rarr; physical addresses.</li>
+    </ul>
+    <span class="frag" id="p2lift"></span>
     <ul class="clean" style="font-size:20px; max-width:54%; margin-top:4px;">
       <li class="frag">The metadata cache is the <b>hot path</b> &mdash; touched on almost every access.</li>
     </ul>
@@ -229,12 +254,12 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker">Why metadata is different</div>
   <h2 class="stitle"><span class="hl-r">Structural locality</span>: a page packs many keys</h2>
   <div class="cols" style="grid-template-columns:1.05fr 0.95fr; gap:30px; align-items:center;">
-    <figure><img src="assets/btree.png" alt="B-tree mapping logical to physical addresses" style="max-height:290px;">
-      <figcaption style="font-size:16.5px; color:#4a5560;">A <b>B-tree</b> maps <b>logical&nbsp;→&nbsp;physical</b> addresses; each node is one <b>metadata page</b>, packed with many mappings.</figcaption></figure>
+    <figure><img src="assets/btree.png" alt="B+ tree mapping logical to physical addresses" style="max-height:290px;">
+      <figcaption style="font-size:16.5px; color:#4a5560;">In vSAN, a <b>B<sup>+</sup>&nbsp;tree</b> maps <b>logical&nbsp;→&nbsp;physical</b> addresses; each leaf is one <b>metadata page</b>.</figcaption></figure>
     <ul class="clean" style="font-size:19px;">
-      <li class="frag" data-f="1">A <b>metadata page</b> = a B-tree <b>leaf</b> holding <b>hundreds of key&nbsp;→&nbsp;location mappings</b> — not one key.</li>
-      <li class="frag" data-f="2">A <b>sequential run of lookups</b> lands on the <b>same page</b> in a <b>short time</b>.</li>
-      <li class="frag" data-f="3">The page <i>looks</i> hot — but that's <b>structure, not real popularity</b>.</li>
+      <li>A <b>B<sup>+</sup>&nbsp;tree</b> is the standard <b>ordered index</b></li>
+      <li>A <b>metadata page</b> is one tree leaf, packing <b>hundreds of mappings</b>, <i>not</i> a single key.</li>
+      <li class="frag" data-f="1">The page <i>looks</i> hot, but that's <b>structure, not real popularity</b>.</li>
     </ul>
   </div>
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
@@ -244,10 +269,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="accentbar"></div>
   <div class="kicker">The problem</div>
   <h2 class="stitle">What is a <span class="hl-r">correlated reference</span>?</h2>
-  <figure style="text-align:center; margin-top:14px;">
+  <div class="sub" style="text-align:center; margin:0 0 2px; font-size:19px;">A <b>sequential run of lookups</b> lands on the same <b style="color:var(--problem)">cold page</b>.</div>
+  <figure style="text-align:center; margin-top:6px;">
       <svg width="680" height="378" viewBox="0 0 540 300">
         <defs><marker id="cr" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker></defs>
-        <text x="270" y="24" text-anchor="middle" font-size="17" font-weight="800" fill="#5f6b76"><tspan fill="#e04b3a">Sequential</tspan> lookups to a <tspan fill="#e04b3a">cold page</tspan>, in a <tspan fill="#e04b3a">short time</tspan></text>
         <g font-size="15" font-weight="800" fill="#fff" text-anchor="middle" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">
           <rect x="118" y="34" width="64" height="34" rx="17" fill="#4c8bf5"/><text x="150" y="57">L1</text>
           <rect x="238" y="34" width="64" height="34" rx="17" fill="#00c39a"/><text x="270" y="57">L2</text>
@@ -257,9 +282,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <path d="M270,70 L270,112" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <path d="M390,70 L294,112" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <rect x="185" y="116" width="170" height="64" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2.4"/>
-        <text x="270" y="143" text-anchor="middle" font-size="16" font-weight="800" fill="#b9860f">Leaf <tspan font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">m4</tspan></text>
+        <text x="270" y="143" text-anchor="middle" font-size="16" font-weight="800" fill="#b9860f">Page <tspan font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">m4</tspan></text>
         <text x="270" y="164" text-anchor="middle" font-size="11" fill="#8b6a12"><tspan font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace">L1, L2, L3</tspan> all live on it</text>
-        <path d="M270,182 L270,206" fill="none" stroke="#9aa5ad" stroke-width="2.2" marker-end="url(#cr)"/>
         <line x1="120" y1="256" x2="430" y2="256" stroke="#c2ccd4" stroke-width="2"/>
         <text x="430" y="276" text-anchor="end" font-size="11" fill="#9aa5ad">time &#8594;</text>
         <g stroke="#e8930c" stroke-width="3.4">
@@ -269,53 +293,89 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <text x="320" y="242" text-anchor="middle" font-size="13" fill="#6b7681">&#8230;then cold for a long while</text>
       </svg>
     </figure>
-  <div class="callout r frag" data-f="2" style="margin-top:16px; text-align:center; font-size:20px;">
-    The trap: counting each hit as a <b>vote for hotness</b>. The page is busy by <b>structure, not popularity</b>.
+  <div class="frag" data-f="1" style="text-align:center; margin-top:4px; font-size:19px; font-weight:800; color:#4a5560;">
+    <span style="color:var(--problem)">sequential accesses</span> &rarr; <span style="color:var(--problem)">same metadata page</span> &rarr; <span style="color:var(--problem)">short time</span>
+    <span style="font-weight:600; color:#8b96a0;">&nbsp;&middot;&nbsp; keys packed together</span>
+  </div>
+  <div class="callout r frag" data-f="2" style="margin-top:10px; text-align:center; font-size:20px;">
+    The trap: counting each hit as a <b>vote for hotness</b>.
   </div>
   <div class="foot"><span class="sec">Problem</span><span class="tm"></span></div>
 </section>
 
 <!-- ============ 3.5 · BACKGROUND: THREE QUEUES ============ -->
-<section class="slide" data-sec="problem" data-secname="Problem" data-time="0:45">
+<section class="slide" id="s-3q" data-sec="problem" data-secname="Problem" data-time="0:45">
   <div class="accentbar"></div>
   <div class="kicker">Background &middot; the shared design</div>
   <h2 class="stitle">These policies share a <span class="hl">three-queue</span> skeleton</h2>
-  <div class="sub" style="text-align:center; margin:0 0 6px; font-size:18.5px;">A new block must prove reuse before it occupies the protected cache.</div>
+  <div class="frag" style="text-align:center; font-size:20px; font-weight:800; color:#4a5560; margin:-14px 0 8px;">2Q &nbsp;&middot;&nbsp; S3-FIFO &nbsp;&middot;&nbsp; Clock2Q</div>
+  <div class="sub" style="text-align:center; margin:0 0 6px; font-size:18.5px;">A cache policy identifies popular blocks and keeps them in the cache.</div>
   <figure style="text-align:center; margin-top:6px;">
-    <svg viewBox="-40 0 680 258" width="92%" style="max-height:340px;">
+    <svg viewBox="-40 0 680 258" width="92%" style="max-height:340px;" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs>
         <marker id="bg-g" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
         <marker id="bg-p" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f9e44"/></marker>
       </defs>
-      <!-- new access (grey solid; middle axis y=90) -->
-      <text x="26" y="80" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5f6b76">new access</text>
-      <path d="M-34,90 L80,90" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#bg-g)"/>
-      <!-- Small · probation (light-yellow blocks) -->
-      <text x="172" y="32" text-anchor="middle" font-size="15.5" font-weight="800" fill="#8b6a12">Small &middot; probation</text>
-      <rect x="84" y="46" width="176" height="88" rx="12" fill="#fff8e6" stroke="#f0b429" stroke-width="2.6"/>
-      <g stroke="#d9a521" stroke-width="1.4"><circle cx="121" cy="90" r="14" fill="#f5d271"/><circle cx="155" cy="90" r="14" fill="#f5d271"/><circle cx="189" cy="90" r="14" fill="#f5d271"/><circle cx="223" cy="90" r="14" fill="#f5d271"/></g>
-      <text x="172" y="123" text-anchor="middle" font-size="11.5" fill="#8b6a12">new items prove reuse here</text>
-      <!-- promotion (green dashed; centered on arrow) -->
-      <path d="M264,90 L436,90" stroke="#2f9e44" stroke-width="2.4" fill="none" stroke-dasharray="6 4" marker-end="url(#bg-p)"/>
-      <text x="350" y="80" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2f9e44">promotion</text>
-      <!-- Main · protection (blue blocks) -->
-      <text x="528" y="32" text-anchor="middle" font-size="15.5" font-weight="800" fill="#2f7fbf">Main &middot; protection</text>
-      <rect x="440" y="46" width="176" height="88" rx="12" fill="#e7f0fb" stroke="#2f7fbf" stroke-width="2.6"/>
-      <g stroke="#2f6fd0" stroke-width="1.4"><circle cx="477" cy="90" r="14" fill="#4c8bf5"/><circle cx="511" cy="90" r="14" fill="#4c8bf5"/><circle cx="545" cy="90" r="14" fill="#4c8bf5"/><circle cx="579" cy="90" r="14" fill="#4c8bf5"/></g>
-      <text x="528" y="123" text-anchor="middle" font-size="11.5" fill="#2f7fbf">items judged worth protecting</text>
-      <!-- not promoted: Small -> Ghost left border (grey solid); labels on the LEFT of the diagonal -->
-      <path d="M150,134 L269,214" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#bg-g)"/>
-      <text x="116" y="190" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5f6b76">not promoted</text>
-      <text x="122" y="203" text-anchor="middle" font-size="10.5" fill="#6b7681">evict data, remember key</text>
-      <!-- Ghost · history (dashed, keys only; centered at Small-Main midpoint, lowered) -->
-      <text x="350" y="169" text-anchor="middle" font-size="14.5" font-weight="800" fill="#5f6b76">Ghost &middot; history</text>
-      <text x="350" y="183" text-anchor="middle" font-size="12" font-weight="600" fill="#8b96a0">keys only</text>
-      <rect x="272" y="190" width="156" height="54" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.4" stroke-dasharray="6 5"/>
-      <g fill="none" stroke="#9aa5ad" stroke-width="1.8" stroke-dasharray="3 2"><circle cx="292" cy="213" r="10"/><circle cx="321" cy="213" r="10"/><circle cx="350" cy="213" r="10"/><circle cx="379" cy="213" r="10"/><circle cx="408" cy="213" r="10"/></g>
-      <text x="350" y="238" text-anchor="middle" font-size="10.5" fill="#6b7681">recently evicted keys</text>
-      <!-- re-request: Ghost -> Main (straight; mirror of 'not promoted' about x=350) -->
-      <path d="M431,214 L550,134" stroke="#2f9e44" stroke-width="2.2" fill="none" stroke-dasharray="6 4" marker-end="url(#bg-p)"/>
-      <text x="584" y="190" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2f9e44">re-request</text>
+
+      <!-- (1) Small · probation  + new access (grey solid; middle axis y=90) -->
+      <g class="frag"><g class="pop">
+        <text x="26" y="80" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5f6b76">new access</text>
+        <path d="M-34,90 L80,90" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#bg-g)"/>
+        <text x="172" y="32" text-anchor="middle" font-size="15.5" font-weight="800" fill="#8b6a12">Small &middot; probation</text>
+        <rect x="84" y="46" width="176" height="88" rx="12" fill="#fff8e6" stroke="#f0b429" stroke-width="2.6"/>
+        <g stroke="#d9a521" stroke-width="1.4"><circle cx="121" cy="90" r="14" fill="#f5d271"/><circle cx="155" cy="90" r="14" fill="#f5d271"/><circle cx="189" cy="90" r="14" fill="#f5d271"/><circle cx="223" cy="90" r="14" fill="#f5d271"/></g>
+        <text x="172" y="123" text-anchor="middle" font-size="11.5" fill="#8b6a12">new items prove reuse here</text>
+      </g></g>
+
+      <!-- (2) Main · protection (blue blocks) -->
+      <g class="frag"><g class="pop">
+        <text x="528" y="32" text-anchor="middle" font-size="15.5" font-weight="800" fill="#2f7fbf">Main &middot; protection</text>
+        <rect x="440" y="46" width="176" height="88" rx="12" fill="#e7f0fb" stroke="#2f7fbf" stroke-width="2.6"/>
+        <g stroke="#2f6fd0" stroke-width="1.4"><circle cx="477" cy="90" r="14" fill="#4c8bf5"/><circle cx="511" cy="90" r="14" fill="#4c8bf5"/><circle cx="545" cy="90" r="14" fill="#4c8bf5"/><circle cx="579" cy="90" r="14" fill="#4c8bf5"/></g>
+        <text x="528" y="123" text-anchor="middle" font-size="11.5" fill="#2f7fbf">long-lived, worth protecting</text>
+      </g></g>
+
+      <!-- (3) Ghost · history (keys only) + the not-promoted drop that fills it -->
+      <g class="frag"><g class="pop">
+        <text x="350" y="169" text-anchor="middle" font-size="14.5" font-weight="800" fill="#5f6b76">Ghost &middot; history</text>
+        <text x="350" y="183" text-anchor="middle" font-size="12" font-weight="600" fill="#8b96a0">keys only</text>
+        <rect x="272" y="190" width="156" height="54" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.4" stroke-dasharray="6 5"/>
+        <g fill="none" stroke="#9aa5ad" stroke-width="1.8" stroke-dasharray="3 2"><circle cx="292" cy="213" r="10"/><circle cx="321" cy="213" r="10"/><circle cx="350" cy="213" r="10"/><circle cx="379" cy="213" r="10"/><circle cx="408" cy="213" r="10"/></g>
+        <text x="350" y="238" text-anchor="middle" font-size="10.5" fill="#6b7681">recently evicted keys</text>
+      </g>
+        <!-- how keys get there: Small tail -> Ghost (data dropped, key remembered) -->
+        <path id="p3b1" class="q3path" d="M150,134 L269,214" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#bg-g)"/>
+        <text x="116" y="190" text-anchor="middle" font-size="13.5" font-weight="700" fill="#5f6b76">not promoted</text>
+        <text x="122" y="203" text-anchor="middle" font-size="10.5" fill="#6b7681">evict data, remember key</text>
+        <circle class="q3dot" r="9" fill="#f5d271" stroke="#9aa5ad" stroke-width="2">
+          <animateMotion dur="3.2s" calcMode="linear" keyPoints="0;1;1" keyTimes="0;0.45;1" repeatCount="indefinite"><mpath href="#p3b1" xlink:href="#p3b1"/></animateMotion>
+          <animate attributeName="opacity" dur="3.2s" repeatCount="indefinite" values="0;1;1;0;0" keyTimes="0;0.08;0.44;0.5;1"/>
+        </circle>
+      </g>
+
+      <!-- (4) path 1 · qualifying reuse -> direct promotion -->
+      <g class="frag">
+        <circle cx="350" cy="44" r="11" fill="#2f9e44"/><text x="350" y="49" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">1</text>
+        <text x="350" y="70" text-anchor="middle" font-size="13.5" font-weight="800" fill="#2f9e44">direct promotion</text>
+        <text x="350" y="82" text-anchor="middle" font-size="10.5" fill="#3f8f52">qualifying reuse in Small</text>
+        <path id="p3a" class="q3path" d="M264,90 L436,90" stroke="#2f9e44" stroke-width="2.4" fill="none" stroke-dasharray="6 4" marker-end="url(#bg-p)"/>
+        <circle class="q3dot" r="9" fill="#f5d271" stroke="#2f9e44" stroke-width="2">
+          <animateMotion dur="2s" calcMode="linear" repeatCount="indefinite"><mpath href="#p3a" xlink:href="#p3a"/></animateMotion>
+          <animate attributeName="opacity" dur="2s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.12;0.86;1"/>
+        </circle>
+      </g>
+
+      <!-- (5) path 2 · re-request after eviction -->
+      <g class="frag">
+        <circle cx="584" cy="164" r="11" fill="#2f9e44"/><text x="584" y="169" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">2</text>
+        <path id="p3b2" class="q3path" d="M431,214 L550,134" stroke="#2f9e44" stroke-width="2.2" fill="none" stroke-dasharray="6 4" marker-end="url(#bg-p)"/>
+        <text x="584" y="192" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2f9e44">re-request</text>
+        <text x="584" y="204" text-anchor="middle" font-size="10.5" fill="#3f8f52">after eviction, via Ghost</text>
+        <circle class="q3dot" r="9" fill="#f5d271" stroke="#2f9e44" stroke-width="2">
+          <animateMotion dur="3.2s" calcMode="linear" keyPoints="0;0;1" keyTimes="0;0.55;1" repeatCount="indefinite"><mpath href="#p3b2" xlink:href="#p3b2"/></animateMotion>
+          <animate attributeName="opacity" dur="3.2s" repeatCount="indefinite" values="0;0;1;1;0" keyTimes="0;0.55;0.62;0.95;1"/>
+        </circle>
+      </g>
     </svg>
   </figure>
   <div class="callout frag" style="margin-top:14px; text-align:center; border-color:var(--accent);">
@@ -336,25 +396,30 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <marker id="p5g" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#2f9e44"/></marker>
       </defs>
       <g class="frag">
+        <g>
         <rect x="548" y="18" width="340" height="66" rx="12" fill="#eef4f8" stroke="#c2ccd4" stroke-width="2"/>
-        <text x="718" y="12" text-anchor="middle" font-size="16" font-weight="700" fill="#5f6b76">Main cache</text>
+        <text x="718" y="12" text-anchor="middle" font-size="16" font-weight="700" fill="#5f6b76">Main queue</text>
         <circle cx="582" cy="52" r="15" fill="#4c8bf5"/><circle cx="634" cy="52" r="15" fill="#00c39a"/><circle cx="686" cy="52" r="15" fill="#9b5de5"/><circle cx="738" cy="52" r="15" fill="#e07a5f"/><circle cx="790" cy="52" r="15" fill="#6a994e"/><circle cx="842" cy="52" r="15" fill="#f7931e"/>
       </g>
-      <g class="frag">
+        <g>
         <rect x="24" y="64" width="196" height="54" rx="11" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
-        <text x="122" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#8b6a12">Small admission queue</text>
+        <text x="122" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#8b6a12">Small queue</text>
         <circle cx="64" cy="91" r="15" fill="#c0c8cf"/><circle cx="122" cy="91" r="15" fill="#c0c8cf"/><circle cx="180" cy="91" r="15" fill="#c0c8cf"/>
       </g>
-      <g class="frag">
+        <g>
         <path d="M224,91 L292,91" stroke="#5f6b76" stroke-width="2.4" fill="none" marker-end="url(#p5)"/>
         <text x="348" y="95" text-anchor="middle" font-size="18" font-weight="800" fill="#3a4750">promote?</text>
-        <path d="M404,84 L544,52" stroke="#2f9e44" stroke-width="2.4" fill="none" marker-end="url(#p5g)"/>
-        <text x="474" y="58" text-anchor="middle" font-size="16" font-weight="800" fill="#2f9e44">yes</text>
+        <g id="yes5" style="transition:opacity .4s ease">
+          <path d="M404,84 L544,52" stroke="#2f9e44" stroke-width="2.4" fill="none" marker-end="url(#p5g)"/>
+          <text x="474" y="58" text-anchor="middle" font-size="16" font-weight="800" fill="#2f9e44">yes</text>
+        </g>
         <path d="M404,98 L544,136" stroke="#9aa5ad" stroke-width="2.4" fill="none" marker-end="url(#p5)"/>
         <text x="474" y="112" text-anchor="middle" font-size="16" font-weight="800" fill="#6b7681">no</text>
         <rect x="548" y="112" width="340" height="48" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2" stroke-dasharray="6 5"/>
         <text x="718" y="142" text-anchor="middle" font-size="16" font-weight="700" fill="#6b7681">Ghost &#183; keys only</text>
       </g>
+      </g>
+
       <g id="refbits5" style="opacity:0; transition:opacity .4s ease">
         <g font-size="11" font-weight="800" text-anchor="middle">
           <circle cx="76" cy="79" r="9" fill="#fff" stroke="#3a4750" stroke-width="1.6"/><text x="76" y="83" fill="#3a4750">0</text>
@@ -379,7 +444,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <svg viewBox="0 0 520 176" width="100%">
         <defs><marker id="a5" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker></defs>
         <rect x="6" y="44" width="150" height="76" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
-        <text x="81" y="34" text-anchor="middle" font-size="13" fill="#8b6a12">admission queue</text>
+        <text x="81" y="34" text-anchor="middle" font-size="13" fill="#8b6a12">Small</text>
         <circle cx="58" cy="84" r="22" fill="#c0c8cf"/><text x="58" y="90" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">C</text>
         <circle cx="76" cy="66" r="12" fill="#2f9e44"/><text x="76" y="70" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1</text>
         <text x="122" y="80" text-anchor="middle" font-size="13.5" font-weight="800" fill="#e04b3a">3 hits</text>
@@ -400,7 +465,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <defs><marker id="a5b" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
           <marker id="a5r" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#e04b3a"/></marker></defs>
         <rect x="6" y="48" width="104" height="72" rx="10" fill="#fff8e6" stroke="#f0b429" stroke-width="2" stroke-dasharray="6 5"/>
-        <text x="58" y="38" text-anchor="middle" font-size="13" fill="#8b6a12">admission queue</text>
+        <text x="58" y="38" text-anchor="middle" font-size="13" fill="#8b6a12">Small</text>
         <circle cx="58" cy="84" r="22" fill="#4c8bf5"/><text x="58" y="90" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">H</text>
         <path d="M112,84 L188,84" stroke="#e04b3a" stroke-width="2.4" fill="none" marker-end="url(#a5r)"/>
         <text x="150" y="75" text-anchor="middle" font-size="14" font-weight="800" fill="#e04b3a">evict</text>
@@ -435,7 +500,8 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <marker id="d6g" markerWidth="12" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9aa5ad"/></marker>
         <marker id="d6h" markerWidth="14" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L13,5.5 L0,11 Z" fill="#d6480f"/></marker>
       </defs>
-      <text id="policy6" x="290" y="378" text-anchor="middle" font-size="18" font-weight="800" fill="#2f7fbf">Clock2Q+</text>
+      <rect id="policyBox6" x="212" y="352" width="156" height="40" rx="12" fill="#eaf4fb" stroke="#2f7fbf" stroke-width="2.4"/>
+      <text id="policy6" x="290" y="380" text-anchor="middle" font-size="23" font-weight="800" fill="#2f7fbf">Clock2Q+</text>
       <rect x="20" y="44" width="340" height="80" rx="12" fill="#fff8e6" stroke="#f0b429" stroke-width="2.4" stroke-dasharray="7 5"/>
       <g id="cw6" style="opacity:0; transition:opacity .5s ease">
         <rect x="28" y="52" width="140" height="64" rx="9" fill="#ffe6ad" stroke="#e8930c" stroke-width="2"/>
@@ -448,19 +514,27 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
         <text id="demoRef6" x="113" y="70" text-anchor="middle" font-size="12.5" font-weight="800" fill="#3a4750">0</text>
       </g>
       <text x="190" y="38" text-anchor="middle" font-size="16.5" font-weight="800" fill="#b9860f">Small FIFO</text>
-      <text x="472" y="46" text-anchor="middle" font-size="16.5" font-weight="800" fill="#1f6fa8">Main Clock</text>
-      <circle cx="472" cy="150" r="92" fill="#eaf4fb" stroke="#3e9fd6" stroke-width="2.6"/>
-      <circle cx="472" cy="88" r="13" fill="#4c8bf5"/><circle cx="526" cy="119" r="13" fill="#00c39a"/><circle cx="526" cy="181" r="13" fill="#9b5de5"/><circle cx="472" cy="212" r="13" fill="#e07a5f"/><circle cx="418" cy="181" r="13" fill="#6a994e"/><circle cx="418" cy="119" r="13" fill="#f7931e"/>
-      <line x1="472" y1="150" x2="472" y2="105" stroke="#d6480f" stroke-width="3.4" marker-end="url(#d6h)"/>
-      <circle cx="472" cy="150" r="5" fill="#d6480f"/>
+      <text x="504" y="79" text-anchor="middle" font-size="16.5" font-weight="800" fill="#1f6fa8">Main Clock</text>
+      <circle cx="472" cy="183" r="92" fill="#eaf4fb" stroke="#3e9fd6" stroke-width="2.6"/>
+      <circle cx="472" cy="121" r="13" fill="#4c8bf5"/><circle cx="526" cy="152" r="13" fill="#00c39a"/><circle cx="526" cy="214" r="13" fill="#9b5de5"/><circle cx="472" cy="245" r="13" fill="#e07a5f"/><circle cx="418" cy="214" r="13" fill="#6a994e"/><circle cx="418" cy="152" r="13" fill="#f7931e"/>
+      <line x1="472" y1="183" x2="472" y2="138" stroke="#d6480f" stroke-width="3.4" marker-end="url(#d6h)"/>
+      <circle cx="472" cy="183" r="5" fill="#d6480f"/>
       <rect x="20" y="250" width="340" height="64" rx="12" fill="#eef1f4" stroke="#9aa5ad" stroke-width="2.4" stroke-dasharray="7 5"/>
       <text x="190" y="330" text-anchor="middle" font-size="16.5" font-weight="800" fill="#6b7681">Ghost FIFO</text>
-      <path d="M360,82 L385,109" fill="none" stroke="#2f9e44" stroke-width="2.4" marker-end="url(#d6)"/>
-      <text x="372" y="72" font-size="14" font-weight="700" fill="#2f9e44">Ref=1</text>
+      <path d="M360,82 L400,118" fill="none" stroke="#2f9e44" stroke-width="2.4" marker-end="url(#d6)"/>
+      <g>
+        <text x="368" y="72" font-size="14" font-weight="700" fill="#2f9e44">Ref</text>
+        <circle cx="410" cy="67" r="10" fill="#2f9e44" stroke="#1c7a30" stroke-width="2"/>
+        <text x="410" y="71.5" text-anchor="middle" font-size="12.5" font-weight="800" fill="#fff">1</text>
+      </g>
       <path d="M190,126 L190,246" fill="none" stroke="#9aa5ad" stroke-width="2.4" marker-end="url(#d6g)"/>
-      <text x="200" y="192" font-size="14" font-weight="700" fill="#6b7681">Ref=0</text>
-      <path d="M360,282 L392,200" fill="none" stroke="#2f9e44" stroke-width="2.4" marker-end="url(#d6)"/>
-      <text x="352" y="244" text-anchor="end" font-size="14" font-weight="700" fill="#2f9e44">Ghost hit</text>
+      <g>
+        <text x="200" y="192" font-size="14" font-weight="700" fill="#6b7681">Ref</text>
+        <circle cx="242" cy="187" r="10" fill="#fff" stroke="#3a4750" stroke-width="2"/>
+        <text x="242" y="191.5" text-anchor="middle" font-size="12.5" font-weight="800" fill="#3a4750">0</text>
+      </g>
+      <path d="M360,282 L400,246" fill="none" stroke="#2f9e44" stroke-width="2.4" marker-end="url(#d6)"/>
+      <text x="368" y="240" text-anchor="end" font-size="14" font-weight="700" fill="#2f9e44">Ghost hit</text>
     </svg>
     <div>
       <div class="callout i" style="font-size:18px; margin-bottom:16px;"><b>Where</b> a re-hit happens tells you whether the popularity is real.</div>
@@ -559,7 +633,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       <div class="tl" style="margin-top:0;">
         <div id="lin-s3" class="stage frag" style="flex:none; width:208px; min-height:136px;">
           <div class="badge">S3-FIFO</div>
-          <div class="mini"><span class="q">FIFO</span><span class="q new">+ Ref bit</span><span class="q">Clock</span><span class="q">Ghost</span></div>
+          <div class="mini"><span class="q">Small FIFO</span><span class="q new">+ Ref bit</span><span class="q">Main FIFO</span><span class="q">Ghost</span></div>
           <div class="chg">add <b>Ref bit</b> to Small FIFO</div>
           <div style="font-size:12px; color:#2f9e44; font-weight:700; margin-top:4px;">direct promotion</div>
           <div class="dep">state-of-the-art comparison <br> 2023</div>
@@ -605,13 +679,13 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   <div class="kicker" style="color:var(--ink)">Takeaways</div>
   <h2 class="stitle">Clock2Q+</h2>
   <ul class="clean" style="font-size:21px;">
-    <li class="frag" data-f="1"><b>Correlated references</b> are a real, costly metadata pattern: a short burst makes a <b>cold</b> page look hot.</li>
-    <li class="frag" data-f="2">The <b>correlation window</b> is a one-line change: filter bursts, still promote genuinely hot blocks directly.</li>
-    <li class="frag" data-f="3"><b>Best miss ratio</b> among SOTA on metadata <i>and</i> data — and it is <b>deployed in VMware vSAN</b>.</li>
-    <li class="frag" data-f="4">Low overhead, scalable, dirty-aware, resizable — <b>simplicity pays off</b> in production.</li>
+    <li class="frag" data-f="1"><b>Correlated references</b> are costly: a short burst makes a <b>cold</b> page look hot.</li>
+    <li class="frag" data-f="2">The <b>correlation window</b> is a one-line fix: filter bursts, promote real hot blocks directly.</li>
+    <li class="frag" data-f="3"><b>Best miss ratio</b> among SOTA — metadata <i>and</i> data — and <b>implemented in VMware vSAN</b>.</li>
+    <li class="frag" data-f="4">Low overhead, scalable, dirty-aware, resizable — <b>simplicity pays off</b>.</li>
   </ul>
   <div class="callout frag" data-f="5" style="margin-top:18px; text-align:center; border-color:var(--wrap); font-size:20px;">
-    Reproducible in <b>libCacheSim</b> — Clock2Q+ &amp; the metadata-trace method are upstreamed.
+    Upstreamed to <b>libCacheSim</b> — Clock2Q+ and the metadata-trace method.
   </div>
   <div class="foot"><span class="sec">Takeaways</span><span class="tm"></span></div>
 </section>
@@ -788,10 +862,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   // (t = transition cue, r = remember). Keep in sync with SPEAKER_SCRIPT.md.
   const NOTES=[
     {t:'Open: name + one-line; the idea is simple and it’s deployed.', r:'A simple, production-deployed idea — promise intuition.'},
-    {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B-trees) that locates data. Hottest path → overhead & simplicity are first-class too.'},
-    {t:'Why does it behave differently? Start with structure.', r:'A B-tree leaf packs hundreds of tuples. Distinct keys co-reside (L1 & L5 → leaf m4) → accesses hit the same page by structure, not popularity.'},
+    {t:'First, what IS a metadata cache?', r:'Data cache = payload; metadata cache = the index (B+ trees in vSAN) that locates data. Hottest path → overhead & simplicity are first-class too.'},
+    {t:'Why does it behave differently? Start with structure.', r:'B+ tree = ordered index: internal nodes route, all tuples live in the leaves (99%+ of pages). One leaf packs hundreds of tuples. Distinct keys co-reside (L1 & L5 → leaf m4) → accesses hit the same page by structure, not popularity.'},
     {t:'That packing shows up directly in the access stream.', r:'Burst = a sequential run of lookups landing on the SAME cold page in a short time (not unrelated random hits) — busy by structure, not popularity. Each hit looks like a vote — the trap.'},
-    {t:'Before the two designs — the shared 3-queue skeleton.', r:'Small = probation (new items prove reuse); Main = protection (items worth keeping); Ghost = history, keys only (recently evicted keys). Two paths into Main: (a) qualifying reuse in Small → direct promote (S3-FIFO, Clock2Q+ only — dashed, policy-dependent); (b) re-request after eviction via Ghost (Clock2Q/2Q). The whole difference is what counts as "qualifying reuse".'},
+    {t:'Before the two designs — the shared 3-queue skeleton. Builds: Small → Main → Ghost → path ① → path ②.', r:'Small = probation (new items prove reuse); Main = protection (items worth keeping); Ghost = history, keys only (recently evicted keys). Two paths into Main: (a) qualifying reuse in Small → direct promote (S3-FIFO, Clock2Q+ only — dashed, policy-dependent); (b) re-request after eviction via Ghost (Clock2Q/2Q) — at the Small tail the data is dropped but the key is kept, so a later hit on that key proves a second, separated access: take the miss, fetch, and admit straight to Main instead of restarting probation. Keys-only = remember far more history than you can cache, for almost nothing. The whole difference is what counts as "qualifying reuse".'},
     {t:'Machinery differs: S3-FIFO uses a bit; Clock2Q/2Q use a ghost round-trip.', r:'S3-FIFO’s ref bit, set on any re-hit → a burst admits a cold page. Clock2Q/2Q: no admission bit → promote only after drop + re-ask → delays hot blocks.'},
     {t:'The insight IS the design: add a correlation window.', r:'WHERE a re-hit happens is the signal. Inside the window → Ref stays 0 (burst → Ghost); beyond → Ref = 1 → promote to Main. One change to S3-FIFO.'},
     {t:'Watch the one change vs. S3-FIFO. (Step: Next ▶ / click.)', r:'The window keeps Ref = 0 on the correlated burst → it goes to Ghost, not Main. S3-FIFO would set Ref = 1 and promote it (pollution).'},
@@ -809,9 +883,21 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
   function apply(){
     slides.forEach((s,i)=>s.classList.toggle('current', i===ci));
     const s=slides[ci], fr=frags(s);
-    fr.forEach((f,k)=>f.classList.toggle('on', k<fi));
-    var _s3=document.getElementById('s3card5'), _rb=document.getElementById('refbits5'); if(_s3&&_rb) _rb.style.opacity=_s3.classList.contains('on')?'1':'0';
-    var _q2=document.getElementById('q2card5'), _g2m=document.getElementById('ghost2main5'); if(_q2&&_g2m) _g2m.style.opacity=_q2.classList.contains('on')?'1':'0';
+    fr.forEach((f,k)=>{ f.classList.toggle('on', k<fi); f.classList.toggle('fragcur', k===fi-1); });
+    var _p2s=document.getElementById('p2show'), _p2l=document.getElementById('p2lift'), _p2=document.getElementById('pair2'),
+        _p2g=document.getElementById('pairGhost2'), _p2c=document.getElementById('dramCap2');
+    if(_p2s&&_p2l&&_p2){ var _show=_p2s.classList.contains('on'), _lift=_p2l.classList.contains('on');
+      _p2.style.opacity=_show?'1':'0';
+      _p2.style.transform=_lift?'translateY(-134px)':'none';
+      if(_p2g) _p2g.style.opacity=_lift?'0.55':'0';
+      if(_p2c) _p2c.style.opacity=_lift?'1':'0'; }
+    var _s3=document.getElementById('s3card5'), _q2=document.getElementById('q2card5'),
+        _rb=document.getElementById('refbits5'), _g2m=document.getElementById('ghost2main5'), _y5=document.getElementById('yes5');
+    if(_s3&&_q2){ var _s3on=_s3.classList.contains('on'), _q2on=_q2.classList.contains('on');
+      // Clock2Q/2Q has no reference bit and no direct promotion: drop both from the top diagram
+      if(_rb) _rb.style.opacity=(_s3on&&!_q2on)?'1':'0';
+      if(_y5) _y5.style.opacity=_q2on?'0':'1';
+      if(_g2m) _g2m.style.opacity=_q2on?'1':'0'; }
     var _dv=document.getElementById('lin-dv'), _s3l=document.getElementById('lin-s3'); if(_dv&&_s3l) _dv.style.opacity=_s3l.classList.contains('on')?'1':'0';
     var _mg=document.getElementById('lin-mg'), _cq=document.getElementById('lin-c2qp'); if(_mg&&_cq) _mg.style.opacity=_cq.classList.contains('on')?'1':'0';
     // section accent
@@ -853,7 +939,7 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       deck.style.display='grid'; deck.style.gridTemplateColumns='repeat(3,1fr)'; deck.style.gap='14px'; deck.style.padding='14px';
       slides.forEach((s,i)=>{ s.style.position='relative'; s.style.opacity='1'; s.style.visibility='visible';
         s.style.transform='scale(1)'; s.style.height='260px'; s.style.cursor='pointer'; s.classList.add('current');
-        frags(s).forEach(f=>f.classList.add('on'));
+        frags(s).forEach(f=>{ f.classList.add('on'); f.classList.remove('fragcur'); });
         s.onclick=()=>{ toggleOverview(); goto(i); ci=i; fi=frags(s).length; apply(); }; });
     } else {
       document.body.style.overflow='hidden';
@@ -903,7 +989,10 @@ svg .ln{stroke:#c2ccd4; stroke-width:2.4; fill:none;}
       if(b) b.classList.toggle('hl', _on && _pos==='in');
       if(c) c.classList.toggle('hl', _on && _pos==='out');
     }
-    function _setPolicy(on){ _on=on; _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a'); _refresh(); }
+    const _pbox=document.getElementById('policyBox6');
+    function _setPolicy(on){ _on=on; _cw.style.opacity=on?'1':'0'; _pol.textContent=on?'Clock2Q+':'S3-FIFO'; _pol.setAttribute('fill',on?'#2f7fbf':'#e04b3a');
+      if(_pbox){ _pbox.setAttribute('stroke',on?'#2f7fbf':'#e04b3a'); _pbox.setAttribute('fill',on?'#eaf4fb':'#fdeceb'); }
+      _refresh(); }
     function _pulse(){ if(_db){ _db.classList.remove('blkpulse6'); _db.getBoundingClientRect(); _db.classList.add('blkpulse6'); } }
     function _hit(inside){ _pos=inside?'in':'out'; if(_dg) _dg.setAttribute('transform', inside?'translate(0,0)':'translate(166,0)'); _setPolicy(true); _pulse(); }
     _setPolicy(false); _svg6.style.cursor='pointer';
